@@ -1,0 +1,17 @@
+# Frontend only: connects to an ALREADY RUNNING Homebox. No data volumes.
+services:
+  homebox-ui:
+    build: .
+    image: homebox-ui:local
+    container_name: homebox-ui
+    restart: unless-stopped
+    ports:
+      - "${HOMEBOX_UI_BIND:-127.0.0.1}:${HOMEBOX_UI_PORT:-3101}:80"
+    environment:
+      HOMEBOX_UPSTREAM: ${HOMEBOX_UPSTREAM:-http://homebox:7745}
+    networks:
+      - homebox-existing
+networks:
+  homebox-existing:
+    external: true
+    name: ${HOMEBOX_DOCKER_NETWORK:-homebox_default}
