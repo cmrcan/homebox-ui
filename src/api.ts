@@ -14,6 +14,69 @@ export interface EntityType {
   id: string;
   name: string;
   isLocation: boolean;
+  description?: string;
+  icon?: string;
+  color?: string;
+  [key: string]: unknown;
+}
+export type FieldType = "text" | "number" | "boolean" | "time";
+export interface CustomField {
+  id?: string;
+  name: string;
+  type: FieldType;
+  textValue?: string;
+  numberValue?: number;
+  booleanValue?: boolean;
+  timeValue?: string;
+}
+export interface Group {
+  id: string;
+  name: string;
+  currency: string;
+}
+export interface Template {
+  id: string;
+  name: string;
+  description?: string;
+  notes?: string;
+  defaultQuantity?: number;
+  defaultName?: string;
+  defaultDescription?: string;
+  defaultManufacturer?: string;
+  defaultModelNumber?: string;
+  defaultLifetimeWarranty?: boolean;
+  defaultInsured?: boolean;
+  fields?: CustomField[];
+  [key: string]: unknown;
+}
+export interface Member {
+  id: string;
+  name: string;
+  email?: string;
+  isOwner?: boolean;
+}
+export interface Invitation {
+  token: string;
+  expiresAt?: string;
+  uses?: number;
+}
+export interface Maintenance {
+  id: string;
+  name: string;
+  description?: string;
+  cost?: string | number;
+  scheduledDate?: string;
+  completedDate?: string;
+  itemName?: string;
+  entityName?: string;
+  [key: string]: unknown;
+}
+export interface Notifier {
+  id: string;
+  name: string;
+  isActive: boolean;
+  url?: string;
+  [key: string]: unknown;
 }
 export interface Attachment {
   id: string;
@@ -124,26 +187,38 @@ export class HomeboxApi {
   get resource() {
     return this.mode === "entities" ? "/entities" : "/items";
   }
-  async request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  private headersFor(options: RequestInit) {
     const headers = new Headers(options.headers);
     if (this.session) headers.set("Authorization", this.session.token);
     if (this.tenant) headers.set("X-Tenant", this.tenant);
     if (options.body && !(options.body instanceof FormData))
       headers.set("Content-Type", "application/json");
+    return headers;
+  }
+  private async fail(response: Response): Promise<never> {
+    const data = await response.json().catch(() => null);
+    const message =
+      response.status === 401
+        ? "Oturum sona erdi. Lütfen tekrar giriş yapın."
+        : data?.error ||
+          data?.message ||
+          `Homebox isteği başarısız (${response.status}).`;
+    throw new ApiError(response.status, String(message));
+  }
+  async download(path: string): Promise<Blob> {
+    const response = await this.transport(`/api/v1${path}`, {
+      headers: this.headersFor({}),
+    });
+    if (!response.ok) return this.fail(response);
+    return response.blob();
+  }
+  async request<T>(path: string, options: RequestInit = {}): Promise<T> {
+    const headers = this.headersFor(options);
     const response = await this.transport(`/api/v1${path}`, {
       ...options,
       headers,
     });
-    if (!response.ok) {
-      const data = await response.json().catch(() => null);
-      const message =
-        response.status === 401
-          ? "Oturum sona erdi. Lütfen tekrar giriş yapın."
-          : data?.error ||
-            data?.message ||
-            `Homebox isteği başarısız (${response.status}).`;
-      throw new ApiError(response.status, String(message));
-    }
+    if (!response.ok) return this.fail(response);
     if (response.status === 204) return undefined as T;
     const text = await response.text();
     return text ? (JSON.parse(text) as T) : (undefined as T);
@@ -161,9 +236,7 @@ export class HomeboxApi {
     ).then(unwrap);
   }
   groups() {
-    return this.request<Array<{ id: string; name: string; currency: string }>>(
-      "/groups/all",
-    );
+    return this.request<Group[]>("/groups/all");
   }
   stats() {
     return this.request<Stats>("/groups/statistics");
@@ -271,5 +344,189 @@ export class HomeboxApi {
     });
     if (this.tenant) query.set("tenant", this.tenant);
     return `/api/v1${this.resource}/${encodeURIComponent(id)}/attachments/${encodeURIComponent(attachmentId)}?${query}`;
+  }
+
+  // ---- Entity types -------------------------------------------------------
+  typeSave(body: Record<string, unknown>, existing?: EntityType) {
+    return this.request<EntityType>(
+      `/entity-types${existing ? "/" + encodeURIComponent(existing.id) : ""}`,
+      {
+        method: existing ? "PUT" : "POST",
+        body: JSON.stringify(
+          existing ? { ...existing, ...body, id: existing.id } : body,
+        ),
+      },
+    );
+  }
+  typeDelete(id: string) {
+    return this.request<void>(`/entity-types/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+  // ---- Templates (field schemas) -----------------------------------------
+  templates() {
+    return this.request<Template[]>("/templates");
+  }
+  template(id: string) {
+    return this.request<Template>(`/templates/${encodeURIComponent(id)}`);
+  }
+  templateSave(body: Record<string, unknown>, existing?: Template) {
+    return this.request<Template>(
+      `/templates${existing ? "/" + encodeURIComponent(existing.id) : ""}`,
+      {
+        method: existing ? "PUT" : "POST",
+        body: JSON.stringify(
+          existing ? { ...existing, ...body, id: existing.id } : body,
+        ),
+      },
+    );
+  }
+  templateDelete(id: string) {
+    return this.request<void>(`/templates/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+  // ---- Users and collection ----------------------------------------------
+  updateSelf(body: { name: string; email: string }) {
+    return this.request<{ item: { name: string; email: string } }>(
+      "/users/self",
+      { method: "PUT", body: JSON.stringify(body) },
+    ).then(unwrap);
+  }
+  changePassword(current: string, next: string) {
+    return this.request<void>("/users/change-password", {
+      method: "PUT",
+      body: JSON.stringify({ current, new: next }),
+    });
+  }
+  deleteSelf() {
+    return this.request<void>("/users/self", { method: "DELETE" });
+  }
+  register(body: {
+    name: string;
+    email: string;
+    password: string;
+    token: string;
+  }) {
+    return this.request<void>("/users/register", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  }
+  group() {
+    return this.request<Group>("/groups");
+  }
+  updateGroup(body: { name: string; currency: string }) {
+    return this.request<Group>("/groups", {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+  }
+  invite(uses: number, expiresAt: string) {
+    return this.request<Invitation>("/groups/invitations", {
+      method: "POST",
+      body: JSON.stringify({ uses, expiresAt }),
+    });
+  }
+  members() {
+    return this.request<Member[]>("/groups/members");
+  }
+  removeMember(id: string) {
+    return this.request<void>(`/groups/members/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+  // ---- Maintenance --------------------------------------------------------
+  maintenanceList(status: "scheduled" | "completed" | "both" = "both") {
+    return this.request<Maintenance[]>(`/maintenance?status=${status}`);
+  }
+  itemMaintenance(id: string) {
+    return this.request<Maintenance[]>(
+      `${this.resource}/${encodeURIComponent(id)}/maintenance`,
+    );
+  }
+  addMaintenance(id: string, body: Record<string, unknown>) {
+    return this.request<Maintenance>(
+      `${this.resource}/${encodeURIComponent(id)}/maintenance`,
+      { method: "POST", body: JSON.stringify(body) },
+    );
+  }
+  saveMaintenance(id: string, body: Record<string, unknown>) {
+    return this.request<Maintenance>(
+      `/maintenance/${encodeURIComponent(id)}`,
+      { method: "PUT", body: JSON.stringify(body) },
+    );
+  }
+  deleteMaintenance(id: string) {
+    return this.request<void>(`/maintenance/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+  // ---- Notifications ------------------------------------------------------
+  notifiers() {
+    return this.request<Notifier[]>("/notifiers");
+  }
+  saveNotifier(body: Record<string, unknown>, existing?: Notifier) {
+    return this.request<Notifier>(
+      `/notifiers${existing ? "/" + encodeURIComponent(existing.id) : ""}`,
+      {
+        method: existing ? "PUT" : "POST",
+        body: JSON.stringify(
+          existing ? { ...existing, ...body, id: existing.id } : body,
+        ),
+      },
+    );
+  }
+  deleteNotifier(id: string) {
+    return this.request<void>(`/notifiers/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+  testNotifier(url: string) {
+    return this.request<void>(
+      `/notifiers/test?${new URLSearchParams({ url })}`,
+      { method: "POST" },
+    );
+  }
+  // ---- Maintenance tools, import/export, labels ---------------------------
+  runAction(name: string) {
+    return this.request<{ completed?: number }>(
+      `/actions/${encodeURIComponent(name)}`,
+      { method: "POST" },
+    );
+  }
+  /** Tries the current resource first, then the other one (0.26 vs. older). */
+  async exportCsv(): Promise<Blob> {
+    try {
+      return await this.download(`${this.resource}/export`);
+    } catch (e) {
+      if (!(e instanceof ApiError) || e.status !== 404) throw e;
+      return this.download(
+        `${this.mode === "entities" ? "/items" : "/entities"}/export`,
+      );
+    }
+  }
+  async importCsv(file: File) {
+    const send = (resource: string) => {
+      const form = new FormData();
+      form.append("csv", file);
+      return this.request<{ completed?: number }>(`${resource}/import`, {
+        method: "POST",
+        body: form,
+      });
+    };
+    try {
+      return await send(this.resource);
+    } catch (e) {
+      if (!(e instanceof ApiError) || e.status !== 404) throw e;
+      return send(this.mode === "entities" ? "/items" : "/entities");
+    }
+  }
+  labelUrl(id: string) {
+    const query = new URLSearchParams({
+      access_token: this.session?.attachmentToken || "",
+    });
+    if (this.tenant) query.set("tenant", this.tenant);
+    return `/api/v1/labelmaker/item/${encodeURIComponent(id)}?${query}`;
   }
 }

@@ -1,22 +1,28 @@
 # Homebox UI
 
-Homebox için Türkçe, duyarlı ve açık/koyu temalı alternatif frontend. Vue 3, TypeScript ve Tailwind CSS 4 kullanır. Homebox'ın API'sine aynı adres üzerinden bağlanır; veriler Homebox sunucusunda kalır.
+Homebox için Türkçe, duyarlı ve açık/koyu temalı alternatif frontend. Vue 3, TypeScript, Tailwind CSS 4 ve Preline UI tasarım dilini kullanır. Homebox'ın API'sine aynı adres üzerinden bağlanır; veriler Homebox sunucusunda kalır.
 
 Masaüstü ve mobil ekran örnekleri `docs/preview-desktop.png` ve `docs/preview-mobile.png` dosyalarında bulunur.
 
-## v0.1.0 kapsamı
+## v0.2.0 kapsamı
 
-- Homebox hesabıyla giriş; mevcut koleksiyonlar arasında geçiş.
-- Toplam ürün, satın alma değeri, konum ve garanti istatistikleri.
-- Kart/tablo görünümü; sunucuda arama, konum/etiket filtresi, arşiv ve sayfalama.
-- Ürün oluşturma, tam kayıt düzenleme ve onayla silme.
-- Marka, model, seri numarası, satın alma tarihi/değeri, garanti bitişi, adet, etiket ve notlar.
-- Fotoğraf, fatura, garanti belgesi, kılavuz ve diğer dosyaları yükleme/görüntüleme.
-- Konum ve etiket oluşturma/düzenleme.
-- Mobil menü, klavye odağı, `/` ile arama, `Esc` ile pencereyi kapatma.
+- Preline UI tasarım dili (Tailwind CSS 4 üzerinde; Preline'ın JS eklentisi gerekmez, etkileşimler Vue ile yazıldı).
+- Giriş, koleksiyon seçimi, genel bakış, kart/tablo envanter, arama, filtre, arşiv ve sayfalama.
+- Ürün oluşturma, düzenleme, silme; fotoğraf ve belge yükleme; konum ve etiket yönetimi.
+- **Özel alanlar:** her üründe metin, sayı, evet/hayır ve tarih alanları.
+- **Ürün türleri:** ekle, düzenle, sil; türe varsayılan alan şablonu bağla (yeni ürün eklerken alanlar otomatik gelir).
+- **Alan şablonları:** şablon oluştur/düzenle/sil; ürün formunda "Şablondan ekle".
+- **Kullanıcılar:** profil, şifre, koleksiyon adı/para birimi, davet kodu oluşturma, üye listesi/çıkarma, hesap silme. Yeni kişi giriş ekranındaki "Davet koduyla hesap oluştur" bölümünden kayıt olur.
+- **Bakım:** ürün detayında kayıt ekleme/tamamlama/silme; genel bakım listesi.
+- **Araçlar:** CSV içe/dışa aktarma, bildirimler, toplu bakım eylemleri, etiket yazdırma bağlantısı.
 - Sunucuya veri göndermeyen, oturum içi örnek envanter modu.
 
-Bu ilk sürüm tüm Homebox özelliklerini değiştirmez. Bakım takvimi, toplu içe/dışa aktarma, etiket yazdırma, özel alan şeması düzenleme, OIDC, kullanıcı yönetimi ve yedekler için mevcut Homebox arayüzünü kullanın. Düzenleme sırasında mevcut özel alanlar, sigorta, garanti detayları, satış bilgileri ve ürün ilişkileri korunur.
+### Bilinen sınırlar
+
+- Ürün türüne bağlı varsayılan şablon seçimi **bu tarayıcıda** saklanır (Homebox'ta tür başına şema olmadığı varsayımıyla). Alan şablonlarının kendisi Homebox'ta durur.
+- Kullanıcı yönetimi, bakım, bildirim, içe/dışa aktarma ve etiket uç noktaları Homebox'ın bilinen API yollarına göre yazıldı ve canlı sunucuda doğrulanmadı. Yollar `src/api.ts` içinde tek yerde durur; farklıysa orada düzeltin.
+- API anahtarları, OIDC ve yedekler henüz yok.
+- `docs/preview-*.png` görselleri eski tasarımdır.
 
 ## API uyumluluğu
 

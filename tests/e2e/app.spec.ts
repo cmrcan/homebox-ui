@@ -191,3 +191,29 @@ test("layout has no horizontal overflow; Escape closes the modal", async ({
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
+
+test("demo: custom fields on an item and field templates", async ({
+  page,
+}, info) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page
+    .getByRole("button", { name: "Örnek envanterle arayüzü keşfet" })
+    .click();
+  await page.getByRole("button", { name: /Siemens EQ700/ }).click();
+  await page.getByRole("button", { name: "Düzenle", exact: true }).click();
+  await page.getByRole("button", { name: "Alan ekle" }).click();
+  await page.getByLabel("Alan adı").fill("Voltaj");
+  await page.getByLabel("Alan değeri").fill("230V");
+  await page.getByRole("button", { name: "Ürünü kaydet" }).click();
+  await expect(page.getByRole("dialog").getByText("230V")).toBeVisible();
+  await page.getByRole("button", { name: "Pencereyi kapat" }).click();
+  if (info.project.name === "mobile")
+    await page.getByRole("button", { name: "Menüyü aç" }).click();
+  await page
+    .getByRole("button", { name: "Alan şablonları", exact: true })
+    .click();
+  await expect(page.getByRole("heading", { name: "Ağ cihazı" })).toBeVisible();
+  expect(errors).toEqual([]);
+});
