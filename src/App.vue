@@ -81,7 +81,7 @@ const showsGenericError = computed(() =>
   ["overview", "inventory", "locations", "tags"].includes(s.tab),
 );
 const initials = computed(() =>
-  (s.user?.name || "Demo Kullanıcı")
+  (s.user?.name || "Kullanıcı")
     .split(" ")
     .map((p) => p[0])
     .slice(0, 2)
@@ -131,8 +131,13 @@ onUnmounted(() => window.removeEventListener("keydown", keyboard));
         ><Box :size="24" class="text-blue-600" />homebox</a
       >
 
-      <div class="mt-3 flex items-center gap-3 rounded-lg border border-gray-200 p-2.5 dark:border-neutral-700">
-        <span class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-800/30 dark:text-blue-400"><Home :size="18" /></span>
+      <div
+        class="mt-3 flex items-center gap-3 rounded-lg border border-gray-200 p-2.5 dark:border-neutral-700"
+      >
+        <span
+          class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-800/30 dark:text-blue-400"
+          ><Home :size="18"
+        /></span>
         <div class="min-w-0 flex-1">
           <p class="muted text-xs">Kişisel alanın</p>
           <select
@@ -143,9 +148,13 @@ onUnmounted(() => window.removeEventListener("keydown", keyboard));
             aria-label="Koleksiyon"
             @change="changeGroup"
           >
-            <option v-for="g in s.groups" :key="g.id" :value="g.id">{{ g.name }}</option>
+            <option v-for="g in s.groups" :key="g.id" :value="g.id">
+              {{ g.name }}
+            </option>
           </select>
-          <p v-else class="truncate text-sm font-semibold">{{ currentGroup()?.name || "Benim evim" }}</p>
+          <p v-else class="truncate text-sm font-semibold">
+            {{ currentGroup()?.name || "Benim evim" }}
+          </p>
         </div>
         <ShieldCheck :size="15" class="text-blue-600" />
       </div>
@@ -161,7 +170,9 @@ onUnmounted(() => window.removeEventListener("keydown", keyboard));
             @click="navigate(n.id)"
           >
             <component :is="n.icon" :size="18" /><span>{{ n.name }}</span
-            ><span v-if="n.id === 'inventory'" class="badge ms-auto">{{ s.stats.totalItems }}</span>
+            ><span v-if="n.id === 'inventory'" class="badge ms-auto">{{
+              s.stats.totalItems
+            }}</span>
           </button>
         </div>
         <p class="nav-caption">Yapılandırma</p>
@@ -184,52 +195,98 @@ onUnmounted(() => window.removeEventListener("keydown", keyboard));
             s.dark ? "Açık görünüm" : "Koyu görünüm"
           }}
         </button>
-        <a href="https://homebox.software" target="_blank" rel="noopener noreferrer" class="nav-item"
-          ><CircleHelp :size="18" />Homebox rehberi<ArrowUpRight :size="14" class="ms-auto"
+        <a
+          href="https://homebox.software"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="nav-item"
+          ><CircleHelp :size="18" />Homebox rehberi<ArrowUpRight
+            :size="14"
+            class="ms-auto"
         /></a>
-        <div class="mt-2 flex items-center gap-3 border-t border-gray-200 px-1 pt-3 dark:border-neutral-700">
-          <span class="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-semibold text-white">{{ initials }}</span>
+        <div
+          class="mt-2 flex items-center gap-3 border-t border-gray-200 px-1 pt-3 dark:border-neutral-700"
+        >
+          <span
+            class="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-semibold text-white"
+            >{{ initials }}</span
+          >
           <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-semibold">{{ s.user?.name || "Demo Kullanıcı" }}</p>
-            <p class="muted truncate text-xs">{{ s.user?.email || "Örnek envanter" }}</p>
+            <p class="truncate text-sm font-semibold">
+              {{ s.user?.name || "Kullanıcı" }}
+            </p>
+            <p class="muted truncate text-xs">{{ s.user?.email || "" }}</p>
           </div>
-          <button class="icon-button" aria-label="Çıkış yap" @click="logout"><LogOut :size="17" /></button>
+          <button class="icon-button" aria-label="Çıkış yap" @click="logout">
+            <LogOut :size="17" />
+          </button>
         </div>
       </div>
     </aside>
 
     <div class="lg:ps-64">
-      <header class="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-gray-200 bg-white/90 px-4 py-2.5 backdrop-blur sm:px-6 dark:border-neutral-700 dark:bg-neutral-800/90">
+      <header
+        class="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-gray-200 bg-white/90 px-4 py-2.5 backdrop-blur sm:px-6 dark:border-neutral-700 dark:bg-neutral-800/90"
+      >
         <div class="flex items-center gap-2">
-          <button class="icon-button lg:hidden" aria-label="Menüyü aç" @click="s.mobileNav = true"><Menu :size="20" /></button>
-          <span class="muted">Benim evim</span><ChevronRight :size="14" class="text-gray-400" />
+          <button
+            class="icon-button lg:hidden"
+            aria-label="Menüyü aç"
+            @click="s.mobileNav = true"
+          >
+            <Menu :size="20" />
+          </button>
+          <span class="muted">Benim evim</span
+          ><ChevronRight :size="14" class="text-gray-400" />
           <span class="text-sm font-medium">{{ title }}</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="badge-green hidden sm:inline-flex">{{ s.demo ? "Demo modu" : "Homebox bağlantısı" }}</span>
-          <button class="icon-button" aria-label="Verileri yenile" @click="refresh">
+          <span class="badge-green hidden sm:inline-flex"
+            >Homebox bağlantısı</span
+          >
+          <button
+            class="icon-button"
+            aria-label="Verileri yenile"
+            @click="refresh"
+          >
             <ArrowDownLeft :size="18" :class="{ 'animate-pulse': s.busy }" />
           </button>
         </div>
       </header>
 
       <main class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
-        <div v-if="s.demo" class="alert-info mb-6 flex flex-wrap items-center justify-between gap-2">
-          <span>Örnek envanteri keşfediyorsun. Değişiklikler Homebox sunucuna gönderilmez.</span>
-          <button class="text-action" @click="logout">Hesabımla giriş yap<ArrowUpRight :size="14" /></button>
+        <div
+          v-if="s.error && !s.modal && showsGenericError"
+          role="alert"
+          class="alert-error mb-6"
+        >
+          {{ s.error }}
         </div>
-        <div v-if="s.error && !s.modal && showsGenericError" role="alert" class="alert-error mb-6">{{ s.error }}</div>
 
         <section class="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 class="text-2xl font-bold tracking-tight">{{ s.tab === "overview" ? "Evine bir bakış." : title }}</h1>
+            <h1 class="text-2xl font-bold tracking-tight">
+              {{ s.tab === "overview" ? "Evine bir bakış." : title }}
+            </h1>
             <p class="muted mt-1">{{ descriptions[s.tab] }}</p>
           </div>
-          <button v-if="s.tab === 'overview' || s.tab === 'inventory'" class="btn-primary" :disabled="s.busy || s.saving" @click="edit()">
+          <button
+            v-if="s.tab === 'overview' || s.tab === 'inventory'"
+            class="btn-primary"
+            :disabled="s.busy || s.saving"
+            @click="edit()"
+          >
             <Plus :size="16" />Ürün ekle
           </button>
-          <button v-else-if="s.tab === 'locations' || s.tab === 'tags'" class="btn-primary" :disabled="s.busy || s.saving" @click="openOrganizer(s.tab === 'locations' ? 'locations' : 'tags')">
-            <Plus :size="16" />{{ s.tab === "locations" ? "Konum ekle" : "Etiket ekle" }}
+          <button
+            v-else-if="s.tab === 'locations' || s.tab === 'tags'"
+            class="btn-primary"
+            :disabled="s.busy || s.saving"
+            @click="openOrganizer(s.tab === 'locations' ? 'locations' : 'tags')"
+          >
+            <Plus :size="16" />{{
+              s.tab === "locations" ? "Konum ekle" : "Etiket ekle"
+            }}
           </button>
         </section>
 
@@ -242,9 +299,18 @@ onUnmounted(() => window.removeEventListener("keydown", keyboard));
         <UsersView v-else-if="s.tab === 'users'" />
         <ToolsView v-else-if="s.tab === 'tools'" />
 
-        <footer class="muted mt-12 flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 pt-6 text-xs dark:border-neutral-700">
-          <span>homebox<span class="text-blue-600">.</span> Bir ev dolusu düzen.</span>
-          <a href="https://github.com/sysadminsmedia/homebox" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 hover:underline"
+        <footer
+          class="muted mt-12 flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 pt-6 text-xs dark:border-neutral-700"
+        >
+          <span
+            >homebox<span class="text-blue-600">.</span> Bir ev dolusu
+            düzen.</span
+          >
+          <a
+            href="https://github.com/sysadminsmedia/homebox"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1 hover:underline"
             >Homebox API ile çalışır<ArrowUpRight :size="12"
           /></a>
         </footer>
@@ -254,5 +320,7 @@ onUnmounted(() => window.removeEventListener("keydown", keyboard));
 
   <ItemModal v-if="s.modal === 'detail' || s.modal === 'edit'" />
   <OrganizerModal v-if="s.modal === 'organizer'" />
-  <div v-if="s.notice" role="status" class="toast"><ShieldCheck :size="18" class="text-blue-600" />{{ s.notice }}</div>
+  <div v-if="s.notice" role="status" class="toast">
+    <ShieldCheck :size="18" class="text-blue-600" />{{ s.notice }}
+  </div>
 </template>

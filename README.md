@@ -4,7 +4,7 @@ Homebox için Türkçe, duyarlı ve açık/koyu temalı alternatif frontend. Vue
 
 Masaüstü ve mobil ekran örnekleri `docs/preview-desktop.png` ve `docs/preview-mobile.png` dosyalarında bulunur.
 
-## v0.2.0 kapsamı
+## v0.2.1 kapsamı
 
 - Preline UI tasarım dili (Tailwind CSS 4 üzerinde; Preline'ın JS eklentisi gerekmez, etkileşimler Vue ile yazıldı).
 - Giriş, koleksiyon seçimi, genel bakış, kart/tablo envanter, arama, filtre, arşiv ve sayfalama.
@@ -15,7 +15,7 @@ Masaüstü ve mobil ekran örnekleri `docs/preview-desktop.png` ve `docs/preview
 - **Kullanıcılar:** profil, şifre, koleksiyon adı/para birimi, davet kodu oluşturma, üye listesi/çıkarma, hesap silme. Yeni kişi giriş ekranındaki "Davet koduyla hesap oluştur" bölümünden kayıt olur.
 - **Bakım:** ürün detayında kayıt ekleme/tamamlama/silme; genel bakım listesi.
 - **Araçlar:** CSV içe/dışa aktarma, bildirimler, toplu bakım eylemleri, etiket yazdırma bağlantısı.
-- Sunucuya veri göndermeyen, oturum içi örnek envanter modu.
+- Yalnızca Homebox hesabıyla giriş; envanter ve değişiklikler doğrudan Homebox API üzerinden yönetilir.
 
 ### Bilinen sınırlar
 
@@ -99,7 +99,7 @@ npm ci
 HOMEBOX_URL=http://SUNUCU_IP:3100 npm run dev
 ```
 
-`HOMEBOX_URL`, mevcut Homebox'ın API'yi sunan tam adresidir. Vite `/api` isteklerini bu adrese iletir. Tarayıcıdan `http://localhost:5173` adresini açın. Demo için sunucu bağlantısı gerekmez.
+`HOMEBOX_URL`, mevcut Homebox'ın API'yi sunan tam adresidir. Vite `/api` isteklerini bu adrese iletir. Tarayıcıdan `http://localhost:5173` adresini açın. Uygulamayı kullanmak için çalışan bir Homebox sunucusu ve kullanıcı hesabı gerekir.
 
 ## Doğrulama
 
@@ -110,7 +110,7 @@ npx playwright install --with-deps chromium
 npm run test:e2e
 ```
 
-API testleri kimlik doğrulama/tenant başlıklarını, filtre parametrelerini, konum sayfalamasını, dosya token'larını, multipart yüklemeyi ve düzenlemede bilgi korunmasını kontrol eder. Tarayıcı testleri masaüstü/mobil demo akışını ve kaynak şemasını izleyen **taklit API** ile giriş, oluşturma, dosya yükleme ve oturum sona ermesini kontrol eder. Bunlar gerçek Homebox sunucusuyla entegrasyon testi yerine geçmez.
+API testleri kimlik doğrulama/tenant başlıklarını, filtre parametrelerini, konum sayfalamasını, dosya token'larını, multipart yüklemeyi ve düzenlemede bilgi korunmasını kontrol eder. Tarayıcı testleri kaynak şemasını izleyen **taklit API** ile masaüstü/mobil giriş, arama, filtreleme, düzenleme, silme, özel alanlar, dosya yükleme ve oturum sona ermesini kontrol eder. Geçersiz girişin envanteri açmadığı da doğrulanır. Test verileri yalnızca testlerde bulunur. Bunlar gerçek Homebox sunucusuyla entegrasyon testi yerine geçmez.
 
 Docker yapılandırması bu geliştirme ortamında Docker bulunmadığı için çalıştırılmamıştır. İlk gerçek kurulumda önce ayrı UI portundan giriş/arama/düzenleme/yükleme akışını doğrulayın, ardından NPM hedefini değiştirin.
 

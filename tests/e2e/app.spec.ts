@@ -1,13 +1,11 @@
 import { test, expect } from "@playwright/test";
-test("demo search, details, edit and delete; filters and dark mode", async ({
+import { loginWithInventory } from "./homebox-fixture";
+test("authenticated inventory: search, details, edit, delete, filters and dark mode", async ({
   page,
 }, info) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/");
-  await page
-    .getByRole("button", { name: "Örnek envanterle arayüzü keşfet" })
-    .click();
+  await loginWithInventory(page);
   await expect(
     page.getByRole("heading", { name: "Evine bir bakış." }),
   ).toBeVisible();
@@ -16,6 +14,12 @@ test("demo search, details, edit and delete; filters and dark mode", async ({
   await page.getByRole("button", { name: "Düzenle", exact: true }).click();
   await page.getByLabel("Ürün adı", { exact: true }).fill("Kahve köşesi");
   await page.getByRole("button", { name: "Ürünü kaydet" }).click();
+  await expect(
+    page
+      .getByRole("dialog")
+      .getByRole("heading", { name: "Kahve köşesi", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Pencereyi kapat" }).click();
   await page
     .getByRole("textbox", { name: "Envanterde ara" })
     .fill("Kahve köşesi");
@@ -178,10 +182,7 @@ test("authenticated Homebox entity API: login, create, upload, and expiry", asyn
 test("layout has no horizontal overflow; Escape closes the modal", async ({
   page,
 }) => {
-  await page.goto("/");
-  await page
-    .getByRole("button", { name: "Örnek envanterle arayüzü keşfet" })
-    .click();
+  await loginWithInventory(page);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -192,15 +193,12 @@ test("layout has no horizontal overflow; Escape closes the modal", async ({
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
-test("demo: custom fields on an item and field templates", async ({
+test("authenticated inventory: custom fields on an item and field templates", async ({
   page,
 }, info) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/");
-  await page
-    .getByRole("button", { name: "Örnek envanterle arayüzü keşfet" })
-    .click();
+  await loginWithInventory(page);
   await page.getByRole("button", { name: /Siemens EQ700/ }).click();
   await page.getByRole("button", { name: "Düzenle", exact: true }).click();
   await page.getByRole("button", { name: "Alan ekle" }).click();
@@ -216,4 +214,24 @@ test("demo: custom fields on an item and field templates", async ({
     .click();
   await expect(page.getByRole("heading", { name: "Ağ cihazı" })).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test("login is required and failed authentication never opens sample inventory", async ({
+  page,
+}) => {
+  await page.route("**/api/v1/**", (route) =>
+    route.fulfill({ status: 401, json: { error: "unauthorized" } }),
+  );
+  await page.goto("/");
+  await expect(
+    page.getByRole("button", { name: /Örnek envanter|Demoyu/i }),
+  ).toHaveCount(0);
+  await page.getByLabel("E-posta", { exact: true }).fill("test@example.com");
+  await page.getByLabel("Şifre", { exact: true }).fill("invalid");
+  await page.getByRole("button", { name: "Giriş yap", exact: true }).click();
+  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Evine hoş geldin." }),
+  ).toBeVisible();
+  await expect(page.locator(".item-card")).toHaveCount(0);
 });

@@ -13,11 +13,7 @@ import {
   type Stats,
   type Template,
 } from "./api";
-import {
-  cleanFields,
-  copyFields,
-  mergeTemplateFields,
-} from "./fields";
+import { cleanFields, copyFields, mergeTemplateFields } from "./fields";
 
 export const api = new HomeboxApi(
   (localStorage.getItem("hb-mode") as Mode) || "entities",
@@ -42,7 +38,6 @@ export const s = reactive({
   tenant: sessionStorage.getItem("hb-tenant") || "",
   currency: "TRY",
   mode: api.mode as Mode,
-  demo: false,
   busy: false,
   saving: false,
   error: "",
@@ -79,8 +74,6 @@ export const s = reactive({
   deleteConfirm: false,
   uploadType: "photo",
   dark: localStorage.getItem("hb-theme") === "dark",
-  demoItems: [] as Item[],
-  demoTemplates: [] as Template[],
 });
 
 export const loginForm = reactive({
@@ -129,7 +122,7 @@ export const date = (v: unknown) =>
 export const dateOnly = (v: unknown) =>
   typeof v === "string" && !v.startsWith("0001") ? v.slice(0, 10) : "";
 
-export const isAuthenticated = () => !!s.user || s.demo;
+export const isAuthenticated = () => !!s.user;
 export const currentGroup = () => s.groups.find((g) => g.id === s.tenant);
 
 // ---- UI helpers -------------------------------------------------------------
@@ -185,13 +178,6 @@ export function filterOrganizer(kind: string, id: string) {
   if (kind === "locations") s.locationFilter = id;
   else s.tagFilter = id;
 }
-/** Features that need a real Homebox server explain themselves in demo mode. */
-export function needsServer() {
-  if (!s.demo) return false;
-  flash("Bu özellik için kendi Homebox hesabınla giriş yap.");
-  return true;
-}
-
 // ---- Loading --------------------------------------------------------------
 let loadVersion = 0;
 export async function loadItems() {
@@ -200,42 +186,21 @@ export async function loadItems() {
   s.busy = true;
   s.error = "";
   try {
-    if (s.demo) {
-      const needle = s.search.toLocaleLowerCase("tr");
-      const list = s.demoItems.filter(
-        (i) =>
-          (!needle ||
-            (i.name + " " + i.description)
-              .toLocaleLowerCase("tr")
-              .includes(needle)) &&
-          (!s.locationFilter || i.location?.id === s.locationFilter) &&
-          (!s.tagFilter || i.tags.some((t) => t.id === s.tagFilter)) &&
-          (s.archived || !i.archived),
-      );
-      s.result = {
-        items: list.slice((s.page - 1) * 12, s.page * 12),
-        total: list.length,
-        totalPrice: list.reduce((sum, i) => sum + i.purchasePrice * i.quantity, 0),
-        page: s.page,
-        pageSize: 12,
-      };
-    } else {
-      const data = await api.list({
-        page: s.page,
-        pageSize: 12,
-        q: s.search,
-        includeArchived: s.archived,
-        orderBy: "updatedAt",
-        ...(api.mode === "entities"
-          ? {
-              isLocation: false,
-              parentIds: s.locationFilter ? [s.locationFilter] : undefined,
-            }
-          : { locations: s.locationFilter ? [s.locationFilter] : undefined }),
-        tags: s.tagFilter ? [s.tagFilter] : undefined,
-      });
-      if (version === loadVersion) s.result = data;
-    }
+    const data = await api.list({
+      page: s.page,
+      pageSize: 12,
+      q: s.search,
+      includeArchived: s.archived,
+      orderBy: "updatedAt",
+      ...(api.mode === "entities"
+        ? {
+            isLocation: false,
+            parentIds: s.locationFilter ? [s.locationFilter] : undefined,
+          }
+        : { locations: s.locationFilter ? [s.locationFilter] : undefined }),
+      tags: s.tagFilter ? [s.tagFilter] : undefined,
+    });
+    if (version === loadVersion) s.result = data;
   } catch (e) {
     if (version === loadVersion) handleError(e);
   } finally {
@@ -243,24 +208,7 @@ export async function loadItems() {
   }
 }
 
-function demoStats(): Stats {
-  return {
-    totalItems: s.demoItems.length,
-    totalItemPrice: s.demoItems.reduce(
-      (sum, i) => sum + i.purchasePrice * i.quantity,
-      0,
-    ),
-    totalLocations: s.locations.length,
-    totalTags: s.tags.length,
-    totalWithWarranty: 2,
-  };
-}
-
 export async function refresh() {
-  if (s.demo) {
-    s.stats = demoStats();
-    return loadItems();
-  }
   s.busy = true;
   s.error = "";
   try {
@@ -324,14 +272,11 @@ export async function login() {
 }
 
 export async function logout() {
-  if (!s.demo) {
-    try {
-      await api.request("/users/logout", { method: "POST" });
-    } catch (e) {
-      handleError(e);
-    }
+  try {
+    await api.request("/users/logout", { method: "POST" });
+  } catch (e) {
+    handleError(e);
   }
-  s.demo = false;
   s.user = null;
   api.session = null;
   api.tenant = "";
@@ -372,9 +317,7 @@ export async function restoreSession() {
 // ---- Items ------------------------------------------------------------------
 export async function openItem(item: Item) {
   await guarded(async () => {
-    s.selected = s.demo
-      ? JSON.parse(JSON.stringify(item))
-      : await api.item(item.id);
+    s.selected = await api.item(item.id);
     s.modal = "detail";
   });
 }
@@ -432,48 +375,24 @@ export async function saveItem() {
         ? { purchaseDate: form.purchaseDate || "0001-01-01" }
         : { purchaseTime: form.purchaseDate || "0001-01-01" }),
     };
-    if (s.demo) {
-      const id = s.selected?.id || crypto.randomUUID();
-      const item = {
-        ...s.selected,
-        ...changes,
-        id,
-        tags: s.tags.filter((t) => form.tagIds.includes(t.id)),
-        entityType:
-          s.types.find((t) => t.id === form.entityTypeId) ||
-          s.selected?.entityType,
-        location:
-          s.locations.find(
-            (l) =>
-              l.id === (api.mode === "entities" ? form.parentId : form.locationId),
-          ) || null,
-        updatedAt: new Date().toISOString(),
-      } as Item;
-      s.demoItems = s.demoItems.filter((i) => i.id !== id);
-      s.demoItems.unshift(item);
-      close();
-      await refresh();
-      flash("Demo envanteri güncellendi.");
-    } else {
-      let item: Item;
-      if (s.selected) item = await api.update(s.selected, changes);
-      else {
-        item = await api.create(base);
-        s.selected = item;
-        try {
-          item = await api.update(item, changes);
-        } catch (e) {
-          s.modal = "edit";
-          throw new Error(
-            `Ürün oluşturuldu; ek bilgiler kaydedilemedi. Formu tekrar kaydedebilirsiniz. ${e instanceof Error ? e.message : ""}`,
-          );
-        }
-      }
+    let item: Item;
+    if (s.selected) item = await api.update(s.selected, changes);
+    else {
+      item = await api.create(base);
       s.selected = item;
-      s.modal = "detail";
-      await refresh();
-      flash("Ürün kaydedildi.");
+      try {
+        item = await api.update(item, changes);
+      } catch (e) {
+        s.modal = "edit";
+        throw new Error(
+          `Ürün oluşturuldu; ek bilgiler kaydedilemedi. Formu tekrar kaydedebilirsiniz. ${e instanceof Error ? e.message : ""}`,
+        );
+      }
     }
+    s.selected = item;
+    s.modal = "detail";
+    await refresh();
+    flash("Ürün kaydedildi.");
   } catch (e) {
     handleError(e);
   } finally {
@@ -485,8 +404,7 @@ export async function removeItem() {
   const target = s.selected;
   if (!target) return;
   await guarded(async () => {
-    if (s.demo) s.demoItems = s.demoItems.filter((i) => i.id !== target.id);
-    else await api.delete(target.id);
+    await api.delete(target.id);
     close();
     await refresh();
     flash("Ürün silindi.");
@@ -498,10 +416,6 @@ export async function uploadFile(event: Event) {
   const file = input.files?.[0];
   const target = s.selected;
   if (!file || !target) return;
-  if (needsServer()) {
-    input.value = "";
-    return;
-  }
   await guarded(async () => {
     await api.upload(target.id, file, s.uploadType);
     s.selected = await api.item(target.id);
@@ -551,19 +465,7 @@ export async function saveOrganizer() {
           }
         : {}),
     };
-    if (s.demo) {
-      const list = s.organizerKind === "locations" ? s.locations : s.tags;
-      const value = {
-        ...s.organizer,
-        ...body,
-        id: s.organizer?.id || crypto.randomUUID(),
-      } as Organizer;
-      const next = list.filter((i) => i.id !== value.id);
-      next.push(value);
-      if (s.organizerKind === "locations") s.locations = next;
-      else s.tags = next;
-    } else
-      await api.saveOrganizer(s.organizerKind, body, s.organizer || undefined);
+    await api.saveOrganizer(s.organizerKind, body, s.organizer || undefined);
     close();
     await refresh();
     flash("Kaydedildi.");
@@ -585,9 +487,7 @@ export async function applyTypeTemplate() {
   const templateId = typeTemplate(form.entityTypeId);
   if (!templateId) return;
   try {
-    const template = s.demo
-      ? s.demoTemplates.find((t) => t.id === templateId)
-      : await api.template(templateId);
+    const template = await api.template(templateId);
     if (template)
       form.fields = mergeTemplateFields(form.fields, template.fields || []);
   } catch {
@@ -596,112 +496,30 @@ export async function applyTypeTemplate() {
 }
 
 export async function listTemplates(): Promise<Template[]> {
-  return s.demo ? [...s.demoTemplates] : api.templates();
+  return api.templates();
 }
 
 export async function saveTemplate(
   body: Record<string, unknown>,
   existing?: Template,
 ) {
-  if (!s.demo) return api.templateSave(body, existing);
-  const value = {
-    ...existing,
-    ...body,
-    id: existing?.id || crypto.randomUUID(),
-  } as Template;
-  s.demoTemplates = [...s.demoTemplates.filter((t) => t.id !== value.id), value];
-  return value;
+  return api.templateSave(body, existing);
 }
 
 export async function deleteTemplate(id: string) {
-  if (s.demo) s.demoTemplates = s.demoTemplates.filter((t) => t.id !== id);
-  else await api.templateDelete(id);
+  await api.templateDelete(id);
 }
 
 export async function saveType(
   body: Record<string, unknown>,
   existing?: EntityType,
 ) {
-  if (!s.demo) {
-    await api.typeSave(body, existing);
-    s.types = await api.types();
-    return;
-  }
-  const value = {
-    ...existing,
-    ...body,
-    id: existing?.id || crypto.randomUUID(),
-  } as EntityType;
-  s.types = [...s.types.filter((t) => t.id !== value.id), value];
+  await api.typeSave(body, existing);
+  s.types = await api.types();
 }
 
 export async function deleteType(id: string) {
-  if (s.demo) s.types = s.types.filter((t) => t.id !== id);
-  else {
-    await api.typeDelete(id);
-    s.types = await api.types();
-  }
+  await api.typeDelete(id);
+  s.types = await api.types();
   setTypeTemplate(id, "");
-}
-
-// ---- Demo mode --------------------------------------------------------------
-export function startDemo() {
-  s.demo = true;
-  s.error = "";
-  s.currency = "TRY";
-  s.locations = [
-    { id: "living", name: "Salon", description: "Günlük yaşam alanı", itemCount: 2 },
-    { id: "kitchen", name: "Mutfak", description: "Kahve, yemek ve küçük aletler", itemCount: 2 },
-    { id: "office", name: "Çalışma odası", description: "Teknoloji ve çalışma ekipmanları", itemCount: 3 },
-  ];
-  s.tags = [
-    { id: "tech", name: "Teknoloji" },
-    { id: "appliance", name: "Ev aletleri" },
-    { id: "audio", name: "Ses & müzik" },
-  ];
-  s.types = [
-    { id: "item", name: "Ürün", isLocation: false },
-    { id: "location", name: "Konum", isLocation: true },
-  ];
-  s.demoTemplates = [
-    {
-      id: "tpl-network",
-      name: "Ağ cihazı",
-      description: "Ağ ürünleri için ortak alanlar",
-      fields: [
-        { name: "IP adresi", type: "text", textValue: "" },
-        { name: "Port sayısı", type: "number", numberValue: 4 },
-        { name: "PoE destekli", type: "boolean", booleanValue: false },
-      ],
-    },
-  ];
-  const data: Array<[string, string, string, number, string, string, string]> = [
-    ["Siemens EQ700", "Tam otomatik kahve makinesi", "kitchen", 42500, "appliance", "Siemens", "TP715R01"],
-    ["UniFi Gateway Max", "Ev ağının merkezi", "office", 10500, "tech", "Ubiquiti", "UCG-Max"],
-    ["Yale Linus L2", "Akıllı kapı kilidi", "living", 12500, "tech", "Yale", "Linus L2"],
-    ["Lenovo ThinkCentre", "Ev sunucusu ve Home Assistant", "office", 7500, "tech", "Lenovo", "M720Q"],
-    ["Apple HomePod mini", "Müzik ve akıllı ev", "living", 4800, "audio", "Apple", "HomePod mini"],
-    ["Bosch Serie 6", "Bulaşık makinesi", "kitchen", 28500, "appliance", "Bosch", "Serie 6"],
-    ["SteelSeries Arctis Nova 7", "Kablosuz kulaklık", "office", 6900, "audio", "SteelSeries", "Nova 7"],
-  ];
-  s.demoItems = data.map(
-    ([name, description, loc, price, tag, manufacturer, modelNumber], i) =>
-      ({
-        id: String(i),
-        name,
-        description,
-        quantity: 1,
-        purchasePrice: price,
-        tags: s.tags.filter((t) => t.id === tag),
-        location: s.locations.find((l) => l.id === loc),
-        parent: s.locations.find((l) => l.id === loc),
-        entityType: s.types[0],
-        manufacturer,
-        modelNumber,
-        updatedAt: new Date(Date.now() - i * 86400000).toISOString(),
-        attachments: [],
-        fields: [],
-      }) as Item,
-  );
-  void refresh();
 }

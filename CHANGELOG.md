@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1
+
+- Demo giriş düğmesi, örnek envanter verileri ve tüm demo işlem dalları kaldırıldı.
+- Ürün, konum/etiket, tür ve şablon işlemleri yalnızca Homebox API üzerinden çalışır.
+- Bakım, kullanıcı ve araç sayfalarındaki demo kısıtları kaldırıldı.
+- Masaüstü/mobil tarayıcı testleri gerçek giriş akışını kullanan test API verilerine taşındı.
+- Ürün ve konum formlarında Vue/TypeScript derlemesini engelleyen iki şablon ifadesi düzeltildi.
+
 ## 0.2.0
 
 - Arayüz Preline UI tasarım diline taşındı; tek parça `App.vue` bileşenlere ve ortak bir store'a bölündü.
