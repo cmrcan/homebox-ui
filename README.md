@@ -1,12 +1,15 @@
 # Homebox UI
 
-Homebox için Türkçe, duyarlı ve açık/koyu temalı alternatif frontend. Vue 3, TypeScript, Tailwind CSS 4 ve Preline UI tasarım dilini kullanır. Homebox'ın API'sine aynı adres üzerinden bağlanır; veriler Homebox sunucusunda kalır.
+Homebox için Türkçe, duyarlı ve açık/koyu temalı alternatif frontend. Vue 3, TypeScript, Tailwind CSS 4 ve Preline UI 4.2 tema/varyant stillerini kullanır. Homebox'ın API'sine aynı adres üzerinden bağlanır; veriler Homebox sunucusunda kalır.
 
 Masaüstü ve mobil ekran örnekleri `docs/preview-desktop.png` ve `docs/preview-mobile.png` dosyalarında bulunur.
 
-## v0.2.1 kapsamı
+## v0.3.0 kapsamı
 
-- Preline UI tasarım dili (Tailwind CSS 4 üzerinde; Preline'ın JS eklentisi gerekmez, etkileşimler Vue ile yazıldı).
+- Preline UI tema ve varyant stilleri; Tailwind Forms ile tutarlı form kontrolleri. Etkileşimler Vue ve yerel HTML dialog ile yönetilir.
+- Telefon ve tablet odaklı yerleşim: 16 px temel yazı, büyük kontroller, alt gezinme ve odak tutan mobil menü.
+- Dar ekranda tek sütunlu, tam ekran ürün formları; tablette kart ızgarası; telefonda yatay ürün kartları ve tablo yerine okunabilir liste.
+- Sade giriş ekranı: e-posta ve şifre; şifre göster/gizle; ayrı davet koduyla kayıt görünümü. API sürümü seçilmez.
 - Giriş, koleksiyon seçimi, genel bakış, kart/tablo envanter, arama, filtre, arşiv ve sayfalama.
 - Ürün oluşturma, düzenleme, silme; fotoğraf ve belge yükleme; konum ve etiket yönetimi.
 - **Özel alanlar:** her üründe metin, sayı, evet/hayır ve tarih alanları.
@@ -24,11 +27,18 @@ Masaüstü ve mobil ekran örnekleri `docs/preview-desktop.png` ve `docs/preview
 - API anahtarları, OIDC ve yedekler henüz yok.
 - `docs/preview-*.png` görselleri eski tasarımdır.
 
+## Logo
+
+Giriş ekranı, masaüstü kenar çubuğu ve mobil üst bölüm aynı `HomeboxBrand` bileşenini kullanır.
+Sağlanan Homebox SVG dosyası `src/assets/homebox-logo.svg` konumunda bulunur ve üretim paketine
+inline olarak dahil edilir. Oranları korunur; yazı ve vurgu rengi açık/koyu temadan gelir.
+Tarayıcı sekmesi simgesi aynı SVG içindeki kutu sembolünden oluşturulmuştur.
+
 ## API uyumluluğu
 
 Varsayılan API, **Homebox v0.26.2** kaynak koduna (`e01dd737238a3fa7e1a6454b37de6c6fc88c86e4`) göre hazırlanmıştır: `/api/v1/entities`, `/entity-types`, `/tags`, `/groups`, `/users`.
 
-Giriş ekranındaki **Bağlantı seçenekleri** altında eski `/items` + `/locations` API'si seçilebilir; bu adaptör v0.23.0 şeması temel alınarak yazılmıştır. Sunucudaki sürümü kontrol edin. Yeni sürümler için otomatik API garantisi verilmez. Kullanıcının canlı Homebox sunucusunda henüz doğrulanmamıştır.
+API ailesi girişten sonra sunucudan otomatik belirlenir. `/entity-types` destekleniyorsa entities API kullanılır. Bu uç nokta 404 döndürürse eski `/items` uç noktasının çalıştığı doğrulanır ve legacy adaptörü seçilir. Oturum, ağ ve diğer sunucu hataları sürüm değişikliği olarak yorumlanmaz. Legacy adaptörü v0.23.0 şeması temel alınarak yazılmıştır; yeni sunucu sürümleri için otomatik uyumluluk garantisi verilmez.
 
 ## Mevcut Homebox'a bağlama (Docker)
 
@@ -110,7 +120,7 @@ npx playwright install --with-deps chromium
 npm run test:e2e
 ```
 
-API testleri kimlik doğrulama/tenant başlıklarını, filtre parametrelerini, konum sayfalamasını, dosya token'larını, multipart yüklemeyi ve düzenlemede bilgi korunmasını kontrol eder. Tarayıcı testleri kaynak şemasını izleyen **taklit API** ile masaüstü/mobil giriş, arama, filtreleme, düzenleme, silme, özel alanlar, dosya yükleme ve oturum sona ermesini kontrol eder. Geçersiz girişin envanteri açmadığı da doğrulanır. Test verileri yalnızca testlerde bulunur. Bunlar gerçek Homebox sunucusuyla entegrasyon testi yerine geçmez.
+API testleri kimlik doğrulama/tenant başlıklarını, filtre parametrelerini, konum sayfalamasını, dosya token'larını, multipart yüklemeyi ve düzenlemede bilgi korunmasını kontrol eder. Tarayıcı testleri kaynak şemasını izleyen **taklit API** ile masaüstü, telefon ve tablet üzerinde giriş, arama, filtreleme, düzenleme, silme, özel alanlar, dosya yükleme ve oturum sona ermesini kontrol eder. Geçersiz girişin envanteri açmadığı da doğrulanır. Girişte API seçeneği olmadığı, giriş alanlarının okunabilir boyutu, şifre görünürlüğü, mobil menü ve 320–1440 px genişliklerde yatay taşma da kontrol edilir. Test verileri yalnızca testlerde bulunur. Bunlar gerçek Homebox sunucusuyla entegrasyon testi yerine geçmez.
 
 Docker yapılandırması bu geliştirme ortamında Docker bulunmadığı için çalıştırılmamıştır. İlk gerçek kurulumda önce ayrı UI portundan giriş/arama/düzenleme/yükleme akışını doğrulayın, ardından NPM hedefini değiştirin.
 

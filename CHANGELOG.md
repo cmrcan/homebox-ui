@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0
+
+- Sağlanan Homebox SVG logosu giriş ekranına, mobil üst bölüme ve masaüstü/mobil menüye eklendi; açık/koyu tema desteği ve sekme simgesi.
+
+- Preline UI 4.2 tema ve varyant stilleri ile Tailwind Forms projeye eklendi.
+- 16 px temel yazı, daha büyük metinler, en az 44 px ikon düğmeleri ve 48 px form kontrolleri.
+- Telefon/tablet için alt gezinme ve odak tutan, Escape ile kapanan mobil menü.
+- Telefonlarda yatay ürün kartları, okunabilir liste ve tam ekran tek sütunlu formlar.
+- Giriş ekranı sadeleştirildi; API/bağlantı seçenekleri kaldırıldı. Sunucu uyumluluğu girişten sonra otomatik belirlenir.
+- Şifre göster/gizle ve ayrı davet koduyla kayıt görünümü.
+- Tablet test projesi; dar ekran, dokunma alanı, gezinme ve API algılama kontrolleri.
+
 ## 0.2.1
 
 - Demo giriş düğmesi, örnek envanter verileri ve tüm demo işlem dalları kaldırıldı.

@@ -244,6 +244,19 @@ export class HomeboxApi {
   tags() {
     return this.request<Organizer[]>("/tags");
   }
+  /** Detect the server's supported resource family after authentication. */
+  async detectMode(): Promise<Mode> {
+    try {
+      await this.request<EntityType[]>("/entity-types");
+      this.mode = "entities";
+    } catch (error) {
+      if (!(error instanceof ApiError) || error.status !== 404) throw error;
+      // Only choose the legacy API if its inventory endpoint actually responds.
+      await this.request<Page>("/items?page=1&pageSize=1");
+      this.mode = "legacy";
+    }
+    return this.mode;
+  }
   types() {
     return this.mode === "entities"
       ? this.request<EntityType[]>("/entity-types")
@@ -452,10 +465,10 @@ export class HomeboxApi {
     );
   }
   saveMaintenance(id: string, body: Record<string, unknown>) {
-    return this.request<Maintenance>(
-      `/maintenance/${encodeURIComponent(id)}`,
-      { method: "PUT", body: JSON.stringify(body) },
-    );
+    return this.request<Maintenance>(`/maintenance/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
   }
   deleteMaintenance(id: string) {
     return this.request<void>(`/maintenance/${encodeURIComponent(id)}`, {

@@ -206,15 +206,15 @@ const customFields = () =>
       class="modal-content"
       @submit.prevent="saveItem"
     >
-      <div class="grid grid-cols-2 gap-4">
-        <label class="field col-span-2"
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <label class="field sm:col-span-2"
           >Ürün adı<input
             v-model="form.name"
             required
             maxlength="255"
             placeholder="Örn. Siemens kahve makinesi"
         /></label>
-        <label class="field col-span-2"
+        <label class="field sm:col-span-2"
           >Açıklama<textarea
             v-model="form.description"
             maxlength="1000"
@@ -290,7 +290,7 @@ const customFields = () =>
         <label class="field"
           >Garanti bitişi<input v-model="form.warrantyExpires" type="date"
         /></label>
-        <div class="field col-span-2">
+        <div class="field sm:col-span-2">
           Etiketler
           <div class="mt-2 flex flex-wrap gap-2">
             <label v-for="t in s.tags" :key="t.id" class="tag-check"
@@ -307,10 +307,10 @@ const customFields = () =>
           </div>
         </div>
         <FieldsEditor v-model="form.fields" />
-        <label class="field col-span-2"
+        <label class="field sm:col-span-2"
           >Notlar<textarea v-model="form.notes" rows="3" maxlength="1000" />
         </label>
-        <label class="col-span-2 flex items-center gap-2 text-sm"
+        <label class="sm:col-span-2 flex items-center gap-2 text-sm"
           ><input
             v-model="form.archived"
             type="checkbox"

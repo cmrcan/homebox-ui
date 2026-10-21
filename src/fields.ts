@@ -53,7 +53,9 @@ export function mergeTemplateFields(
   current: CustomField[],
   templateFields: CustomField[] = [],
 ): CustomField[] {
-  const known = new Set(current.map((f) => f.name.trim().toLocaleLowerCase("tr")));
+  const known = new Set(
+    current.map((f) => f.name.trim().toLocaleLowerCase("tr")),
+  );
   const added = templateFields
     .filter((f) => f.name && !known.has(f.name.trim().toLocaleLowerCase("tr")))
     .map((f) => {

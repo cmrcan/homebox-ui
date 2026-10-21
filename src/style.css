@@ -1,12 +1,14 @@
 @import "tailwindcss";
+@import "../node_modules/preline/variants.css";
+@import "../node_modules/preline/css/themes/theme.css";
+@plugin "@tailwindcss/forms";
 @custom-variant dark (&:where(.dark, .dark *));
 
-/*
- * Preline UI design language on Tailwind CSS 4: neutral grays, blue-600
- * primary, rounded-lg controls and rounded-xl cards. The class names below
- * collect the utility sets Preline documents for each component, so Vue
- * templates stay readable.
- */
+@theme {
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+}
+
 :root {
   font-family:
     Inter,
@@ -15,175 +17,318 @@
     -apple-system,
     "Segoe UI",
     sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   font-synthesis: none;
   color-scheme: light;
+  --muted-foreground: var(--color-gray-600);
+  -webkit-text-size-adjust: 100%;
 }
 :root.dark {
   color-scheme: dark;
+  --muted-foreground: var(--color-neutral-400);
 }
 body {
-  @apply bg-gray-50 text-gray-800 antialiased dark:bg-neutral-900 dark:text-neutral-200;
+  @apply m-0 bg-background-1 text-base text-foreground antialiased;
+}
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
 }
 button {
   cursor: pointer;
+  touch-action: manipulation;
 }
 button:disabled {
   cursor: not-allowed;
 }
+input,
+select,
+textarea {
+  min-width: 0;
+}
+svg {
+  flex-shrink: 0;
+}
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
 
 @layer components {
-  /* Buttons */
+  /* Preline's theme tokens keep surfaces, controls and navigation consistent. */
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger,
+  .btn-soft {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border px-4 py-3 text-base font-medium transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+  }
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-x-2 rounded-lg border border-transparent bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:bg-blue-700 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:focus-visible:ring-offset-neutral-900;
+    @apply border-transparent bg-primary text-primary-foreground hover:bg-primary-hover;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-x-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-800 shadow-2xs hover:bg-gray-50 focus:bg-gray-50 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700;
+    @apply border-border bg-card text-foreground shadow-2xs hover:bg-muted;
   }
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-x-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-700 focus:bg-red-700 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-red-500 disabled:pointer-events-none disabled:opacity-50;
+    @apply border-transparent bg-red-600 text-white hover:bg-red-700;
   }
   .btn-soft {
-    @apply inline-flex items-center justify-center gap-x-2 rounded-lg border border-transparent bg-blue-100 px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-200 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 dark:bg-blue-800/30 dark:text-blue-400 dark:hover:bg-blue-800/20;
+    @apply border-transparent bg-primary/10 text-primary hover:bg-primary/15;
   }
   .icon-button {
-    @apply inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-transparent text-gray-600 hover:bg-gray-100 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700;
+    @apply inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-transparent text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50;
   }
   .text-action {
-    @apply inline-flex items-center gap-x-1 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline focus:outline-hidden focus-visible:underline dark:text-blue-500 dark:hover:text-blue-400;
+    @apply inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-medium text-primary hover:underline focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50;
   }
-
-  /* Forms */
   .field {
-    @apply block text-sm font-medium text-gray-800 dark:text-white;
+    @apply block min-w-0 text-base font-medium text-foreground;
   }
   .field input:not([type="checkbox"]):not([type="file"]),
   .field select,
   .field textarea,
   .input {
-    @apply mt-2 block w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm font-normal text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:placeholder:text-neutral-500;
+    @apply mt-2 block min-h-12 w-full rounded-lg border border-border bg-card px-3.5 py-3 text-base font-normal text-foreground shadow-2xs placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary focus:outline-hidden disabled:opacity-50;
   }
   .input {
     @apply mt-0;
   }
   select.input,
   .field select {
-    @apply pe-9;
+    @apply pe-10;
   }
   .tag-check {
-    @apply inline-flex cursor-pointer items-center gap-x-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-800 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:has-[:checked]:bg-blue-900/30 dark:has-[:checked]:text-blue-400;
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary;
   }
   .search-field {
-    @apply relative block;
+    @apply relative block min-w-0;
   }
   .search-field svg {
-    @apply pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-gray-400;
+    @apply pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-muted-foreground;
   }
   .search-field input {
-    @apply w-full rounded-lg border border-gray-200 bg-white py-2.5 ps-10 pe-9 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300;
+    @apply block min-h-12 w-full rounded-lg border border-border bg-card py-3 ps-11 pe-3.5 text-base shadow-2xs placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary focus:outline-hidden;
   }
   .search-field kbd {
-    @apply pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 rounded border border-gray-200 bg-gray-50 px-1.5 text-xs text-gray-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400;
+    @apply pointer-events-none absolute end-3 top-1/2 hidden -translate-y-1/2 rounded border border-border bg-muted px-1.5 text-xs text-muted-foreground xl:block;
   }
-
-  /* Surfaces */
   .card {
-    @apply rounded-xl border border-gray-200 bg-white shadow-2xs dark:border-neutral-700 dark:bg-neutral-800;
+    @apply min-w-0 rounded-xl border border-border bg-card text-foreground shadow-2xs;
   }
   .card-body {
-    @apply p-4 md:p-5;
+    @apply p-5 sm:p-6;
   }
   .muted {
-    @apply text-sm text-gray-500 dark:text-neutral-400;
+    @apply text-sm leading-relaxed text-muted-foreground;
+  }
+  .badge,
+  .badge-blue,
+  .badge-green {
+    @apply inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium;
   }
   .badge {
-    @apply inline-flex items-center gap-x-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-neutral-700 dark:text-neutral-200;
+    @apply bg-muted text-foreground;
   }
   .badge-blue {
-    @apply inline-flex items-center gap-x-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-800/30 dark:text-blue-500;
+    @apply bg-primary/10 text-primary;
   }
   .badge-green {
-    @apply inline-flex items-center gap-x-1 rounded-full bg-teal-100 px-2.5 py-0.5 text-xs font-medium text-teal-800 dark:bg-teal-800/30 dark:text-teal-500;
+    @apply bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300;
   }
   .alert-error {
-    @apply rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900 dark:bg-red-900/20 dark:text-red-400;
+    @apply rounded-lg border border-red-200 bg-red-50 p-4 text-sm leading-relaxed text-red-800 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300;
   }
   .alert-info {
-    @apply rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-900/20 dark:text-blue-400;
+    @apply rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm leading-relaxed text-primary;
   }
   .toast {
-    @apply fixed end-4 bottom-4 z-[90] flex max-w-sm items-center gap-x-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 shadow-lg dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200;
+    @apply fixed inset-x-4 z-[90] mx-auto flex w-fit max-w-lg items-center gap-3 rounded-xl border border-border bg-card px-5 py-4 text-sm text-foreground shadow-lg;
+    bottom: calc(6rem + env(safe-area-inset-bottom));
   }
-
-  /* Navigation */
   .nav-item {
-    @apply flex w-full items-center gap-x-3 rounded-lg px-2.5 py-2 text-start text-sm text-gray-800 hover:bg-gray-100 focus:bg-gray-100 focus:outline-hidden dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700;
+    @apply flex min-h-12 w-full items-center gap-3 rounded-lg px-3 py-3 text-start text-base text-foreground transition-colors hover:bg-muted focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary;
   }
   .nav-active {
-    @apply bg-gray-100 font-medium dark:bg-neutral-700;
+    @apply bg-primary/10 font-semibold text-primary hover:bg-primary/15;
   }
   .nav-caption {
-    @apply px-2.5 pt-4 pb-1 text-xs font-medium text-gray-500 dark:text-neutral-500;
+    @apply mb-2 px-3 text-xs font-semibold tracking-wide text-muted-foreground;
   }
-
-  /* Tables */
+  .collection-select {
+    @apply -ms-1 min-h-11 w-full min-w-0 truncate rounded-lg border-0 bg-transparent py-1 pe-8 ps-1 text-base font-semibold focus:ring-primary;
+  }
   .data-table {
-    @apply min-w-full divide-y divide-gray-200 text-sm dark:divide-neutral-700;
+    @apply min-w-full divide-y divide-border text-base;
   }
   .data-table th {
-    @apply px-5 py-3 text-start text-xs font-medium text-gray-500 dark:text-neutral-500;
+    @apply bg-background-1 px-5 py-4 text-start text-sm font-medium text-muted-foreground;
   }
   .data-table td {
-    @apply px-5 py-3 align-middle text-gray-800 dark:text-neutral-200;
+    @apply px-5 py-4 align-middle text-foreground;
   }
   .data-table tbody {
-    @apply divide-y divide-gray-200 dark:divide-neutral-700;
+    @apply divide-y divide-border;
   }
-
-  /* Modal (native dialog) */
   .modal {
-    @apply m-auto max-h-[92vh] w-[calc(100%-1.5rem)] max-w-2xl overflow-y-auto rounded-xl border border-gray-200 bg-white p-0 text-gray-800 shadow-xl dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200;
+    @apply m-0 h-dvh max-h-dvh w-full max-w-none overflow-y-auto overscroll-contain border-0 bg-card p-0 text-foreground shadow-xl sm:m-auto sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:w-[calc(100%-3rem)] sm:max-w-3xl sm:rounded-2xl sm:border sm:border-border;
   }
-  .modal::backdrop {
-    background: rgb(17 24 39 / 0.55);
+  .modal::backdrop,
+  .navigation-drawer::backdrop {
+    background: rgb(15 23 42 / 0.48);
+    backdrop-filter: blur(2px);
   }
   .modal-header {
-    @apply flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4 dark:border-neutral-700;
+    @apply sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-card px-5 py-4 sm:px-7 sm:py-5;
+    padding-top: max(1rem, env(safe-area-inset-top));
   }
   .modal-content {
-    @apply p-5;
+    @apply p-5 sm:p-7;
   }
   .modal-actions {
-    @apply mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 pt-4 dark:border-neutral-700;
-  }
-
-  /* Inventory */
-  .item-card {
-    @apply flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-start shadow-2xs transition hover:shadow-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-neutral-700 dark:bg-neutral-800;
-  }
-  .item-visual {
-    @apply relative flex aspect-[4/3] items-center justify-center bg-gray-100 text-gray-400 dark:bg-neutral-700 dark:text-neutral-500;
-  }
-  .item-visual img {
-    @apply size-full object-cover;
+    @apply sticky bottom-0 z-10 -mx-5 mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-border bg-card px-5 pt-4 sm:-mx-7 sm:px-7;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
   .attachment-link {
-    @apply mt-2 flex items-center gap-x-2 rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700;
+    @apply mt-3 flex min-h-12 items-center gap-3 rounded-lg border border-border px-4 py-3 text-base hover:bg-muted;
+  }
+  .attachment-link span {
+    overflow-wrap: anywhere;
   }
   .detail-grid {
-    @apply grid grid-cols-1 gap-4 sm:grid-cols-2;
+    @apply grid grid-cols-1 gap-5 sm:grid-cols-2;
   }
   .detail-grid small {
-    @apply block text-xs text-gray-500 dark:text-neutral-400;
+    @apply mb-1 block text-sm text-muted-foreground;
   }
   .detail-grid strong {
-    @apply block text-sm font-medium;
+    @apply block text-base font-medium;
+    overflow-wrap: anywhere;
+  }
+  .item-card {
+    @apply flex min-w-0 flex-row overflow-hidden rounded-xl border border-border bg-card text-start shadow-2xs transition hover:border-primary/35 hover:shadow-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary sm:flex-col;
+  }
+  .item-visual {
+    @apply relative flex w-28 shrink-0 items-center justify-center overflow-hidden bg-muted text-muted-foreground sm:aspect-[4/3] sm:w-full;
+  }
+  .item-visual img {
+    @apply absolute inset-0 size-full object-cover;
+  }
+  .item-content {
+    @apply flex min-w-0 flex-1 flex-col p-4 sm:p-5;
+  }
+  .item-content h3 {
+    @apply break-words text-lg font-semibold leading-snug;
+  }
+  .item-location {
+    @apply mt-2 flex items-center gap-1.5 text-sm text-muted-foreground;
+  }
+  .item-location span {
+    @apply truncate;
+  }
+  .inventory-list-row {
+    @apply flex w-full min-w-0 items-center gap-4 border-b border-border p-4 text-start last:border-b-0 hover:bg-muted;
+  }
+  .inventory-controls {
+    @apply mt-5 flex flex-wrap gap-3;
+  }
+  .inventory-filters {
+    @apply mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto];
+  }
+  .segmented-control {
+    @apply inline-flex shrink-0 rounded-lg border border-border bg-card p-1;
+  }
+  .segmented-control .icon-button {
+    @apply size-11;
+  }
+  .segmented-control [aria-pressed="true"] {
+    @apply bg-muted text-primary;
+  }
+  .filter-button[aria-expanded="true"] {
+    @apply border-primary/30 bg-primary/5 text-primary;
+  }
+  .homebox-brand {
+    @apply inline-flex min-h-10 items-center;
+  }
+  .homebox-logo {
+    @apply block w-44 max-w-full text-foreground;
+  }
+  .homebox-logo svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .brand-link {
+    @apply flex min-h-24 items-center px-7;
+  }
+  .app-shell {
+    @apply min-h-dvh;
+  }
+  .app-sidebar {
+    @apply fixed inset-y-0 start-0 z-40 w-72 flex-col border-e border-border bg-card;
+  }
+  .app-header {
+    @apply sticky top-0 z-30 flex min-h-20 items-center justify-between gap-4 border-b border-border bg-card px-4 sm:px-7 lg:px-8;
+    padding-top: env(safe-area-inset-top);
+  }
+  .app-content {
+    @apply mx-auto max-w-[100rem] px-4 pt-6 sm:px-7 sm:pt-8 lg:px-8 xl:py-9;
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom));
+  }
+  .page-heading {
+    @apply mb-7 flex flex-wrap items-end justify-between gap-5 sm:mb-8;
+  }
+  .page-heading h1 {
+    @apply text-[1.75rem] font-semibold tracking-tight sm:text-[2rem];
+  }
+  .app-footer {
+    @apply mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6 text-sm text-muted-foreground;
+  }
+  .bottom-navigation {
+    @apply fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-card px-2 pt-2 shadow-[0_-4px_18px_rgb(0_0_0/0.03)];
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  .bottom-navigation button {
+    @apply flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary;
+  }
+  .bottom-navigation [aria-current="page"],
+  .bottom-navigation .is-active {
+    @apply bg-primary/10 text-primary;
+  }
+  .navigation-drawer {
+    @apply fixed inset-y-0 start-0 m-0 h-dvh max-h-dvh w-[min(90vw,23rem)] max-w-none overflow-hidden overscroll-contain border-0 border-e border-border bg-card p-0 text-foreground shadow-xl;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .login-page {
+    @apply flex min-h-dvh items-center justify-center bg-background-1 px-4 py-8 sm:px-6 sm:py-12;
+    padding-top: max(2rem, env(safe-area-inset-top));
+    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+  }
+  .login-page .homebox-logo {
+    width: 16.4375rem;
+    max-width: 80vw;
+  }
+  .skip-link {
+    @apply fixed start-4 top-4 z-50 -translate-y-24 rounded-lg bg-primary px-4 py-3 text-primary-foreground focus:translate-y-0;
   }
 }
 
+@media (min-width: 1280px) {
+  .app-content {
+    padding-bottom: 2.25rem;
+  }
+  .toast {
+    bottom: 1.5rem;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     transition: none !important;
     animation: none !important;
+    scroll-behavior: auto !important;
   }
 }

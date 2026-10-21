@@ -21,7 +21,7 @@ test("authenticated inventory: search, details, edit, delete, filters and dark m
   ).toBeVisible();
   await page.getByRole("button", { name: "Pencereyi kapat" }).click();
   await page
-    .getByRole("textbox", { name: "Envanterde ara" })
+    .getByRole("searchbox", { name: "Envanterde ara" })
     .fill("Kahve köşesi");
   await expect(page.locator(".item-card")).toHaveCount(1);
   await page.locator(".item-card").click();
@@ -30,17 +30,23 @@ test("authenticated inventory: search, details, edit, delete, filters and dark m
   await expect(
     page.getByRole("heading", { name: "Eşleşen ürün bulunamadı" }),
   ).toBeVisible();
-  if (info.project.name === "mobile")
+  if (info.project.name !== "desktop")
     await page.getByRole("button", { name: "Menüyü aç" }).click();
-  await page.getByRole("button", { name: "Konumlar", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Ana menü" })
+    .getByRole("button", { name: "Konumlar", exact: true })
+    .click();
   await page.getByRole("button", { name: "Ürünleri gör" }).first().click();
   await expect(
     page.getByRole("combobox", { name: "Konuma göre filtrele" }),
   ).toHaveValue("living");
   await expect(page.locator(".item-card")).toHaveCount(2);
-  if (info.project.name === "mobile")
+  if (info.project.name !== "desktop")
     await page.getByRole("button", { name: "Menüyü aç" }).click();
-  await page.getByRole("button", { name: "Koyu görünüm" }).click();
+  await page
+    .getByRole("navigation", { name: "Ana menü" })
+    .getByRole("button", { name: "Koyu görünüm" })
+    .click();
   await expect(page.locator("html")).toHaveClass("dark");
   expect(errors).toEqual([]);
 });
@@ -76,6 +82,8 @@ test("authenticated Homebox entity API: login, create, upload, and expiry", asyn
       };
     } else {
       expect(request.headers().authorization).toBe("Bearer session");
+      if (path === "/entity-types")
+        expect(request.headers()["x-tenant"]).toBe("g");
       if (path === "/users/self")
         data = { item: { name: "Can", email: "can@example.com" } };
       else if (path === "/groups/all")
@@ -207,7 +215,7 @@ test("authenticated inventory: custom fields on an item and field templates", as
   await page.getByRole("button", { name: "Ürünü kaydet" }).click();
   await expect(page.getByRole("dialog").getByText("230V")).toBeVisible();
   await page.getByRole("button", { name: "Pencereyi kapat" }).click();
-  if (info.project.name === "mobile")
+  if (info.project.name !== "desktop")
     await page.getByRole("button", { name: "Menüyü aç" }).click();
   await page
     .getByRole("button", { name: "Alan şablonları", exact: true })
@@ -234,4 +242,134 @@ test("login is required and failed authentication never opens sample inventory",
     page.getByRole("heading", { name: "Evine hoş geldin." }),
   ).toBeVisible();
   await expect(page.locator(".item-card")).toHaveCount(0);
+});
+
+test("simple login: no connection options, readable inputs and password visibility", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.getByRole("combobox")).toHaveCount(0);
+  await expect(page.getByText("Bağlantı seçenekleri")).toHaveCount(0);
+  await expect(page.getByLabel("E-posta", { exact: true })).toBeVisible();
+  const password = page.getByLabel("Şifre", { exact: true });
+  await password.fill("test-password");
+  await expect(password).toHaveAttribute("type", "password");
+  await page
+    .getByRole("button", { name: "Şifreyi göster", exact: true })
+    .click();
+  await expect(password).toHaveAttribute("type", "text");
+  await page
+    .getByRole("button", { name: "Şifreyi gizle", exact: true })
+    .click();
+  await expect(password).toHaveAttribute("type", "password");
+  const metrics = await password.evaluate((input) => ({
+    fontSize: parseFloat(getComputedStyle(input).fontSize),
+    height: input.getBoundingClientRect().height,
+  }));
+  expect(metrics.fontSize).toBeGreaterThanOrEqual(16);
+  expect(metrics.height).toBeGreaterThanOrEqual(48);
+  expect(
+    await page
+      .getByRole("button", { name: "Giriş yap", exact: true })
+      .evaluate((button) => button.getBoundingClientRect().height),
+  ).toBeGreaterThanOrEqual(48);
+});
+
+test("responsive navigation, forms and list remain usable on narrow phones and tablets", async ({
+  page,
+}, info) => {
+  await page.addInitScript(() => localStorage.setItem("hb-mode", "legacy"));
+  await loginWithInventory(page);
+  for (const width of [320, 390, 820, 1180, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    const bottom = page.getByRole("navigation", { name: "Hızlı gezinme" });
+    if (width < 1280) {
+      await expect(bottom).toBeVisible();
+      const open = page.getByRole("button", { name: "Menüyü aç", exact: true });
+      expect(
+        await open.evaluate((button) => button.getBoundingClientRect().height),
+      ).toBeGreaterThanOrEqual(44);
+      await open.click();
+      await expect(page.locator(".navigation-drawer")).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(page.locator(".navigation-drawer")).not.toBeVisible();
+    } else await expect(bottom).not.toBeVisible();
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "Liste görünümü" }).click();
+  await expect(page.getByTestId("mobile-inventory-list")).toBeVisible();
+  await page.getByRole("button", { name: "Ürün ekle", exact: true }).click();
+  const dialog = page
+    .getByRole("dialog")
+    .filter({ has: page.getByLabel("Ürün adı", { exact: true }) });
+  await expect(dialog).toBeVisible();
+  const nameBox = await page
+    .getByLabel("Ürün adı", { exact: true })
+    .boundingBox();
+  const brandBox = await page
+    .getByLabel("Marka", { exact: true })
+    .boundingBox();
+  const modelBox = await page
+    .getByLabel("Model", { exact: true })
+    .boundingBox();
+  expect(nameBox!.width).toBeGreaterThan(300);
+  expect(modelBox!.y).toBeGreaterThan(brandBox!.y);
+  expect(
+    await dialog.evaluate(
+      (element) => element.scrollWidth <= element.clientWidth,
+    ),
+  ).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  const originalSize = info.project.use.viewport!;
+  await page.setViewportSize(originalSize);
+});
+
+test("supplied SVG logo preserves its proportions and follows light and dark themes", async ({
+  page,
+}, info) => {
+  await page.goto("/");
+  const loginLogo = page.getByRole("img", { name: "Homebox", exact: true });
+  await expect(loginLogo).toBeVisible();
+  const rect = await loginLogo.boundingBox();
+  expect(rect!.width / rect!.height).toBeCloseTo(263 / 45, 2);
+  expect(await loginLogo.locator("path").count()).toBe(13);
+  const lightText = await loginLogo
+    .locator(".logo-text")
+    .evaluate((path) => getComputedStyle(path).fill);
+  expect(lightText).not.toBe("none");
+  const accent = await loginLogo
+    .locator(".logo-accent")
+    .evaluate((path) => getComputedStyle(path).fill);
+  expect(accent).not.toBe("none");
+  await page.screenshot({
+    path: `/workspace/scratch/3c7ddd8e74ec/qa-branded-login-${info.project.name}.png`,
+  });
+  await page.evaluate(() => document.documentElement.classList.add("dark"));
+  const darkText = await loginLogo
+    .locator(".logo-text")
+    .evaluate((path) => getComputedStyle(path).fill);
+  expect(darkText).not.toBe(lightText);
+  expect(darkText).not.toBe("none");
+  await page.screenshot({
+    path: `/workspace/scratch/3c7ddd8e74ec/qa-branded-dark-${info.project.name}.png`,
+  });
+  await page.evaluate(() => document.documentElement.classList.remove("dark"));
+  await loginWithInventory(page);
+  const appLogo = page.getByRole("img", { name: "Homebox", exact: true });
+  await expect(appLogo).toHaveCount(1);
+  await expect(appLogo).toBeVisible();
+  if (info.project.name !== "desktop") {
+    await page.getByRole("button", { name: "Menüyü aç", exact: true }).click();
+    await expect(
+      page
+        .locator(".navigation-drawer")
+        .getByRole("img", { name: "Homebox", exact: true }),
+    ).toBeVisible();
+  }
 });

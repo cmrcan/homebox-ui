@@ -199,18 +199,18 @@ async function remove(id: string) {
       {{ s.error }}
     </div>
     <form class="modal-content" @submit.prevent="save">
-      <div class="grid grid-cols-2 gap-4">
-        <label class="field col-span-2"
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <label class="field sm:col-span-2"
           >Şablon adı<input v-model="form.name" required maxlength="255"
         /></label>
-        <label class="field col-span-2"
+        <label class="field sm:col-span-2"
           >Açıklama<textarea
             v-model="form.description"
             rows="2"
             maxlength="1000"
           />
         </label>
-        <label class="field col-span-2"
+        <label class="field sm:col-span-2"
           >Varsayılan ürün adı<input v-model="form.defaultName" maxlength="255"
         /></label>
         <label class="field"

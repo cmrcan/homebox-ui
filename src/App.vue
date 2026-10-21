@@ -1,28 +1,17 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  Box,
   ChevronRight,
-  CircleHelp,
-  Home,
-  LayoutDashboard,
-  LayoutTemplate,
-  Layers,
-  LogOut,
-  MapPin,
   Menu,
   Moon,
-  Package,
   Plus,
+  RefreshCw,
   ShieldCheck,
   Sun,
-  Tag,
-  Users,
-  Wrench,
-  Settings2,
+  X,
 } from "lucide-vue-next";
+import HomeboxBrand from "./components/HomeboxBrand.vue";
+import AppNavigation from "./components/AppNavigation.vue";
 import LoginView from "./components/LoginView.vue";
 import ItemModal from "./components/ItemModal.vue";
 import OrganizerModal from "./components/OrganizerModal.vue";
@@ -34,12 +23,11 @@ import TemplatesView from "./views/TemplatesView.vue";
 import MaintenanceView from "./views/MaintenanceView.vue";
 import UsersView from "./views/UsersView.vue";
 import ToolsView from "./views/ToolsView.vue";
+import { collection, configuration } from "./navigation";
 import {
-  changeGroup,
   currentGroup,
   edit,
   isAuthenticated,
-  logout,
   navigate,
   openOrganizer,
   refresh,
@@ -48,51 +36,49 @@ import {
   type TabId,
 } from "./store";
 
-const collection = [
-  { id: "overview", name: "Genel bakış", icon: LayoutDashboard },
-  { id: "inventory", name: "Envanterim", icon: Package },
-  { id: "locations", name: "Konumlar", icon: MapPin },
-  { id: "tags", name: "Etiketler", icon: Tag },
-] as const;
-const configuration = [
-  { id: "types", name: "Ürün türleri", icon: Layers },
-  { id: "templates", name: "Alan şablonları", icon: LayoutTemplate },
-  { id: "maintenance", name: "Bakım", icon: Wrench },
-  { id: "users", name: "Kullanıcılar", icon: Users },
-  { id: "tools", name: "Araçlar", icon: Settings2 },
-] as const;
 const descriptions: Record<TabId, string> = {
-  overview: "Sahip olduklarını tanı. İhtiyacın olanı kolayca bul.",
-  inventory: "Her eşyanın bir yeri, her bilginin bir kaydı var.",
+  overview: "Evine ve eşyalarına dair her şey, bir arada.",
+  inventory: "Eşyalarını bul, bilgilerini güncelle, düzenini koru.",
   locations: "Odalar, dolaplar ve saklama alanların.",
   tags: "Eşyalarını senin için anlamlı gruplarda topla.",
-  types: "Ürün ve konum türlerini yönet, türlere özel alan şablonu bağla.",
-  templates: "Ortak özel alanları bir kez tanımla, her üründe kullan.",
-  maintenance: "Planlı ve tamamlanmış bakımlar.",
-  users: "Profilini, koleksiyonunu ve üyelerini yönet.",
-  tools: "İçe/dışa aktarma, bildirimler ve toplu düzeltmeler.",
+  types: "Ürün ve konum türlerini, varsayılan alanlarını yönet.",
+  templates: "Ortak bilgileri bir kez tanımla, her üründe kullan.",
+  maintenance: "Planlı ve tamamlanmış bakımların.",
+  users: "Hesabını, koleksiyonunu ve üyelerini yönet.",
+  tools: "İçe ve dışa aktarma, bildirimler ve bakım araçları.",
 };
 const title = computed(
   () =>
-    [...collection, ...configuration].find((n) => n.id === s.tab)?.name ||
-    "Genel bakış",
+    [...collection, ...configuration].find((entry) => entry.id === s.tab)
+      ?.name || "Genel bakış",
 );
 const showsGenericError = computed(() =>
   ["overview", "inventory", "locations", "tags"].includes(s.tab),
 );
-const initials = computed(() =>
-  (s.user?.name || "Kullanıcı")
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase(),
+const drawer = ref<HTMLDialogElement | null>(null);
+const moreActive = computed(
+  () => !["overview", "inventory", "locations"].includes(s.tab),
 );
 
+watch(
+  () => s.mobileNav,
+  async (open) => {
+    await nextTick();
+    if (open && !drawer.value?.open) drawer.value?.showModal();
+    else if (!open) drawer.value?.close();
+  },
+);
+watch(
+  () => s.user,
+  (user) => {
+    if (!user) s.mobileNav = false;
+  },
+);
 function keyboard(event: KeyboardEvent) {
   if (
     event.key === "/" &&
     !s.modal &&
+    !s.mobileNav &&
     !(event.target instanceof HTMLInputElement) &&
     !(event.target instanceof HTMLTextAreaElement) &&
     !(event.target instanceof HTMLSelectElement)
@@ -103,158 +89,98 @@ function keyboard(event: KeyboardEvent) {
       ?.focus();
   }
 }
+let desktopQuery: MediaQueryList;
+const closeDrawerOnDesktop = () => {
+  if (desktopQuery.matches) s.mobileNav = false;
+};
 onMounted(() => {
   window.addEventListener("keydown", keyboard);
+  desktopQuery = window.matchMedia("(min-width: 1280px)");
+  desktopQuery.addEventListener("change", closeDrawerOnDesktop);
   void restoreSession();
 });
-onUnmounted(() => window.removeEventListener("keydown", keyboard));
+onUnmounted(() => {
+  window.removeEventListener("keydown", keyboard);
+  desktopQuery?.removeEventListener("change", closeDrawerOnDesktop);
+});
 </script>
 
 <template>
   <LoginView v-if="!isAuthenticated()" />
-  <div v-else>
-    <button
-      v-if="s.mobileNav"
-      class="fixed inset-0 z-[55] bg-gray-900/50 lg:hidden"
-      aria-label="Menüyü kapat"
-      @click="s.mobileNav = false"
-    ></button>
-
+  <div v-else class="app-shell">
+    <a class="skip-link" href="#main-content">İçeriğe geç</a>
     <aside
-      class="fixed inset-y-0 start-0 z-[60] flex w-64 -translate-x-full flex-col overflow-y-auto border-e border-gray-200 bg-white p-3 transition-transform duration-200 lg:translate-x-0 dark:border-neutral-700 dark:bg-neutral-800"
-      :class="{ '!translate-x-0': s.mobileNav }"
+      class="app-sidebar hidden xl:flex"
+      aria-label="Kenar çubuğu"
+      :inert="s.mobileNav"
     >
       <a
         href="#overview"
-        class="flex items-center gap-x-2 px-2.5 py-2 text-xl font-semibold"
+        class="brand-link"
+        aria-label="Homebox ana sayfa"
         @click.prevent="navigate('overview')"
-        ><Box :size="24" class="text-blue-600" />homebox</a
-      >
-
-      <div
-        class="mt-3 flex items-center gap-3 rounded-lg border border-gray-200 p-2.5 dark:border-neutral-700"
-      >
-        <span
-          class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-800/30 dark:text-blue-400"
-          ><Home :size="18"
-        /></span>
-        <div class="min-w-0 flex-1">
-          <p class="muted text-xs">Kişisel alanın</p>
-          <select
-            v-if="s.groups.length > 1"
-            v-model="s.tenant"
-            :disabled="s.busy"
-            class="w-full truncate border-0 bg-transparent p-0 text-sm font-semibold focus:ring-0"
-            aria-label="Koleksiyon"
-            @change="changeGroup"
-          >
-            <option v-for="g in s.groups" :key="g.id" :value="g.id">
-              {{ g.name }}
-            </option>
-          </select>
-          <p v-else class="truncate text-sm font-semibold">
-            {{ currentGroup()?.name || "Benim evim" }}
-          </p>
-        </div>
-        <ShieldCheck :size="15" class="text-blue-600" />
-      </div>
-
-      <nav class="mt-2">
-        <p class="nav-caption">Koleksiyon</p>
-        <div class="space-y-0.5">
-          <button
-            v-for="n in collection"
-            :key="n.id"
-            class="nav-item"
-            :class="{ 'nav-active': s.tab === n.id }"
-            @click="navigate(n.id)"
-          >
-            <component :is="n.icon" :size="18" /><span>{{ n.name }}</span
-            ><span v-if="n.id === 'inventory'" class="badge ms-auto">{{
-              s.stats.totalItems
-            }}</span>
-          </button>
-        </div>
-        <p class="nav-caption">Yapılandırma</p>
-        <div class="space-y-0.5">
-          <button
-            v-for="n in configuration"
-            :key="n.id"
-            class="nav-item"
-            :class="{ 'nav-active': s.tab === n.id }"
-            @click="navigate(n.id)"
-          >
-            <component :is="n.icon" :size="18" /><span>{{ n.name }}</span>
-          </button>
-        </div>
-      </nav>
-
-      <div class="mt-auto space-y-0.5 pt-4">
-        <button class="nav-item" @click="s.dark = !s.dark">
-          <Sun v-if="s.dark" :size="18" /><Moon v-else :size="18" />{{
-            s.dark ? "Açık görünüm" : "Koyu görünüm"
-          }}
-        </button>
-        <a
-          href="https://homebox.software"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="nav-item"
-          ><CircleHelp :size="18" />Homebox rehberi<ArrowUpRight
-            :size="14"
-            class="ms-auto"
-        /></a>
-        <div
-          class="mt-2 flex items-center gap-3 border-t border-gray-200 px-1 pt-3 dark:border-neutral-700"
-        >
-          <span
-            class="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-semibold text-white"
-            >{{ initials }}</span
-          >
-          <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-semibold">
-              {{ s.user?.name || "Kullanıcı" }}
-            </p>
-            <p class="muted truncate text-xs">{{ s.user?.email || "" }}</p>
-          </div>
-          <button class="icon-button" aria-label="Çıkış yap" @click="logout">
-            <LogOut :size="17" />
-          </button>
-        </div>
-      </div>
+        ><HomeboxBrand
+      /></a>
+      <AppNavigation />
     </aside>
-
-    <div class="lg:ps-64">
-      <header
-        class="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-gray-200 bg-white/90 px-4 py-2.5 backdrop-blur sm:px-6 dark:border-neutral-700 dark:bg-neutral-800/90"
-      >
-        <div class="flex items-center gap-2">
+    <dialog
+      ref="drawer"
+      class="navigation-drawer"
+      aria-labelledby="navigation-title"
+      @cancel.prevent="s.mobileNav = false"
+      @click="$event.target === drawer && (s.mobileNav = false)"
+    >
+      <div class="flex h-full flex-col">
+        <div class="flex items-center justify-between px-5 py-5">
+          <span id="navigation-title"><HomeboxBrand /></span>
           <button
-            class="icon-button lg:hidden"
-            aria-label="Menüyü aç"
-            @click="s.mobileNav = true"
+            class="icon-button"
+            aria-label="Menüyü kapat"
+            @click="s.mobileNav = false"
           >
-            <Menu :size="20" />
+            <X :size="24" />
           </button>
-          <span class="muted">Benim evim</span
-          ><ChevronRight :size="14" class="text-gray-400" />
-          <span class="text-sm font-medium">{{ title }}</span>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="badge-green hidden sm:inline-flex"
-            >Homebox bağlantısı</span
+        <AppNavigation />
+      </div>
+    </dialog>
+    <div class="min-w-0 xl:ps-72" :inert="s.mobileNav">
+      <header class="app-header">
+        <a
+          href="#overview"
+          class="xl:hidden"
+          aria-label="Homebox ana sayfa"
+          @click.prevent="navigate('overview')"
+          ><HomeboxBrand
+        /></a>
+        <div class="hidden min-w-0 items-center gap-3 xl:flex">
+          <span class="muted truncate">{{
+            currentGroup()?.name || "Benim evim"
+          }}</span
+          ><ChevronRight :size="18" class="text-muted-foreground" /><span
+            class="font-medium"
+            >{{ title }}</span
           >
+        </div>
+        <div class="ms-auto flex items-center gap-1 sm:gap-2">
+          <button
+            class="icon-button xl:hidden"
+            :aria-label="s.dark ? 'Açık görünüm' : 'Koyu görünüm'"
+            @click="s.dark = !s.dark"
+          >
+            <Sun v-if="s.dark" :size="22" /><Moon v-else :size="22" />
+          </button>
           <button
             class="icon-button"
             aria-label="Verileri yenile"
+            :disabled="s.busy || s.saving"
             @click="refresh"
           >
-            <ArrowDownLeft :size="18" :class="{ 'animate-pulse': s.busy }" />
+            <RefreshCw :size="21" :class="{ 'animate-spin': s.busy }" />
           </button>
         </div>
       </header>
-
-      <main class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
+      <main id="main-content" class="app-content" tabindex="-1">
         <div
           v-if="s.error && !s.modal && showsGenericError"
           role="alert"
@@ -262,34 +188,33 @@ onUnmounted(() => window.removeEventListener("keydown", keyboard));
         >
           {{ s.error }}
         </div>
-
-        <section class="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 class="text-2xl font-bold tracking-tight">
-              {{ s.tab === "overview" ? "Evine bir bakış." : title }}
-            </h1>
-            <p class="muted mt-1">{{ descriptions[s.tab] }}</p>
+        <section class="page-heading">
+          <div class="min-w-0">
+            <p class="mb-1 text-sm font-medium text-primary">
+              {{ currentGroup()?.name || "Benim evim" }}
+            </p>
+            <h1>{{ s.tab === "overview" ? "Evine bir bakış." : title }}</h1>
+            <p class="muted mt-2 max-w-xl">{{ descriptions[s.tab] }}</p>
           </div>
           <button
             v-if="s.tab === 'overview' || s.tab === 'inventory'"
-            class="btn-primary"
+            class="btn-primary shrink-0"
             :disabled="s.busy || s.saving"
             @click="edit()"
           >
-            <Plus :size="16" />Ürün ekle
+            <Plus :size="21" />Ürün ekle
           </button>
           <button
             v-else-if="s.tab === 'locations' || s.tab === 'tags'"
-            class="btn-primary"
+            class="btn-primary shrink-0"
             :disabled="s.busy || s.saving"
             @click="openOrganizer(s.tab === 'locations' ? 'locations' : 'tags')"
           >
-            <Plus :size="16" />{{
+            <Plus :size="21" />{{
               s.tab === "locations" ? "Konum ekle" : "Etiket ekle"
             }}
           </button>
         </section>
-
         <OverviewView v-if="s.tab === 'overview'" />
         <InventoryView v-else-if="s.tab === 'inventory'" />
         <OrganizersView v-else-if="s.tab === 'locations' || s.tab === 'tags'" />
@@ -298,29 +223,37 @@ onUnmounted(() => window.removeEventListener("keydown", keyboard));
         <MaintenanceView v-else-if="s.tab === 'maintenance'" />
         <UsersView v-else-if="s.tab === 'users'" />
         <ToolsView v-else-if="s.tab === 'tools'" />
-
-        <footer
-          class="muted mt-12 flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 pt-6 text-xs dark:border-neutral-700"
-        >
-          <span
-            >homebox<span class="text-blue-600">.</span> Bir ev dolusu
-            düzen.</span
-          >
-          <a
-            href="https://github.com/sysadminsmedia/homebox"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-1 hover:underline"
-            >Homebox API ile çalışır<ArrowUpRight :size="12"
-          /></a>
+        <footer class="app-footer">
+          <span>Homebox · Bir ev dolusu düzen.</span><span>v0.3.0</span>
         </footer>
       </main>
     </div>
+    <nav
+      class="bottom-navigation xl:hidden"
+      aria-label="Hızlı gezinme"
+      :inert="s.mobileNav"
+    >
+      <button
+        v-for="entry in collection.slice(0, 3)"
+        :key="entry.id"
+        :aria-current="s.tab === entry.id ? 'page' : undefined"
+        @click="navigate(entry.id)"
+      >
+        <component :is="entry.icon" :size="23" /><span>{{ entry.name }}</span>
+      </button>
+      <button
+        aria-label="Menüyü aç"
+        :aria-expanded="s.mobileNav"
+        :class="{ 'is-active': moreActive }"
+        @click="s.mobileNav = true"
+      >
+        <Menu :size="23" /><span>Diğer</span>
+      </button>
+    </nav>
   </div>
-
   <ItemModal v-if="s.modal === 'detail' || s.modal === 'edit'" />
   <OrganizerModal v-if="s.modal === 'organizer'" />
   <div v-if="s.notice" role="status" class="toast">
-    <ShieldCheck :size="18" class="text-blue-600" />{{ s.notice }}
+    <ShieldCheck :size="21" class="shrink-0 text-primary" />{{ s.notice }}
   </div>
 </template>

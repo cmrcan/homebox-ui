@@ -79,7 +79,6 @@ export const s = reactive({
 export const loginForm = reactive({
   email: "",
   password: "",
-  mode: api.mode as Mode,
 });
 
 export const organizerForm = reactive({
@@ -243,22 +242,23 @@ watch(() => s.page, loadItems);
 
 // ---- Session ----------------------------------------------------------------
 export async function establish() {
-  s.user = await api.self();
+  const user = await api.self();
   s.groups = await api.groups();
   if (!s.groups.some((g) => g.id === s.tenant))
     s.tenant = s.groups[0]?.id || "";
   api.tenant = s.tenant;
   s.currency = currentGroup()?.currency || "TRY";
   sessionStorage.setItem("hb-tenant", s.tenant);
+  await api.detectMode();
+  s.mode = api.mode;
+  localStorage.setItem("hb-mode", api.mode);
+  s.user = user;
   await refresh();
 }
 
 export async function login() {
   s.busy = true;
   s.error = "";
-  api.mode = loginForm.mode;
-  s.mode = api.mode;
-  localStorage.setItem("hb-mode", api.mode);
   try {
     const session = await api.login(loginForm.email, loginForm.password);
     sessionStorage.setItem("hb-session", JSON.stringify(session));
@@ -278,6 +278,7 @@ export async function logout() {
     handleError(e);
   }
   s.user = null;
+  s.mobileNav = false;
   api.session = null;
   api.tenant = "";
   sessionStorage.removeItem("hb-session");

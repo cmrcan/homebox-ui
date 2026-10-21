@@ -17,7 +17,7 @@ onMounted(() => dialog.value?.showModal());
     <div class="modal-header">
       <div>
         <p v-if="subtitle" class="muted">{{ subtitle }}</p>
-        <h2 id="modal-title" class="text-lg font-semibold">{{ title }}</h2>
+        <h2 id="modal-title" class="text-xl font-semibold">{{ title }}</h2>
       </div>
       <button
         class="icon-button"
@@ -25,7 +25,7 @@ onMounted(() => dialog.value?.showModal());
         aria-label="Pencereyi kapat"
         @click="emit('close')"
       >
-        <X :size="20" />
+        <X :size="24" />
       </button>
     </div>
     <slot />

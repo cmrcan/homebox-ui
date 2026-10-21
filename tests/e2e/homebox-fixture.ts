@@ -43,6 +43,8 @@ export async function loginWithInventory(page: Page) {
       };
     } else {
       expect(request.headers().authorization).toBe("Bearer fixture");
+      if (path === "/entity-types")
+        expect(request.headers()["x-tenant"]).toBe("g");
       if (path === "/users/self")
         data = { item: { name: "Test Kullanıcı", email: "test@example.com" } };
       else if (path === "/groups/all")

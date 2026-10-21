@@ -257,7 +257,7 @@ const deleteAccount = () =>
       <div class="flex flex-wrap gap-2">
         <input
           v-model="deleteText"
-          class="input !w-72"
+          class="input w-full sm:!w-72"
           aria-label="Silmeyi onayla"
           :placeholder="s.user?.email"
         />

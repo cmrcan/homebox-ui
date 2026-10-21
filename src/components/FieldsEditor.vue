@@ -33,7 +33,7 @@ function apply(template: Template) {
 </script>
 
 <template>
-  <fieldset class="col-span-2">
+  <fieldset class="sm:col-span-2">
     <legend class="text-sm font-medium text-gray-800 dark:text-white">
       Özel alanlar
     </legend>
@@ -59,7 +59,10 @@ function apply(template: Template) {
           aria-label="Alan türü"
           :value="field.type"
           @change="
-            setType(field, ($event.target as HTMLSelectElement).value as FieldType)
+            setType(
+              field,
+              ($event.target as HTMLSelectElement).value as FieldType,
+            )
           "
         >
           <option v-for="t in fieldTypes" :key="t.id" :value="t.id">
@@ -107,17 +110,25 @@ function apply(template: Template) {
       </div>
     </div>
     <div class="mt-3 flex flex-wrap gap-2">
-      <button type="button" class="btn-secondary" @click="fields.push(blankField())">
+      <button
+        type="button"
+        class="btn-secondary"
+        @click="fields.push(blankField())"
+      >
         <Plus :size="16" />Alan ekle
       </button>
       <button type="button" class="btn-secondary" @click="togglePicker">
         <LayoutTemplate :size="16" />Şablondan ekle
       </button>
     </div>
-    <div v-if="picker" class="mt-3 rounded-lg border border-gray-200 p-3 dark:border-neutral-700">
+    <div
+      v-if="picker"
+      class="mt-3 rounded-lg border border-gray-200 p-3 dark:border-neutral-700"
+    >
       <p v-if="loading" class="muted">Şablonlar yükleniyor…</p>
       <p v-else-if="!templates.length" class="muted">
-        Henüz şablon yok. Şablonlar ekranından bir alan şablonu oluşturabilirsin.
+        Henüz şablon yok. Şablonlar ekranından bir alan şablonu
+        oluşturabilirsin.
       </p>
       <div v-else class="flex flex-wrap gap-2">
         <button
