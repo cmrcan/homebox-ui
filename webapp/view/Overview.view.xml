@@ -2,51 +2,39 @@
   <Page showHeader="false" class="sapUiContentPadding">
     <content>
       <VBox width="100%">
+        <f:HeroBanner id="homeHero" width="100%" headerText="Evine bir bakış." overlineText="{/groupName}" columnsRatio="Equal" actionsPlacement="BottomStart" headerBlockPlacement="Bottom" class="sapUiSmallMarginBottom">
+          <f:actions>
+            <Button text="Ürün ekle" icon="sap-icon://add" type="Emphasized" press=".onAddItem" enabled="{= !${/saving} &amp;&amp; !${/busy} }"/>
+            <Button text="Envanteri aç" icon="sap-icon://list" type="Transparent" press=".onInventory"/>
+            <Button text="Konumlar" icon="sap-icon://home" type="Transparent" press=".onLocations"/>
+          </f:actions>
+          <f:endContent>
+            <FlexBox id="demoGrid" width="100%" wrap="Wrap" justifyContent="End" alignItems="Start">
+              <GenericTile header="Toplam Ürün" subheader="" frameType="OneByOne" class="sapUiTinyMarginBegin sapUiTinyMarginBottom">
+                <TileContent unit="Adet" footer="">
+                  <NumericContent value="{/stats/totalItems}" icon="sap-icon://product" withMargin="false"/>
+                </TileContent>
+              </GenericTile>
+              <GenericTile header="Toplam Değer" subheader="" frameType="OneByOne" class="sapUiTinyMarginBegin sapUiTinyMarginBottom">
+                <TileContent unit="{/currency}" footer="" tooltip="{parts:['/stats/totalItemPrice','/currency'],formatter:'.formatter.money'}">
+                  <NumericContent value="{path:'/stats/totalItemPrice',formatter:'.formatter.compactNumber'}" icon="sap-icon://product" withMargin="false" formatterValue="true"/>
+                </TileContent>
+              </GenericTile>
+              <GenericTile header="Toplam Konum" subheader="" frameType="OneByOne" class="sapUiTinyMarginBegin sapUiTinyMarginBottom">
+                <TileContent unit="Adet" footer="">
+                  <NumericContent value="{/stats/totalLocations}" icon="sap-icon://product" withMargin="false"/>
+                </TileContent>
+              </GenericTile>
+              <GenericTile header="Garantili Ürün" subheader="" frameType="OneByOne" class="sapUiTinyMarginBegin sapUiTinyMarginBottom">
+                <TileContent unit="Adet" footer="">
+                  <NumericContent value="{/stats/totalWithWarranty}" icon="sap-icon://product" withMargin="false"/>
+                </TileContent>
+              </GenericTile>
+            </FlexBox>
+          </f:endContent>
+        </f:HeroBanner>
         <core:Fragment fragmentName="homebox.fragment.Breadcrumbs" type="XML"/>
         <core:Fragment fragmentName="homebox.fragment.Error" type="XML" class="sapUiSmallMarginBottom"/>
-        <Text text="{/groupName}" class="sapUiSmallMarginBottom"/>
-        <FlexBox renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
-          <Title text="Evine bir bakış." level="H1" titleStyle="H2" wrapping="true" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
-          <Button text="Ürün ekle" type="Emphasized" icon="sap-icon://add" press=".onAddItem" enabled="{= !${/saving} &amp;&amp; !${/busy} }" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
-        </FlexBox>
-        <Text text="Evine ve eşyalarına dair her şey, bir arada." class="sapUiSmallMarginBottom"/>
-        <f:GridContainer id="demoGrid" class="sapUiSmallMarginBottom" width="100%" containerQuery="true">
-          <f:layout>
-            <f:GridContainerSettings columnSize="5rem" rowSize="5rem" gap="1rem"/>
-          </f:layout>
-          <GenericTile header="Toplam Ürün" subheader="" frameType="OneByOne">
-            <layoutData>
-              <f:GridContainerItemLayoutData columns="2" rows="2"/>
-            </layoutData>
-            <TileContent unit="Adet" footer="">
-              <NumericContent value="{/stats/totalItems}" icon="sap-icon://product" withMargin="false"/>
-            </TileContent>
-          </GenericTile>
-          <GenericTile header="Toplam Değer" subheader="" frameType="OneByOne">
-            <layoutData>
-              <f:GridContainerItemLayoutData columns="2" rows="2"/>
-            </layoutData>
-            <TileContent unit="Adet" footer="">
-              <NumericContent value="{parts:['/stats/totalItemPrice','/currency'],formatter:'.formatter.money'}" icon="sap-icon://product" withMargin="false"/>
-            </TileContent>
-          </GenericTile>
-          <GenericTile header="Toplam Konum" subheader="" frameType="OneByOne">
-            <layoutData>
-              <f:GridContainerItemLayoutData columns="2" rows="2"/>
-            </layoutData>
-            <TileContent unit="Adet" footer="">
-              <NumericContent value="{/stats/totalLocations}" icon="sap-icon://product" withMargin="false"/>
-            </TileContent>
-          </GenericTile>
-          <GenericTile header="Garantili Ürün" subheader="" frameType="OneByOne">
-            <layoutData>
-              <f:GridContainerItemLayoutData columns="2" rows="2"/>
-            </layoutData>
-            <TileContent unit="Adet" footer="">
-              <NumericContent value="{/stats/totalWithWarranty}" icon="sap-icon://product" withMargin="false"/>
-            </TileContent>
-          </GenericTile>
-        </f:GridContainer>
         <Title text="Envanterin" level="H2" titleStyle="H3" class="sapUiSmallMarginBottom"/>
         <core:Fragment fragmentName="homebox.fragment.Inventory" type="XML" class="sapUiSmallMarginBottom"/>
       </VBox>

@@ -2,6 +2,15 @@
 
 Homebox için Türkçe, duyarlı alternatif frontend. **OpenUI5 1.154.0** üzerinde standart **MVC** uygulamasıdır: `UIComponent`, `manifest.json`, UI5 Router, XML view/fragment, TypeScript controller ve `JSONModel`. Veriler mevcut Homebox backend'inde kalır.
 
+## v0.5.2 — Hero Banner, tablolar ve barkod okuma
+
+- Ana sayfanın ilk bileşeni native `sap.f.HeroBanner`: `HeaderBlockPlacement.Bottom`, `ActionsPlacement.BottomStart`, iki eşit içerik alanı. Dört mevcut özet tile sağdaki içerik alanında native FlexBox ile sağa yaslanır ve dar ekranlarda satır değiştirir.
+- Ana sayfa envanteri ve Konumlar, Etiketler, Ürün Türleri, Alan Şablonları yalnızca responsive tablolarla gösterilir. Kart/tablo görünüm düğmeleri sadece **Envanterim** sayfasındadır.
+- Telefon ve tablette ToolHeader içinde **Barkod oku** düğmesi. Kamera ile QR/EAN/UPC/Code128 okuma, kamera izni verilmediğinde veya kamera açılamadığında elle kod girişi.
+- Homebox UUID/QR bağlantısı, `#` varlık kodu ve seri numarasıyla eşleştirme; entities API'de `Barkod`, `Barcode`, `EAN`, `EAN-13`, `UPC`, `GTIN` metin alanlarında arama. Tek eşleşme nesneyi açar, birden fazla eşleşme seçim listesi gösterir; eşleşme bulunamazsa envanter araması açılır.
+- ZXing kod çözücü build sırasında paketlenir, kamera açıldığında aynı origin'den yüklenir. Pencere kapanınca, okuma bitince veya oturum sonlanınca kamera akışları durdurulur; geciken kamera izinleri de temizlenir.
+- **Telefon/tablet kamerasını HTTPS adresinden kullanın.** Nginx Proxy Manager'daki SSL'li Homebox adresi uygundur. Düz HTTP/LAN IP bağlantısında elle giriş kullanılabilir; geliştirmede `localhost` güvenilir kabul edilir.
+
 ## v0.5.1 — Nesne sayfaları ve native UI5 yerleşimi
 
 - Ürün ve konum detaylarında native `sap.uxap.ObjectPageLayout` + `ObjectPageDynamicHeaderTitle`; örnekteki gibi `TitleOnTop`, breadcrumb, daralabilen başlık ve bölüm navigasyonu.
@@ -88,7 +97,8 @@ npm.cmd run preview
 Üretim derlemesi `ui5 build --all` ile yapılır. TypeScript controller'lar UI5
 modüllerine çevrilir; XML view/fragment'ler component preload'a dahil edilir;
 Horizon temaları, framework kütüphaneleri ve sürüm metadata'sı `dist/` altına
-hazırlanır. Runtime için CDN bağlantısı gerekmez. `preview` yalnızca derlenmiş
+hazırlanır. Kamera çözücüsü `scripts/build-scanner.mjs` ile yerel bir UI5 modülüne dönüştürülür;
+geliştirme sunucusu da bu hazırlığı otomatik yapar. Runtime için CDN bağlantısı gerekmez. `preview` yalnızca derlenmiş
 arayüzü incelemek ve test etmek içindir; backend bağlantısıyla geliştirme için
 `npm run dev` kullanın.
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.2
+
+- Add native HeroBanner with bottom header/actions placement and the four right-aligned summary tiles.
+- Make overview and administration pages table-only; retain grid/table switching exclusively on Inventory.
+- Add a phone/tablet ToolHeader scanner with local ZXing camera decoding, manual fallback, Homebox label/UUID/serial/custom-barcode lookup and explicit duplicate selection.
+- Release camera streams on close, successful decode, cancellation during permission/decoder loading and view/session teardown.
+- Bundle the scanner as a local UI5 module during build/dev, include licenses and verify media CSP, camera lifecycle and real QR video frames.
+
 ## 0.5.1
 
 - Adopt native sap.uxap ObjectPageLayout with ObjectPageDynamicHeaderTitle and TitleOnTop for object details; split item information, fields, files and maintenance into sections and add location hierarchy sections.

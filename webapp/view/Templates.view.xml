@@ -9,17 +9,39 @@
           <Title text="Alan şablonları" level="H1" titleStyle="H2" wrapping="true" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
           <Button text="Şablon ekle" type="Emphasized" icon="sap-icon://add" press=".onNew" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
         </FlexBox>
-        <VBox items="{view&gt;/templates}" class="sapUiSmallMarginBottom">
-          <Panel headerText="{view&gt;name}" class="sapUiSmallMarginBottom">
-            <VBox>
-              <Text text="{view&gt;description}" class="sapUiSmallMarginBottom"/>
-              <HBox class="sapUiSmallMarginBottom">
-                <Button text="Düzenle" icon="sap-icon://edit" press=".onEdit" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
-                <Button text="Sil" icon="sap-icon://delete" press=".onDelete" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
-              </HBox>
-            </VBox>
-          </Panel>
-        </VBox>
+        <Table id="templatesTable" items="{view&gt;/templates}" autoPopinMode="true" contextualWidth="Auto" fixedLayout="true" growing="true" noDataText="Henüz alan şablonu yok.">
+          <columns>
+            <Column width="12rem" importance="High">
+              <Text text="Ad"/>
+            </Column>
+            <Column width="16rem" importance="Medium">
+              <Text text="Açıklama"/>
+            </Column>
+            <Column width="6rem" importance="Low">
+              <Text text="Alan sayısı"/>
+            </Column>
+            <Column width="7rem" importance="Low">
+              <Text text="Varsayılan adet"/>
+            </Column>
+            <Column width="11rem" importance="High">
+              <Text text="İşlemler"/>
+            </Column>
+          </columns>
+          <items>
+            <ColumnListItem vAlign="Middle" type="Navigation" press=".onEdit">
+              <cells>
+                <ObjectIdentifier title="{view&gt;name}"/>
+                <Text text="{view&gt;description}"/>
+                <Text text="{= ${view&gt;fields} ? ${view&gt;fields}.length : '—' }"/>
+                <Text text="{= ${view&gt;defaultQuantity} || '—' }"/>
+                <HBox wrap="Wrap">
+                  <Button text="Düzenle" icon="sap-icon://edit" press=".onEdit" class="sapUiTinyMarginEnd"/>
+                  <Button text="Sil" icon="sap-icon://delete" press=".onDelete"/>
+                </HBox>
+              </cells>
+            </ColumnListItem>
+          </items>
+        </Table>
       </VBox>
     </content>
   </Page>

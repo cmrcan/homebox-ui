@@ -15,6 +15,9 @@ framework:
     - name: sap.ui.unified
     - name: themelib_sap_horizon
 builder:
+  componentPreload:
+    excludes:
+      - "homebox/thirdparty/**"
   customTasks:
     - name: ui5-tooling-transpile-task
       afterTask: replaceVersion

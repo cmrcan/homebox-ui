@@ -9,7 +9,7 @@ server {
     set $homebox_upstream "${HOMEBOX_UPSTREAM}";
     add_header X-Content-Type-Options nosniff always;
     add_header Referrer-Policy no-referrer always;
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'" always;
 
     location = /healthz { access_log off; return 200 'ok'; }
     location /api/ {

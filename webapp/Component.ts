@@ -38,6 +38,10 @@ export default class Component extends UIComponent {
       const phone = innerWidth < 768;
       const wasPhone = app.state().isPhone;
       app.setProperty("/isPhone", phone);
+      app.setProperty(
+        "/isMobile",
+        innerWidth < 1024 || Device.system.phone || Device.system.tablet,
+      );
       if (phone && !wasPhone) app.setProperty("/sideExpanded", false);
     };
     Device.resize.attachHandler(this.resize);

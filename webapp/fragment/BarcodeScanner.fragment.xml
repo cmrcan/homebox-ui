@@ -1,0 +1,23 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+  <Dialog id="scannerDialog" title="Barkod / QR kod oku" contentWidth="30rem" horizontalScrolling="false" afterOpen=".onScannerOpened" beforeClose=".onScannerClosing" afterClose=".onScannerClosed" class="sapUiContentPadding">
+    <content>
+      <VBox width="100%">
+        <MessageStrip text="{view&gt;/scanMessage}" type="{view&gt;/scanMessageType}" showIcon="true" class="sapUiSmallMarginBottom"/>
+        <VBox width="100%" alignItems="Center" visible="{view&gt;/scanCameraVisible}" class="sapUiSmallMarginBottom">
+          <core:HTML id="scanPreview" content="&lt;video width='256' height='192' autoplay='' muted='' playsinline='' aria-label='Barkod kamera önizlemesi'&gt;&lt;/video&gt;"/>
+        </VBox>
+        <Button text="Kamerayı yeniden aç" icon="sap-icon://camera" press=".onScannerOpened" enabled="{= !${view&gt;/scanBusy} }" class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+        <Label text="Barkod / seri numarası" labelFor="scanCode"/>
+        <Input id="scanCode" value="{view&gt;/scanCode}" valueLiveUpdate="true" submit=".onLookupBarcode" enabled="{= !${view&gt;/scanBusy} }"/>
+        <Text text="Homebox etiketi, seri numarası veya Barkod / EAN / UPC özel alanıyla eşleştirilir." class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+        <List id="scanResults" items="{view&gt;/scanMatches}" visible="{= !!${view&gt;/scanMatches}.length }" headerText="Eşleşen kayıtlar">
+          <StandardListItem title="{view&gt;name}" description="{view&gt;location}" icon="{= ${view&gt;kind} === 'location' ? 'sap-icon://home' : 'sap-icon://product' }" type="Navigation" press=".onSelectScannedItem"/>
+        </List>
+      </VBox>
+    </content>
+    <buttons>
+      <Button text="Envanterde bul" icon="sap-icon://search" type="Emphasized" press=".onLookupBarcode" enabled="{= !!${view&gt;/scanCode} &amp;&amp; !${view&gt;/scanBusy} }"/>
+      <Button text="Kapat" press=".onCloseScanner"/>
+    </buttons>
+  </Dialog>
+</core:FragmentDefinition>

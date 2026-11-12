@@ -9,18 +9,43 @@
           <Title text="{/title}" level="H1" titleStyle="H2" wrapping="true" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
           <Button text="{= ${/tab} === 'locations' ? 'Konum ekle' : 'Etiket ekle' }" icon="sap-icon://add" type="Emphasized" press=".onOpenOrganizer" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
         </FlexBox>
-        <VBox items="{view&gt;/organizers}" class="sapUiSmallMarginBottom">
-          <Panel headerText="{view&gt;name}" class="sapUiSmallMarginBottom">
-            <VBox>
-              <Text text="{view&gt;description}" class="sapUiSmallMarginBottom"/>
-              <Text text="{= (${view&gt;itemCount} || 0) + ' ürün' }" class="sapUiSmallMarginBottom"/>
-              <HBox class="sapUiSmallMarginBottom">
-                <Button text="Ürünleri gör" icon="sap-icon://product" press=".onViewOrganizer" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
-                <Button text="Detayı aç" icon="sap-icon://inspect" press=".onEditOrganizer" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
-              </HBox>
-            </VBox>
-          </Panel>
-        </VBox>
+        <Table id="organizerTable" items="{view&gt;/organizers}" autoPopinMode="true" contextualWidth="Auto" fixedLayout="true" growing="true" growingThreshold="25" noDataText="Henüz kayıt yok.">
+          <columns>
+            <Column width="12rem" importance="High">
+              <Text text="Ad"/>
+            </Column>
+            <Column width="16rem" importance="Low">
+              <Text text="Açıklama"/>
+            </Column>
+            <Column width="10rem" importance="Low">
+              <Text text="Üst kayıt"/>
+            </Column>
+            <Column width="8rem" importance="Low">
+              <Text text="Tür"/>
+            </Column>
+            <Column width="6rem" importance="Medium">
+              <Text text="Ürün sayısı"/>
+            </Column>
+            <Column width="14rem" importance="High">
+              <Text text="İşlemler"/>
+            </Column>
+          </columns>
+          <items>
+            <ColumnListItem type="Navigation" press=".onEditOrganizer" vAlign="Middle">
+              <cells>
+                <ObjectIdentifier title="{view&gt;name}"/>
+                <Text text="{view&gt;description}"/>
+                <Text text="{view&gt;parent/name}"/>
+                <Text text="{view&gt;entityType/name}"/>
+                <ObjectNumber number="{= ${view&gt;itemCount} || 0 }"/>
+                <HBox wrap="Wrap">
+                  <Button text="Ürünleri gör" icon="sap-icon://product" press=".onViewOrganizer" class="sapUiTinyMarginEnd"/>
+                  <Button text="Detayı aç" icon="sap-icon://inspect" press=".onEditOrganizer"/>
+                </HBox>
+              </cells>
+            </ColumnListItem>
+          </items>
+        </Table>
       </VBox>
     </content>
   </Page>

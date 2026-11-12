@@ -10,24 +10,41 @@
           <Button text="Tür ekle" type="Emphasized" icon="sap-icon://add" press=".onNew" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
         </FlexBox>
         <MessageStrip text="Ürün türleri için Homebox entities API gereklidir." visible="{= ${/mode} !== 'entities' }" class="sapUiSmallMarginBottom"/>
-        <VBox items="{view&gt;/types}" class="sapUiSmallMarginBottom">
-          <Panel headerText="{view&gt;name}" class="sapUiSmallMarginBottom">
-            <VBox>
-              <Text text="{= ${view&gt;isLocation} ? 'Konum türü' : 'Ürün türü' }" class="sapUiSmallMarginBottom"/>
-              <Text text="{view&gt;description}" class="sapUiSmallMarginBottom"/>
-              <VBox class="sapUiSmallMarginBottom">
-                <Label text="Varsayılan alan şablonu" labelFor="typeTemplate"/>
-                <Select id="typeTemplate" width="100%" selectedKey="{view&gt;templateId}" items="{view&gt;/templates}" change=".onTemplateChange">
+        <Table id="typesTable" items="{view&gt;/types}" autoPopinMode="true" contextualWidth="Auto" fixedLayout="true" growing="true" noDataText="Henüz ürün türü yok.">
+          <columns>
+            <Column width="12rem" importance="High">
+              <Text text="Ad"/>
+            </Column>
+            <Column width="8rem" importance="High">
+              <Text text="Kapsam"/>
+            </Column>
+            <Column width="16rem" importance="Low">
+              <Text text="Açıklama"/>
+            </Column>
+            <Column width="13rem" importance="Medium">
+              <Text text="Varsayılan alan şablonu"/>
+            </Column>
+            <Column width="11rem" importance="High">
+              <Text text="İşlemler"/>
+            </Column>
+          </columns>
+          <items>
+            <ColumnListItem vAlign="Middle" type="Navigation" press=".onEdit">
+              <cells>
+                <ObjectIdentifier title="{view&gt;name}"/>
+                <ObjectStatus text="{= ${view&gt;isLocation} ? 'Konum türü' : 'Ürün türü' }"/>
+                <Text text="{view&gt;description}"/>
+                <Select width="100%" tooltip="Varsayılan alan şablonu" selectedKey="{view&gt;templateId}" items="{view&gt;/templates}" change=".onTemplateChange">
                   <core:Item key="{view&gt;id}" text="{view&gt;name}"/>
                 </Select>
-              </VBox>
-              <HBox class="sapUiSmallMarginBottom">
-                <Button text="Düzenle" icon="sap-icon://edit" press=".onEdit" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
-                <Button text="Sil" icon="sap-icon://delete" press=".onDelete" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
-              </HBox>
-            </VBox>
-          </Panel>
-        </VBox>
+                <HBox wrap="Wrap">
+                  <Button text="Düzenle" icon="sap-icon://edit" press=".onEdit" class="sapUiTinyMarginEnd"/>
+                  <Button text="Sil" icon="sap-icon://delete" press=".onDelete"/>
+                </HBox>
+              </cells>
+            </ColumnListItem>
+          </items>
+        </Table>
       </VBox>
     </content>
   </Page>

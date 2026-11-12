@@ -326,7 +326,9 @@ test("Horizon theme persists after reload and resources stay on the same origin"
   );
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Evine bir bakış." }),
+    page
+      .locator(".sapMPage:visible")
+      .getByRole("heading", { name: "Envanterim", exact: true }),
   ).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   expect(external).toEqual([]);
@@ -468,11 +470,7 @@ test("entity type creation and field template editing send complete API values",
   await page.getByRole("button", { name: "Türü kaydet", exact: true }).click();
   await expect(page.getByText("Elektronik", { exact: true })).toBeVisible();
   expect(writes[0]).toMatchObject({ name: "Elektronik", isLocation: false });
-  await page
-    .locator(".sapMPage:visible .sapMPanel")
-    .filter({ has: page.getByText("Elektronik", { exact: true }) })
-    .getByRole("button", { name: "Düzenle", exact: true })
-    .click();
+  await page.getByRole("gridcell", { name: "Elektronik", exact: true }).click();
   await page.getByLabel("Tür adı", { exact: true }).fill("Elektronik cihazlar");
   await page.getByRole("button", { name: "Türü kaydet", exact: true }).click();
   await expect(
@@ -964,6 +962,7 @@ test("overview statistic tiles never overlap and stay above inventory on narrow 
   page,
 }) => {
   await loginWithInventory(page);
+  await page.goto("/#overview");
   const tiles = page.locator('[id$="--demoGrid"] .sapMGT');
   await expect(tiles).toHaveCount(4);
   for (const width of [320, 390, 820, 1440]) {
@@ -973,7 +972,7 @@ test("overview statistic tiles never overlap and stay above inventory on narrow 
         tiles.evaluateAll((els) => {
           const boxes = els.map((el) => el.getBoundingClientRect());
           const grid = els[0]
-            .closest(".sapFGridContainer")!
+            .closest('[id$="--demoGrid"]')!
             .getBoundingClientRect();
           const inside = boxes.every(
             (b) =>
@@ -1093,4 +1092,60 @@ test("item and location use native Object Page titles, sections and floating sav
       page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
     )
     .toBe(true);
+});
+
+test("Hero Banner owns the right-hand statistics and administration pages only show tables", async ({
+  page,
+}) => {
+  await loginWithInventory(page);
+  await page.goto("/#overview");
+  const hero = page.locator('[id$="--homeHero"]');
+  await expect(hero).toBeVisible();
+  await expect(hero.locator(".sapMGT")).toHaveCount(4);
+  const placement = await hero.evaluate(
+    async (el) =>
+      new Promise<any>((resolve, reject) =>
+        (window as any).sap.ui.require(
+          ["sap/ui/core/Element"],
+          (Element: any) => {
+            try {
+              const control = Element.getElementById(el.id);
+              resolve({
+                type: control.getMetadata().getName(),
+                header: control.getHeaderBlockPlacement(),
+                actions: control.getActionsPlacement(),
+                columns: control.getColumnsRatio(),
+              });
+            } catch (e) {
+              reject(e);
+            }
+          },
+          reject,
+        ),
+      ),
+  );
+  expect(placement).toEqual({
+    type: "sap.f.HeroBanner",
+    header: "Bottom",
+    actions: "BottomStart",
+    columns: "Equal",
+  });
+  await expect(
+    page.getByRole("button", { name: "Kart görünümü", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("grid")).toBeVisible();
+  for (const route of ["locations", "tags", "types", "templates"]) {
+    await page.goto("/#" + route);
+    await expect(page.getByRole("grid")).toBeVisible();
+    await expect(page.locator(".sapFCard:visible")).toHaveCount(0);
+    await expect(page.locator(".sapMPage:visible .sapMPanel")).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Kart görünümü", exact: true }),
+    ).toHaveCount(0);
+  }
+  await page.goto("/#inventory");
+  await expect(
+    page.getByRole("button", { name: "Kart görünümü", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".sapFCard:visible")).toHaveCount(3);
 });

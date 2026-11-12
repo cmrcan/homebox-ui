@@ -16,6 +16,11 @@ export const dateOnly = (value: unknown) =>
     : "";
 export default {
   money,
+  compactNumber: (value: unknown) =>
+    new Intl.NumberFormat("tr-TR", {
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(Number(value) || 0),
   date,
   initials: (name: string) =>
     (name || "")

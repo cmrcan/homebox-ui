@@ -33,10 +33,10 @@
     <OverflowToolbar class="sapUiSmallMarginBottom">
       <Title text="{= ${/result/total} + ' ürün' }" level="H2"/>
       <ToolbarSpacer/>
-      <Button text="Kart görünümü" icon="sap-icon://grid" type="{= ${/view} === 'grid' ? 'Emphasized' : 'Transparent' }" press=".onGrid"/>
-      <Button text="Liste görünümü" icon="sap-icon://list" type="{= ${/view} === 'list' ? 'Emphasized' : 'Transparent' }" press=".onList"/>
+      <Button text="Kart görünümü" icon="sap-icon://grid" type="{= ${/view} === 'grid' ? 'Emphasized' : 'Transparent' }" press=".onGrid" visible="{= ${/tab} === 'inventory' }"/>
+      <Button text="Liste görünümü" icon="sap-icon://list" type="{= ${/view} === 'list' ? 'Emphasized' : 'Transparent' }" press=".onList" visible="{= ${/tab} === 'inventory' }"/>
     </OverflowToolbar>
-    <f:GridContainer id="inventoryCards" width="100%" containerQuery="true" snapToRow="false" items="{/result/items}" visible="{= ${/view} === 'grid' }">
+    <f:GridContainer id="inventoryCards" width="100%" containerQuery="true" snapToRow="false" items="{/result/items}" visible="{= ${/tab} === 'inventory' &amp;&amp; ${/view} === 'grid' }">
       <f:layout>
         <f:GridContainerSettings columnSize="18rem" rowSize="1rem" gap="1rem"/>
       </f:layout>
@@ -59,7 +59,7 @@
         </f:Card>
       </f:items>
     </f:GridContainer>
-    <Table id="inventoryTable" width="100%" fixedLayout="true" autoPopinMode="true" contextualWidth="Auto" sticky="ColumnHeaders,HeaderToolbar" items="{/result/items}" visible="{= ${/view} === 'list' }" noDataText="Eşleşen ürün bulunamadı">
+    <Table id="inventoryTable" width="100%" fixedLayout="true" autoPopinMode="true" contextualWidth="Auto" sticky="ColumnHeaders,HeaderToolbar" items="{/result/items}" visible="{= ${/tab} === 'overview' || ${/view} === 'list' }" noDataText="Eşleşen ürün bulunamadı">
       <headerToolbar>
         <OverflowToolbar>
           <Title text="Envanter listesi" level="H2"/>

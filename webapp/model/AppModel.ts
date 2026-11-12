@@ -1,5 +1,6 @@
 import JSONModel from "sap/ui/model/json/JSONModel";
 import Theming from "sap/ui/core/Theming";
+import Device from "sap/ui/Device";
 import MessageToast from "sap/m/MessageToast";
 import {
   ApiError,
@@ -116,6 +117,7 @@ function initialState() {
     uploadType: "photo",
     dark: (localStorage.getItem("hb-theme") || "dark") === "dark",
     isPhone: innerWidth < 768,
+    isMobile: innerWidth < 1024 || Device.system.phone || Device.system.tablet,
     sideExpanded: innerWidth >= 1024,
   };
 }

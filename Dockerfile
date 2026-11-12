@@ -5,6 +5,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY ui5.yaml tsconfig.json ./
 COPY webapp ./webapp
+COPY scripts ./scripts
 RUN npm run build
 
 FROM nginx:1.28-alpine

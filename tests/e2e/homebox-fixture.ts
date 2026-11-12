@@ -4,8 +4,18 @@ import type { Item, Template } from "../../webapp/service/HomeboxApi";
 /** Test-only API data: the application always follows the authenticated path. */
 export async function loginWithInventory(page: Page) {
   const locations = [
-    { id: "living", name: "Salon", itemCount: 2 },
-    { id: "kitchen", name: "Mutfak", itemCount: 1 },
+    {
+      id: "living",
+      name: "Salon",
+      itemCount: 2,
+      entityType: { id: "room", name: "Oda", isLocation: true },
+    },
+    {
+      id: "kitchen",
+      name: "Mutfak",
+      itemCount: 1,
+      entityType: { id: "room", name: "Oda", isLocation: true },
+    },
   ];
   let items: Item[] = [
     ["coffee", "Siemens EQ700", "kitchen"],
@@ -15,6 +25,8 @@ export async function loginWithInventory(page: Page) {
     id,
     name,
     description: "Test kaydı",
+    serialNumber: id === "coffee" ? "SCAN-SERIAL-1" : "",
+    assetId: id === "coffee" ? "000000001" : "",
     quantity: 1,
     purchasePrice: 100,
     tags: [],
@@ -67,15 +79,40 @@ export async function loginWithInventory(page: Page) {
       else if (path === "/templates/network") data = templates[0];
       else if (path === "/entities") {
         if (url.searchParams.get("isLocation") === "true")
-          data = { items: locations, total: locations.length };
+          data = {
+            items: locations.filter(
+              (location) =>
+                !url.searchParams.get("q") &&
+                !url.searchParams.getAll("fields").length,
+            ),
+            total:
+              !url.searchParams.get("q") &&
+              !url.searchParams.getAll("fields").length
+                ? locations.length
+                : 0,
+          };
         else {
           const query = (url.searchParams.get("q") || "").toLocaleLowerCase(
             "tr",
           );
           const parent = url.searchParams.get("parentIds");
+          const fields = url.searchParams.getAll("fields");
           const filtered = items.filter(
             (item) =>
-              item.name.toLocaleLowerCase("tr").includes(query) &&
+              (query.startsWith("#")
+                ? String(Number(item.assetId)) ===
+                  String(Number(query.slice(1)))
+                : (item.name + " " + (item.serialNumber || ""))
+                    .toLocaleLowerCase("tr")
+                    .includes(query)) &&
+              (!fields.length ||
+                fields.some((value) => {
+                  const [name, ...rest] = value.split("=");
+                  return ((item.fields as any[]) || []).some(
+                    (field) =>
+                      field.name === name && field.textValue === rest.join("="),
+                  );
+                })) &&
               (!parent || item.parent?.id === parent),
           );
           data = {
@@ -107,5 +144,7 @@ export async function loginWithInventory(page: Page) {
   await page.getByLabel("E-posta", { exact: true }).fill("test@example.com");
   await page.getByLabel("Şifre", { exact: true }).fill("password");
   await page.getByRole("button", { name: "Giriş yap", exact: true }).click();
+  await expect(page.locator('[id$="--homeHero"]')).toBeVisible();
+  await page.goto("/#inventory");
   await expect(page.locator(".sapFCard:visible")).toHaveCount(3);
 }

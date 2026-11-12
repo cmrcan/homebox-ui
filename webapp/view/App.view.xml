@@ -25,6 +25,11 @@
             <core:Item key="{id}" text="{name}"/>
           </Select>
           <Button icon="sap-icon://refresh" type="Transparent" tooltip="Verileri yenile" press=".onRefresh" enabled="{= !${/busy} &amp;&amp; !${/saving} }"/>
+          <Button id="scanButton" icon="sap-icon://bar-code" type="Transparent" tooltip="Barkod oku" press=".onOpenScanner" visible="{/isMobile}" enabled="{= !${/saving} }">
+            <layoutData>
+              <OverflowToolbarLayoutData priority="NeverOverflow"/>
+            </layoutData>
+          </Button>
           <Button id="themeButton" icon="{= ${/dark} ? 'sap-icon://light-mode' : 'sap-icon://dark-mode' }" type="Transparent" tooltip="{= ${/dark} ? 'Açık görünüm' : 'Koyu görünüm' }" press=".onToggleTheme"/>
           <Avatar displaySize="XS" initials="{path:'/user/name',formatter:'.formatter.initials'}" tooltip="{/user/name}" press=".onProfile"/>
         </tnt:ToolHeader>

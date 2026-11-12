@@ -17,7 +17,7 @@
         <Button text="{= ${view&gt;/showPassword} ? 'Şifreyi gizle' : 'Şifreyi göster' }" icon="sap-icon://show" press=".onTogglePassword" class="sapUiSmallMarginBottom"/>
         <Button text="Giriş yap" type="Emphasized" icon="sap-icon://log" width="100%" press=".onLogin" enabled="{= !${/saving} &amp;&amp; !${/busy} }" class="sapUiSmallMarginBottom"/>
         <Button text="Davet ile hesap oluştur" press=".onRegister" class="sapUiSmallMarginBottom"/>
-        <Text text="Homebox UI v0.5.1 · OpenUI5 MVC" class="sapUiSmallMarginBottom"/>
+        <Text text="Homebox UI v0.5.2 · OpenUI5 MVC" class="sapUiSmallMarginBottom"/>
       </VBox>
     </l:Grid>
   </VBox>

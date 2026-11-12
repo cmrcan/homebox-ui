@@ -6,7 +6,7 @@
     "title": "Homebox",
     "description": "Homebox inventory with native OpenUI5 MVC",
     "applicationVersion": {
-      "version": "0.5.1"
+      "version": "0.5.2"
     },
     "dataSources": {
       "homebox": {
