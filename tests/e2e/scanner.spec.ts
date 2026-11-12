@@ -1,6 +1,9 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import { BarcodeFormat, QRCodeWriter } from "@zxing/library";
+import { createRequire } from "node:module";
+const { BarcodeFormat, QRCodeWriter } = createRequire(import.meta.url)(
+  "@zxing/library",
+) as typeof import("@zxing/library");
 import { loginWithInventory } from "./homebox-fixture";
 async function fakeCamera(page: Page, code?: string, denyFirst = false) {
   const matrix = code
