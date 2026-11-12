@@ -1,15 +1,16 @@
-<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="homebox.controller.Inventory">
-  <Page showHeader="false" class="hb-content-page">
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="homebox.controller.Inventory" height="100%">
+  <Page showHeader="false" class="sapUiContentPadding">
     <content>
-      <VBox width="100%" class="hb-page hb-stack">
-        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
-        <Text text="{/groupName}" class="hb-muted"/>
-        <FlexBox renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center" class="hb-row">
-          <Title text="Envanterim" level="H1" titleStyle="H2" wrapping="true"/>
-          <Button text="Ürün ekle" type="Emphasized" icon="sap-icon://add" press=".onAddItem" enabled="{= !${/saving} &amp;&amp; !${/busy} }"/>
+      <VBox width="100%">
+        <core:Fragment fragmentName="homebox.fragment.Breadcrumbs" type="XML"/>
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML" class="sapUiSmallMarginBottom"/>
+        <Text text="{/groupName}" class="sapUiSmallMarginBottom"/>
+        <FlexBox renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
+          <Title text="Envanterim" level="H1" titleStyle="H2" wrapping="true" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+          <Button text="Ürün ekle" type="Emphasized" icon="sap-icon://add" press=".onAddItem" enabled="{= !${/saving} &amp;&amp; !${/busy} }" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
         </FlexBox>
-        <Text text="Eşyalarını bul, bilgilerini güncelle, düzenini koru."/>
-        <core:Fragment fragmentName="homebox.fragment.Inventory" type="XML"/>
+        <Text text="Eşyalarını bul, bilgilerini güncelle, düzenini koru." class="sapUiSmallMarginBottom"/>
+        <core:Fragment fragmentName="homebox.fragment.Inventory" type="XML" class="sapUiSmallMarginBottom"/>
       </VBox>
     </content>
   </Page>

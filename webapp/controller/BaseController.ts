@@ -25,9 +25,10 @@ export default class BaseController extends Controller {
   private activeDialog?: Dialog;
   private closePromise?: Promise<void>;
   private routeNames: string[] = [];
+  protected routeArguments: Record<string, string> = {};
   private listeners: {
     route: ReturnType<Router["getRoute"]>;
-    callback: () => void;
+    callback: (event: Event) => void;
   }[] = [];
   public onInit(): void {
     this.app = this.getOwnerComponent()!.getModel() as AppModel;
@@ -64,19 +65,18 @@ export default class BaseController extends Controller {
     for (const name of names) {
       const route = this.getRouter().getRoute(name);
       if (!route) continue;
-      const callback = () => {
-        if (this.app.state().user) void this.onPageEntered();
+      const callback = (event: Event) => {
+        this.routeArguments = (event.getParameter("arguments" as never) ||
+          {}) as Record<string, string>;
+        if (this.app.state().user) void this.onPageEntered(true);
       };
       route.attachPatternMatched(callback);
       this.listeners.push({ route, callback });
     }
   }
-  protected onPageEntered(): void | Promise<void> {}
+  protected onPageEntered(_entered = false): void | Promise<void> {}
   private contextChanged() {
-    if (
-      this.routeNames.includes(this.app.state().tab) ||
-      (this.app.state().tab === "overview" && this.routeNames.includes("home"))
-    )
+    if (this.routeNames.includes(this.app.state().routeName))
       void this.onPageEntered();
   }
   private sessionChanged() {
@@ -128,33 +128,20 @@ export default class BaseController extends Controller {
   public onCloseDialog(): void {
     this.activeDialog?.close();
   }
-  public async onAddItem(): Promise<void> {
-    await this.app.prepareItem();
-    this.getView()!.setModel(new JSONModel(this.app.state().form), "edit");
-    await this.openDialog("ItemEdit");
+  public onHome(): void {
+    this.getRouter().navTo("overview");
   }
-  public async onOpenItem(event: UIEvent): Promise<void> {
-    const item = this.context<Item>(event);
-    if (await this.app.selectItem(item.id)) {
-      this.vm().setProperty("/maintenanceLoaded", false);
-      await this.openDialog("ItemDetail");
-    }
+  public onInventory(): void {
+    this.getRouter().navTo("inventory");
   }
-  public async onEditItem(): Promise<void> {
-    await this.app.prepareItem(this.app.state().selected);
-    this.getView()!.setModel(new JSONModel(this.app.state().form), "edit");
-    await this.openDialog("ItemEdit");
+  public onLocations(): void {
+    this.getRouter().navTo("locations");
   }
-  public async onSaveItem(): Promise<void> {
-    this.app.setProperty("/form", this.editModel().getData());
-    if (await this.app.saveItem()) await this.openDialog("ItemDetail");
+  public onAddItem(): void {
+    this.getRouter().navTo("itemNew");
   }
-  public onDeleteItem(): void {
-    const item = this.app.state().selected;
-    if (!item) return;
-    this.confirm(`“${item.name}” silinsin mi?`, async () => {
-      if (await this.app.removeItem()) this.onCloseDialog();
-    });
+  public onOpenItem(event: UIEvent): void {
+    this.getRouter().navTo("item", { id: this.context<Item>(event).id });
   }
   protected confirm(message: string, task: () => Promise<void>) {
     MessageBox.confirm(message, {
@@ -219,27 +206,24 @@ export default class BaseController extends Controller {
           template.fields || [],
         ),
       );
-      await this.openDialog("ItemEdit");
+      this.onCloseDialog();
     });
   }
   public onCancelTemplatePicker(): void {
-    void this.openDialog("ItemEdit");
+    this.onCloseDialog();
   }
-  public async onAddOrganizer(): Promise<void> {
-    this.app.prepareOrganizer(
-      this.app.state().tab === "locations" ? "locations" : "tags",
+  public onAddOrganizer(): void {
+    this.getRouter().navTo(
+      this.app.state().tab === "locations" ? "locationNew" : "tagNew",
     );
-    await this.openDialog("OrganizerEdit");
   }
-  public async onEditOrganizer(event: UIEvent): Promise<void> {
-    this.app.prepareOrganizer(
-      this.app.state().tab === "locations" ? "locations" : "tags",
-      this.context<Organizer>(event, "view"),
+  public onEditOrganizer(event: UIEvent): void {
+    this.getRouter().navTo(
+      this.app.state().tab === "locations" ? "location" : "tag",
+      {
+        id: this.context<Organizer>(event, "view").id,
+      },
     );
-    await this.openDialog("OrganizerEdit");
-  }
-  public async onSaveOrganizer(): Promise<void> {
-    if (await this.app.saveOrganizer()) this.onCloseDialog();
   }
   public onViewOrganizer(event: UIEvent): void {
     const item = this.context<Organizer>(event, "view");

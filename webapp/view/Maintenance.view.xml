@@ -1,13 +1,14 @@
-<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="homebox.controller.Maintenance">
-  <Page showHeader="false" class="hb-content-page">
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="homebox.controller.Maintenance" height="100%">
+  <Page showHeader="false" class="sapUiContentPadding">
     <content>
-      <VBox width="100%" class="hb-page hb-stack">
-        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
-        <Text text="{/groupName}" class="hb-muted"/>
-        <FlexBox renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center" class="hb-row">
-          <Title text="Bakım" level="H1" titleStyle="H2" wrapping="true"/>
+      <VBox width="100%">
+        <core:Fragment fragmentName="homebox.fragment.Breadcrumbs" type="XML"/>
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML" class="sapUiSmallMarginBottom"/>
+        <Text text="{/groupName}" class="sapUiSmallMarginBottom"/>
+        <FlexBox renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
+          <Title text="Bakım" level="H1" titleStyle="H2" wrapping="true" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
         </FlexBox>
-        <VBox class="hb-field">
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="Bakım durumu" labelFor="maintenanceStatus"/>
           <Select id="maintenanceStatus" selectedKey="{view&gt;/status}" change=".onStatusChange">
             <core:Item key="scheduled" text="Planlanan"/>
@@ -15,16 +16,16 @@
             <core:Item key="both" text="Tümü"/>
           </Select>
         </VBox>
-        <VBox items="{view&gt;/maintenance}" class="hb-stack">
-          <Panel headerText="{view&gt;name}">
-            <VBox class="hb-stack">
-              <Text text="{view&gt;description}"/>
-              <Text text="{path:'view&gt;scheduledDate',formatter:'.formatter.date'}"/>
-              <Text text="{path:'view&gt;completedDate',formatter:'.formatter.date'}"/>
-              <ObjectNumber number="{parts:['view&gt;cost','/currency'],formatter:'.formatter.money'}"/>
-              <HBox class="hb-row">
-                <Button text="Tamamlandı" icon="sap-icon://accept" press=".onCompleteMaintenance" visible="{= !${view&gt;completedDate} || ${view&gt;completedDate}.indexOf('0001') === 0 }"/>
-                <Button text="Sil" icon="sap-icon://delete" press=".onDeleteMaintenance"/>
+        <VBox items="{view&gt;/maintenance}" class="sapUiSmallMarginBottom">
+          <Panel headerText="{view&gt;name}" class="sapUiSmallMarginBottom">
+            <VBox>
+              <Text text="{view&gt;description}" class="sapUiSmallMarginBottom"/>
+              <Text text="{path:'view&gt;scheduledDate',formatter:'.formatter.date'}" class="sapUiSmallMarginBottom"/>
+              <Text text="{path:'view&gt;completedDate',formatter:'.formatter.date'}" class="sapUiSmallMarginBottom"/>
+              <ObjectNumber number="{parts:['view&gt;cost','/currency'],formatter:'.formatter.money'}" class="sapUiSmallMarginBottom"/>
+              <HBox class="sapUiSmallMarginBottom">
+                <Button text="Tamamlandı" icon="sap-icon://accept" press=".onCompleteMaintenance" visible="{= !${view&gt;completedDate} || ${view&gt;completedDate}.indexOf('0001') === 0 }" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                <Button text="Sil" icon="sap-icon://delete" press=".onDeleteMaintenance" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
               </HBox>
             </VBox>
           </Panel>

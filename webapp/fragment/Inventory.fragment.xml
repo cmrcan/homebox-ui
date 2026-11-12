@@ -1,73 +1,140 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-  <VBox class="hb-stack" width="100%">
-    <VBox class="hb-field">
-      <Label text="Envanterde ara" labelFor="inventorySearch"/>
-      <SearchField id="inventorySearch" width="100%" placeholder="Ürün adı, marka veya seri numarası" value="{/search}" liveChange=".onSearch" search=".onSearch"/>
-    </VBox>
-    <FlexBox renderType="Bare" wrap="Wrap" alignItems="Center" class="hb-row">
-      <VBox class="hb-field hb-filter">
-        <Label text="Konuma göre filtrele" labelFor="locationFilter"/>
-        <Select id="locationFilter" width="100%" selectedKey="{/locationFilter}" items="{/locationOptions}" change=".onFilter">
-          <core:Item key="{id}" text="{name}"/>
-        </Select>
-      </VBox>
-      <VBox class="hb-field hb-filter">
-        <Label text="Etikete göre filtrele" labelFor="tagFilter"/>
-        <Select id="tagFilter" width="100%" selectedKey="{/tagFilter}" items="{/tagOptions}" change=".onFilter">
-          <core:Item key="{id}" text="{name}"/>
-        </Select>
-      </VBox>
-      <CheckBox text="Arşivdekileri dahil et" selected="{/archived}" select=".onFilter"/>
-    </FlexBox>
-    <HBox class="hb-row">
-      <Button text="Kart görünümü" icon="sap-icon://grid" press=".onGrid"/>
-      <Button text="Liste görünümü" icon="sap-icon://list" press=".onList"/>
-    </HBox>
-    <FlexBox id="inventoryCards" renderType="Bare" wrap="Wrap" items="{/result/items}" visible="{= ${/view} === 'grid' }" class="hb-cards">
-      <Panel class="hb-item-card">
-        <VBox class="hb-stack">
-          <Image src="{photoUrl}" height="10rem" width="100%" densityAware="false" decorative="false" alt="{name}" visible="{= !!${photoUrl} }"/>
-          <core:Icon src="sap-icon://product" size="3rem" visible="{= !${photoUrl} }" class="hb-product-icon"/>
-          <Button text="{name}" press=".onOpenItem" type="Transparent"/>
-          <Text text="{parts:['parent','location'],formatter:'.formatter.location'}"/>
-          <ObjectNumber number="{parts:['purchasePrice','/currency'],formatter:'.formatter.money'}" unit="{= ${quantity} + ' adet' }"/>
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.f" xmlns:card="sap.f.cards">
+  <VBox width="100%">
+    <Panel headerText="Filtreler" expandable="true" expanded="true" class="sapUiSmallMarginBottom">
+      <l:Grid defaultSpan="XL3 L3 M6 S12" hSpacing="1" vSpacing="1">
+        <VBox>
+          <Label text="Envanterde ara" labelFor="inventorySearch"/>
+          <SearchField id="inventorySearch" width="100%" placeholder="Ürün adı, marka veya seri numarası" value="{/search}" liveChange=".onSearch" search=".onSearch"/>
         </VBox>
-      </Panel>
-    </FlexBox>
-    <Table id="inventoryTable" fixedLayout="false" items="{/result/items}" visible="{= ${/view} === 'list' }">
+        <VBox>
+          <Label text="Konuma göre filtrele" labelFor="locationFilter"/>
+          <Select id="locationFilter" width="100%" selectedKey="{/locationFilter}" items="{/locationOptions}" change=".onFilter">
+            <core:Item key="{id}" text="{name}"/>
+          </Select>
+        </VBox>
+        <VBox>
+          <Label text="Etikete göre filtrele" labelFor="tagFilter"/>
+          <Select id="tagFilter" width="100%" selectedKey="{/tagFilter}" items="{/tagOptions}" change=".onFilter">
+            <core:Item key="{id}" text="{name}"/>
+          </Select>
+        </VBox>
+        <VBox>
+          <Label text="Sıralama" labelFor="sortOrder"/>
+          <Select id="sortOrder" width="100%" selectedKey="{/orderBy}" change=".onFilter">
+            <core:Item key="updatedAt" text="Son güncellenen"/>
+            <core:Item key="createdAt" text="Son eklenen"/>
+            <core:Item key="name" text="Ürün adı"/>
+          </Select>
+        </VBox>
+        <CheckBox text="Arşivdekileri dahil et" selected="{/archived}" select=".onFilter"/>
+        <Button text="Filtreleri temizle" icon="sap-icon://clear-filter" press=".onResetFilters"/>
+      </l:Grid>
+    </Panel>
+    <OverflowToolbar class="sapUiSmallMarginBottom">
+      <Title text="{= ${/result/total} + ' ürün' }" level="H2"/>
+      <ToolbarSpacer/>
+      <Button text="Kart görünümü" icon="sap-icon://grid" type="{= ${/view} === 'grid' ? 'Emphasized' : 'Transparent' }" press=".onGrid"/>
+      <Button text="Liste görünümü" icon="sap-icon://list" type="{= ${/view} === 'list' ? 'Emphasized' : 'Transparent' }" press=".onList"/>
+    </OverflowToolbar>
+    <f:GridContainer id="inventoryCards" width="100%" containerQuery="true" snapToRow="false" items="{/result/items}" visible="{= ${/view} === 'grid' }">
+      <f:layout>
+        <f:GridContainerSettings columnSize="18rem" rowSize="1rem" gap="1rem"/>
+      </f:layout>
+      <f:layoutXS>
+        <f:GridContainerSettings columnSize="100%" rowSize="1rem" gap="1rem"/>
+      </f:layoutXS>
+      <f:items>
+        <f:Card width="100%" height="21rem">
+          <f:header>
+            <card:Header title="{name}" subtitle="{parts:['parent','location'],formatter:'.formatter.location'}" iconSrc="sap-icon://product" press=".onOpenItem"/>
+          </f:header>
+          <f:content>
+            <VBox width="100%" height="100%" justifyContent="SpaceBetween" class="sapUiSmallMarginBeginEnd" alignItems="Center">
+              <Avatar src="{photoUrl}" fallbackIcon="sap-icon://product" displaySize="Custom" customDisplaySize="7rem" customFontSize="3rem" displayShape="Square" imageFitType="Contain"/>
+              <Text text="{= [${manufacturer}, ${modelNumber}].filter(Boolean).join(' · ') || ${description} || 'Ürün bilgilerini görüntüle' }" maxLines="1" textAlign="Center" width="100%"/>
+              <ObjectNumber number="{parts:['purchasePrice','/currency'],formatter:'.formatter.money'}" unit="{= ${quantity} + ' adet' }"/>
+              <Button text="{name}" tooltip="Ürün detayını aç" width="100%" press=".onOpenItem" type="Transparent"/>
+            </VBox>
+          </f:content>
+        </f:Card>
+      </f:items>
+    </f:GridContainer>
+    <Table id="inventoryTable" width="100%" fixedLayout="true" autoPopinMode="true" contextualWidth="Auto" sticky="ColumnHeaders,HeaderToolbar" items="{/result/items}" visible="{= ${/view} === 'list' }" noDataText="Eşleşen ürün bulunamadı">
+      <headerToolbar>
+        <OverflowToolbar>
+          <Title text="Envanter listesi" level="H2"/>
+          <ToolbarSpacer/>
+          <Text text="{= ${/result/total} + ' kayıt' }"/>
+        </OverflowToolbar>
+      </headerToolbar>
       <columns>
-        <Column>
+        <Column width="13rem" importance="High">
           <Text text="Ürün"/>
         </Column>
-        <Column minScreenWidth="Tablet" demandPopin="true">
+        <Column width="9rem" importance="High">
           <Text text="Konum"/>
         </Column>
-        <Column minScreenWidth="Tablet" demandPopin="true">
+        <Column width="7rem" importance="Low">
+          <Text text="Tür"/>
+        </Column>
+        <Column width="8rem" importance="Medium">
+          <Text text="Marka"/>
+        </Column>
+        <Column width="8rem" importance="Low">
+          <Text text="Model"/>
+        </Column>
+        <Column width="9rem" importance="Low">
+          <Text text="Seri numarası"/>
+        </Column>
+        <Column width="9rem" importance="Low">
+          <Text text="Etiketler"/>
+        </Column>
+        <Column width="4rem" importance="Medium" hAlign="End">
           <Text text="Adet"/>
         </Column>
-        <Column minScreenWidth="Tablet" demandPopin="true" hAlign="End">
+        <Column width="8rem" importance="High" hAlign="End">
           <Text text="Değer"/>
+        </Column>
+        <Column width="8rem" importance="Low">
+          <Text text="Satın alma"/>
+        </Column>
+        <Column width="8rem" importance="Low">
+          <Text text="Garanti bitişi"/>
+        </Column>
+        <Column width="8rem" importance="Low">
+          <Text text="Güncelleme"/>
+        </Column>
+        <Column width="6rem" importance="Low">
+          <Text text="Durum"/>
         </Column>
       </columns>
       <items>
-        <ColumnListItem type="Active" press=".onOpenItem">
+        <ColumnListItem type="Navigation" press=".onOpenItem" vAlign="Middle">
           <cells>
-            <Text text="{name}"/>
+            <ObjectIdentifier title="{name}" text="{description}"/>
             <Text text="{parts:['parent','location'],formatter:'.formatter.location'}"/>
+            <Text text="{entityType/name}"/>
+            <Text text="{manufacturer}"/>
+            <Text text="{modelNumber}"/>
+            <Text text="{serialNumber}"/>
+            <Text text="{path:'tags',formatter:'.formatter.tags'}"/>
             <Text text="{quantity}"/>
-            <Text text="{parts:['purchasePrice','/currency'],formatter:'.formatter.money'}"/>
+            <ObjectNumber number="{parts:['purchasePrice','/currency'],formatter:'.formatter.money'}"/>
+            <Text text="{path:'displayPurchaseDate',formatter:'.formatter.date'}"/>
+            <Text text="{path:'warrantyExpires',formatter:'.formatter.date'}"/>
+            <Text text="{path:'updatedAt',formatter:'.formatter.date'}"/>
+            <ObjectStatus text="{= ${archived} ? 'Arşiv' : 'Aktif' }" state="{= ${archived} ? 'None' : 'Success' }"/>
           </cells>
         </ColumnListItem>
       </items>
     </Table>
-    <VBox visible="{= !${/busy} &amp;&amp; !${/result/total} }">
-      <Title text="Eşleşen ürün bulunamadı" level="H2" titleStyle="H3"/>
-      <Text text="Aramayı veya filtreleri değiştirebilir, yeni bir ürün ekleyebilirsin."/>
-    </VBox>
-    <FlexBox renderType="Bare" wrap="Wrap" alignItems="Center" class="hb-row">
+    <IllustratedMessage illustrationType="sapIllus-NoSearchResults" title="Eşleşen ürün bulunamadı" description="Aramayı veya filtreleri değiştirebilir, yeni bir ürün ekleyebilirsin." visible="{= !${/busy} &amp;&amp; !${/result/total} }"/>
+    <OverflowToolbar class="sapUiSmallMarginTop">
       <Button text="Önceki" icon="sap-icon://navigation-left-arrow" press=".onPrevious" enabled="{= ${/page} &gt; 1 }"/>
+      <ToolbarSpacer/>
       <Text text="{parts:['/page','/result/total'],formatter:'.formatter.page'}"/>
+      <ToolbarSpacer/>
       <Button text="Sonraki" icon="sap-icon://navigation-right-arrow" press=".onNext" enabled="{parts:['/page','/result/total'],formatter:'.formatter.next'}"/>
-    </FlexBox>
+    </OverflowToolbar>
   </VBox>
 </core:FragmentDefinition>

@@ -13,11 +13,15 @@ async function navigate(page: Page, name: string) {
     name: "Ana menü",
     exact: true,
   });
-  if (!(await sidebar.getByRole("treeitem", { name, exact: true }).isVisible()))
+  const item = sidebar.getByRole("treeitem", { name, exact: true });
+  const itemBox = (await item.isVisible()) ? await item.boundingBox() : null;
+  if (!itemBox || itemBox.x < 0 || itemBox.x >= page.viewportSize()!.width)
     await page.getByRole("button", { name: "Menüyü aç", exact: true }).click();
   await sidebar.getByRole("treeitem", { name, exact: true }).click();
   await expect(
-    page.locator(".hb-page").getByRole("heading", { name, exact: true }),
+    page
+      .locator(".sapMPage:visible")
+      .getByRole("heading", { name, exact: true }),
   ).toBeVisible();
 }
 
@@ -31,6 +35,14 @@ async function shellAction(page: Page, name: string) {
   await action.click();
 }
 
+async function objectAction(page: Page, name: string) {
+  const overflow = page
+    .locator(".sapMPage:visible header")
+    .getByRole("button", { name: "Ek seçenekler", exact: true });
+  await overflow.click();
+  await page.getByRole("button", { name, exact: true }).click();
+}
+
 test("OpenUI5 inventory supports search, edit, confirmed deletion and location filters", async ({
   page,
 }) => {
@@ -42,28 +54,22 @@ test("OpenUI5 inventory supports search, edit, confirmed deletion and location f
     .click();
   await page.getByRole("button", { name: "Düzenle", exact: true }).click();
   await page.getByLabel("Ürün adı", { exact: true }).fill("Kahve köşesi");
-  await page.getByRole("button", { name: "Ürünü kaydet", exact: true }).click();
+  await page.getByRole("button", { name: "Kaydet", exact: true }).click();
   await expect(
-    page
-      .getByRole("dialog")
-      .getByRole("heading", { name: "Kahve köşesi", exact: true }),
+    page.getByRole("heading", { name: "Kahve köşesi", exact: true }),
   ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Pencereyi kapat", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Geri", exact: true }).click();
   await page
     .getByRole("searchbox", { name: "Envanterde ara" })
     .fill("Kahve köşesi");
-  await expect(page.locator(".hb-item-card:visible")).toHaveCount(1);
+  await expect(page.locator(".sapFCard:visible")).toHaveCount(1);
   await page.getByRole("button", { name: "Kahve köşesi", exact: true }).click();
-  await page.getByRole("button", { name: "Sil", exact: true }).click();
+  await objectAction(page, "Sil");
   await page.getByRole("button", { name: "Vazgeç", exact: true }).click();
   await expect(
-    page
-      .getByRole("dialog")
-      .getByRole("heading", { name: "Kahve köşesi", exact: true }),
+    page.getByRole("heading", { name: "Kahve köşesi", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Sil", exact: true }).click();
+  await objectAction(page, "Sil");
   await page.getByRole("button", { name: "Evet, sil", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Eşleşen ürün bulunamadı" }),
@@ -73,7 +79,7 @@ test("OpenUI5 inventory supports search, edit, confirmed deletion and location f
     .getByRole("button", { name: "Ürünleri gör", exact: true })
     .first()
     .click();
-  await expect(page.locator(".hb-item-card:visible")).toHaveCount(2);
+  await expect(page.locator(".sapFCard:visible")).toHaveCount(2);
   await expect(
     page.getByRole("combobox", { name: "Konuma göre filtrele" }),
   ).toContainText("Salon");
@@ -184,11 +190,9 @@ test("authenticated Homebox entity API: login, create, upload, and expiry", asyn
   await page.getByRole("button", { name: "Ürün ekle", exact: true }).click();
   await page.getByLabel("Ürün adı", { exact: true }).fill("Test ürün");
   await page.getByLabel("Satın alma değeri (TRY)", { exact: true }).fill("123");
-  await page.getByRole("button", { name: "Ürünü kaydet" }).click();
+  await page.getByRole("button", { name: "Kaydet" }).click();
   await expect(
-    page
-      .getByRole("dialog")
-      .getByRole("heading", { name: "Test ürün", exact: true }),
+    page.getByRole("heading", { name: "Test ürün", exact: true }),
   ).toBeVisible();
   expect(writes).toHaveLength(2);
   expect(writes[0].entityTypeId).toBe("type");
@@ -204,12 +208,14 @@ test("authenticated Homebox entity API: login, create, upload, and expiry", asyn
     buffer: Buffer.from("test"),
   });
   await expect(page.getByRole("link", { name: "fatura.txt" })).toBeVisible();
-  await page.getByRole("button", { name: "Pencereyi kapat" }).click();
+  await page.getByRole("button", { name: "Geri", exact: true }).click();
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Evine bir bakış." }),
+    page
+      .locator(".sapMPage:visible")
+      .getByRole("heading", { name: "Envanterim", exact: true }),
   ).toBeVisible();
-  await expect(page.locator(".hb-item-card:visible")).toHaveCount(1);
+  await expect(page.locator(".sapFCard:visible")).toHaveCount(1);
   await page.unrouteAll({ behavior: "wait" });
   await page.route("**/api/v1/**", (route) =>
     route.fulfill({ status: 401, json: { error: "unauthorized" } }),
@@ -231,13 +237,9 @@ test("item custom fields and template management remain available", async ({
   await page.getByRole("button", { name: "Alan ekle", exact: true }).click();
   await page.getByLabel("Alan adı", { exact: true }).fill("Voltaj");
   await page.getByLabel("Alan değeri", { exact: true }).fill("230V");
-  await page.getByRole("button", { name: "Ürünü kaydet", exact: true }).click();
-  await expect(
-    page.getByRole("dialog").getByText("230V", { exact: true }),
-  ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Pencereyi kapat", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Kaydet", exact: true }).click();
+  await expect(page.getByText("230V", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Geri", exact: true }).click();
   await navigate(page, "Alan şablonları");
   await expect(page.getByText("Ağ cihazı", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Düzenle", exact: true }).click();
@@ -276,7 +278,7 @@ test("failed login keeps inventory inaccessible; password visibility and registr
   await expect(
     page.getByRole("heading", { name: "Evine hoş geldin." }),
   ).toBeVisible();
-  await expect(page.locator(".hb-item-card:visible")).toHaveCount(0);
+  await expect(page.locator(".sapFCard:visible")).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: /Örnek envanter|Demoyu/i }),
   ).toHaveCount(0);
@@ -300,7 +302,23 @@ test("Horizon theme persists after reload and resources stay on the same origin"
       external.push(req.url());
   });
   await loginWithInventory(page);
+  const themeId = (await page
+    .locator(".sapTntToolPage")
+    .getAttribute("id"))!.replace(/toolPage$/, "themeButton");
+  const icon = () =>
+    page.evaluate(
+      (id) =>
+        new Promise<string>((resolve) =>
+          (window as any).sap.ui.require(
+            ["sap/ui/core/Element"],
+            (Element: any) => resolve(Element.getElementById(id).getIcon()),
+          ),
+        ),
+      themeId,
+    );
+  expect(await icon()).toBe("sap-icon://dark-mode");
   await shellAction(page, "Koyu görünüm");
+  await expect.poll(icon).toBe("sap-icon://light-mode");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page.locator('link[id="sap-ui-theme-sap.m"]')).toHaveAttribute(
     "href",
@@ -329,11 +347,11 @@ test("OpenUI5 forms, menu and responsive table fit phones and tablets", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(
     page.getByRole("navigation", { name: "Ana menü", exact: true }),
-  ).not.toBeVisible();
+  ).not.toBeInViewport();
   await page.getByRole("button", { name: "Menüyü aç", exact: true }).click();
   await expect(
     page.getByRole("navigation", { name: "Ana menü" }),
-  ).toBeVisible();
+  ).toBeInViewport();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page
@@ -341,18 +359,19 @@ test("OpenUI5 forms, menu and responsive table fit phones and tablets", async ({
     .click();
   await expect(page.getByRole("grid")).toBeVisible();
   await page.getByRole("button", { name: "Ürün ekle", exact: true }).click();
-  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page).toHaveURL(/#\/?inventory\/new$/);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   const name = await page.getByLabel("Ürün adı", { exact: true }).boundingBox();
-  expect(name!.width).toBeGreaterThan(280);
+  expect(name!.width).toBeGreaterThan(250);
   await expect
     .poll(() =>
       page
-        .getByRole("dialog")
+        .locator(".sapMPage:visible")
         .evaluate((el) => el.scrollWidth <= el.clientWidth),
     )
     .toBe(true);
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.getByRole("button", { name: "Vazgeç", exact: true }).click();
+  await expect(page).toHaveURL(/#\/?inventory$/);
 });
 
 test("built runtime loads compiled styles, preserves logo and respects production CSP", async ({
@@ -450,7 +469,7 @@ test("entity type creation and field template editing send complete API values",
   await expect(page.getByText("Elektronik", { exact: true })).toBeVisible();
   expect(writes[0]).toMatchObject({ name: "Elektronik", isLocation: false });
   await page
-    .locator(".hb-page .sapMPanel")
+    .locator(".sapMPage:visible .sapMPanel")
     .filter({ has: page.getByText("Elektronik", { exact: true }) })
     .getByRole("button", { name: "Düzenle", exact: true })
     .click();
@@ -512,9 +531,7 @@ test("item maintenance, profile saving and CSV export remain functional", async 
     cost: "90",
     completedDate: "0001-01-01",
   });
-  await page
-    .getByRole("button", { name: "Pencereyi kapat", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Geri", exact: true }).click();
   await page.route("**/api/v1/groups/members", (route) =>
     route.fulfill({ json: [] }),
   );
@@ -553,10 +570,10 @@ test("native MVC component, ToolPage and router restore a deep-linked inventory 
   await page.goto("/#inventory");
   await expect(
     page
-      .locator(".hb-page")
+      .locator(".sapMPage:visible")
       .getByRole("heading", { name: "Envanterim", exact: true }),
   ).toBeVisible();
-  const toolPageId = await page.locator(".hb-tool-page").getAttribute("id");
+  const toolPageId = await page.locator(".sapTntToolPage").getAttribute("id");
   const shape = await page.evaluate(
     async (id) =>
       new Promise((resolve, reject) => {
@@ -653,7 +670,7 @@ test("ToolHeader collection selection reloads inventory with the new tenant", as
     });
   });
   await page.reload();
-  await expect(page.locator(".hb-item-card:visible")).toHaveCount(3);
+  await expect(page.locator(".sapFCard:visible")).toHaveCount(3);
   const collection = page.getByRole("combobox", {
     name: "Koleksiyon",
     exact: true,
@@ -666,11 +683,11 @@ test("ToolHeader collection selection reloads inventory with the new tenant", as
   await collection.locator("..").click();
   await page.getByRole("option", { name: "İkinci ev", exact: true }).click();
   await page.keyboard.press("Escape");
-  await expect(page.locator(".hb-item-card:visible")).toHaveCount(1);
+  await expect(page.locator(".sapFCard:visible")).toHaveCount(1);
   await expect(
     page.getByRole("button", { name: "Yeni koleksiyon ürünü", exact: true }),
   ).toBeVisible();
-  await expect(page.locator(".hb-item-card:visible")).not.toContainText(
+  await expect(page.locator(".sapFCard:visible")).not.toContainText(
     "Siemens EQ700",
   );
 });
@@ -685,7 +702,7 @@ test("an expanded mobile menu survives resizing within the phone layout", async 
     name: "Ana menü",
     exact: true,
   });
-  await expect(navigation).toBeVisible();
+  await expect(navigation).toBeInViewport();
   await page.evaluate(
     () =>
       new Promise<void>((resolve) => {
@@ -702,14 +719,241 @@ test("an expanded mobile menu survives resizing within the phone layout", async 
   );
   await page.setViewportSize({ width: 390, height: 820 });
   await page.waitForFunction(() => (window as any).__ui5ResizeObserved);
-  await expect(navigation).toBeVisible();
+  await expect(navigation).toBeInViewport();
   await navigation
     .getByRole("treeitem", { name: "Konumlar", exact: true })
     .click();
   await expect(
     page
-      .locator(".hb-page")
+      .locator(".sapMPage:visible")
       .getByRole("heading", { name: "Konumlar", exact: true }),
   ).toBeVisible();
-  await expect(navigation).not.toBeVisible();
+  await expect(navigation).not.toBeInViewport();
+});
+
+test("object routes restore detail pages, breadcrumbs and footer edits without dialogs", async ({
+  page,
+}) => {
+  await loginWithInventory(page);
+  await page.goto("/#inventory/coffee");
+  await expect(
+    page.getByRole("heading", { name: "Siemens EQ700", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(
+    page.getByRole("navigation", { name: "Dolaşma yolu" }),
+  ).toContainText("Mutfak");
+  await page.getByRole("button", { name: "Düzenle", exact: true }).click();
+  const footer = page.locator(".sapMPage:visible footer");
+  await expect(
+    footer.getByRole("button", { name: "Kaydet", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Ürün adı", { exact: true })
+    .fill("Kaydedilmeyen değişiklik");
+  await footer.getByRole("button", { name: "Vazgeç", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Siemens EQ700", exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Siemens EQ700", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Düzenle", exact: true }).click();
+  await page.route("**/api/v1/entities/coffee", async (route) => {
+    if (route.request().method() === "PUT")
+      await route.fulfill({
+        status: 503,
+        json: { error: "Kayıt servisi geçici olarak kapalı" },
+      });
+    else await route.fallback();
+  });
+  await page
+    .getByLabel("Ürün adı", { exact: true })
+    .fill("Tekrar denenecek kayıt");
+  await footer.getByRole("button", { name: "Kaydet", exact: true }).click();
+  await expect(page.getByRole("note")).toContainText(
+    "Kayıt servisi geçici olarak kapalı",
+  );
+  await expect(page.getByLabel("Ürün adı", { exact: true })).toHaveValue(
+    "Tekrar denenecek kayıt",
+  );
+  await expect(
+    footer.getByRole("button", { name: "Kaydet", exact: true }),
+  ).toBeEnabled();
+});
+
+test("location details edit and cancel through the page footer and survive reload", async ({
+  page,
+}) => {
+  await loginWithInventory(page);
+  await navigate(page, "Konumlar");
+  await page
+    .getByRole("button", { name: "Detayı aç", exact: true })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/#\/?locations\/living$/);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(
+    page.getByRole("navigation", { name: "Dolaşma yolu" }),
+  ).toContainText("Konumlar");
+  await page.getByRole("button", { name: "Düzenle", exact: true }).click();
+  await page.getByLabel("Ad", { exact: true }).fill("Deneme");
+  await page.getByRole("button", { name: "Vazgeç", exact: true }).click();
+  await expect(
+    page
+      .locator(".sapMPage:visible header")
+      .getByRole("heading", { name: "Salon", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Düzenle", exact: true }).click();
+  await page.getByLabel("Ad", { exact: true }).fill("Oturma odası");
+  await page
+    .locator(".sapMPage:visible footer")
+    .getByRole("button", { name: "Kaydet", exact: true })
+    .click();
+  await expect(
+    page
+      .locator(".sapMPage:visible header")
+      .getByRole("heading", { name: "Oturma odası", exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page
+      .locator(".sapMPage:visible header")
+      .getByRole("heading", { name: "Oturma odası", exact: true }),
+  ).toBeVisible();
+  await objectAction(page, "Ürünleri gör");
+  await expect(page).toHaveURL(/#\/?inventory$/);
+  await expect(page.locator(".sapFCard:visible")).toHaveCount(2);
+});
+
+test("inventory native cards stay equal sized and the filtered table exposes full records", async ({
+  page,
+}) => {
+  await loginWithInventory(page);
+  const cards = page.locator(".sapFCard:visible");
+  const sizes = await cards.evaluateAll((els) =>
+    els.map((el) => ({
+      width: Math.round(el.getBoundingClientRect().width),
+      height: Math.round(el.getBoundingClientRect().height),
+    })),
+  );
+  expect(new Set(sizes.map((s) => s.width)).size).toBe(1);
+  expect(new Set(sizes.map((s) => s.height)).size).toBe(1);
+  expect(sizes[0].height).toBe(336);
+  await page
+    .getByRole("button", { name: "Liste görünümü", exact: true })
+    .click();
+  const table = page.getByRole("grid");
+  await expect(table).toBeVisible();
+  await expect(table).toContainText("Siemens EQ700");
+  const columnCount = await table.evaluate(
+    async (el) =>
+      new Promise<number>((resolve) =>
+        (window as any).sap.ui.require(
+          ["sap/ui/core/Element"],
+          (Element: any) =>
+            resolve(
+              Element.getElementById(el.closest(".sapMList")!.id).getColumns()
+                .length,
+            ),
+        ),
+      ),
+  );
+  expect(columnCount).toBe(13);
+  const sorted = page.waitForRequest(
+    (req) =>
+      req.url().includes("/entities?") &&
+      new URL(req.url()).searchParams.get("orderBy") === "name",
+  );
+  await page
+    .getByRole("combobox", { name: "Sıralama", exact: true })
+    .locator("..")
+    .click();
+  await page.getByRole("option", { name: "Ürün adı", exact: true }).click();
+  await sorted;
+  await page
+    .getByRole("searchbox", { name: "Envanterde ara", exact: true })
+    .fill("Siemens");
+  await expect(table.getByRole("row")).toHaveCount(2);
+  await page
+    .getByRole("button", { name: "Filtreleri temizle", exact: true })
+    .click();
+  await expect(table.getByRole("row")).toHaveCount(4);
+  await expect
+    .poll(() =>
+      page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+    )
+    .toBe(true);
+  const appCss = page.locator('link[href*="css/style.css"]');
+  await expect(appCss).toHaveCount(0);
+});
+
+test("new locations and tags use routed forms and save through footer actions", async ({
+  page,
+}) => {
+  await loginWithInventory(page);
+  const records: Record<string, any> = {};
+  await page.route("**/api/v1/entities", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.fallback();
+      return;
+    }
+    const body = route.request().postDataJSON();
+    expect(body).toMatchObject({
+      name: "Çalışma odası",
+      quantity: 1,
+      tagIds: [],
+      entityTypeId: "room",
+    });
+    records.room = {
+      id: "new-room",
+      ...body,
+      entityType: { id: "room", name: "Oda", isLocation: true },
+    };
+    await route.fulfill({ json: records.room });
+  });
+  await page.route("**/api/v1/entities/new-room", (route) =>
+    route.fulfill({ json: records.room }),
+  );
+  await page.route("**/api/v1/tags", async (route) => {
+    if (route.request().method() === "POST") {
+      const body = route.request().postDataJSON();
+      expect(body.name).toBe("Elektronik");
+      records.tag = { id: "new-tag", ...body };
+      await route.fulfill({ json: records.tag });
+    } else await route.fulfill({ json: records.tag ? [records.tag] : [] });
+  });
+  await page.route("**/api/v1/tags/new-tag", (route) =>
+    route.fulfill({ json: records.tag }),
+  );
+  await navigate(page, "Konumlar");
+  await page.getByRole("button", { name: "Konum ekle", exact: true }).click();
+  await expect(page).toHaveURL(/#\/?locations\/new$/);
+  await page.getByLabel("Ad", { exact: true }).fill("Çalışma odası");
+  await page
+    .locator(".sapMPage:visible footer")
+    .getByRole("button", { name: "Kaydet", exact: true })
+    .click();
+  await expect(page).toHaveURL(/#\/?locations\/new-room$/);
+  await expect(
+    page
+      .locator(".sapMPage:visible header")
+      .getByRole("heading", { name: "Çalışma odası", exact: true }),
+  ).toBeVisible();
+  await navigate(page, "Etiketler");
+  await page.getByRole("button", { name: "Etiket ekle", exact: true }).click();
+  await expect(page).toHaveURL(/#\/?tags\/new$/);
+  await page.getByLabel("Ad", { exact: true }).fill("Elektronik");
+  await page
+    .locator(".sapMPage:visible footer")
+    .getByRole("button", { name: "Kaydet", exact: true })
+    .click();
+  await expect(page).toHaveURL(/#\/?tags\/new-tag$/);
+  await expect(
+    page
+      .locator(".sapMPage:visible header")
+      .getByRole("heading", { name: "Elektronik", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 });

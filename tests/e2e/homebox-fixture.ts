@@ -88,11 +88,11 @@ export async function loginWithInventory(page: Page) {
         }
       } else if (path.startsWith("/entities/")) {
         const id = path.split("/")[2];
-        const item = items.find((item) => item.id === id);
+        const item = [...items, ...locations].find((item) => item.id === id);
         expect(item, `API item ${id}`).toBeTruthy();
         if (request.method() === "PUT") {
           Object.assign(item!, request.postDataJSON());
-          item!.parent =
+          (item as Item).parent =
             locations.find((l) => l.id === request.postDataJSON().parentId) ||
             null;
         } else if (request.method() === "DELETE")
@@ -107,5 +107,5 @@ export async function loginWithInventory(page: Page) {
   await page.getByLabel("E-posta", { exact: true }).fill("test@example.com");
   await page.getByLabel("Şifre", { exact: true }).fill("password");
   await page.getByRole("button", { name: "Giriş yap", exact: true }).click();
-  await expect(page.locator(".hb-item-card")).toHaveCount(3);
+  await expect(page.locator(".sapFCard:visible")).toHaveCount(3);
 }

@@ -1,30 +1,31 @@
-<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="homebox.controller.Overview">
-  <Page showHeader="false" class="hb-content-page">
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" controllerName="homebox.controller.Overview" height="100%">
+  <Page showHeader="false" class="sapUiContentPadding">
     <content>
-      <VBox width="100%" class="hb-page hb-stack">
-        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
-        <Text text="{/groupName}" class="hb-muted"/>
-        <FlexBox renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center" class="hb-row">
-          <Title text="Evine bir bakış." level="H1" titleStyle="H2" wrapping="true"/>
-          <Button text="Ürün ekle" type="Emphasized" icon="sap-icon://add" press=".onAddItem" enabled="{= !${/saving} &amp;&amp; !${/busy} }"/>
+      <VBox width="100%">
+        <core:Fragment fragmentName="homebox.fragment.Breadcrumbs" type="XML"/>
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML" class="sapUiSmallMarginBottom"/>
+        <Text text="{/groupName}" class="sapUiSmallMarginBottom"/>
+        <FlexBox renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
+          <Title text="Evine bir bakış." level="H1" titleStyle="H2" wrapping="true" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+          <Button text="Ürün ekle" type="Emphasized" icon="sap-icon://add" press=".onAddItem" enabled="{= !${/saving} &amp;&amp; !${/busy} }" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
         </FlexBox>
-        <Text text="Evine ve eşyalarına dair her şey, bir arada."/>
-        <FlexBox renderType="Bare" wrap="Wrap" class="hb-cards">
-          <Panel headerText="Toplam ürün" class="hb-stat">
+        <Text text="Evine ve eşyalarına dair her şey, bir arada." class="sapUiSmallMarginBottom"/>
+        <l:Grid defaultSpan="XL3 L3 M6 S6" hSpacing="1" vSpacing="1" class="sapUiSmallMarginBottom">
+          <Panel headerText="Toplam ürün">
             <ObjectNumber number="{/stats/totalItems}"/>
           </Panel>
-          <Panel headerText="Toplam değer" class="hb-stat">
+          <Panel headerText="Toplam değer">
             <ObjectNumber number="{parts:['/stats/totalItemPrice','/currency'],formatter:'.formatter.money'}"/>
           </Panel>
-          <Panel headerText="Konumlar" class="hb-stat">
+          <Panel headerText="Konumlar">
             <ObjectNumber number="{/stats/totalLocations}"/>
           </Panel>
-          <Panel headerText="Garantili ürün" class="hb-stat">
+          <Panel headerText="Garantili ürün">
             <ObjectNumber number="{/stats/totalWithWarranty}"/>
           </Panel>
-        </FlexBox>
-        <Title text="Envanterin" level="H2" titleStyle="H3"/>
-        <core:Fragment fragmentName="homebox.fragment.Inventory" type="XML"/>
+        </l:Grid>
+        <Title text="Envanterin" level="H2" titleStyle="H3" class="sapUiSmallMarginBottom"/>
+        <core:Fragment fragmentName="homebox.fragment.Inventory" type="XML" class="sapUiSmallMarginBottom"/>
       </VBox>
     </content>
   </Page>

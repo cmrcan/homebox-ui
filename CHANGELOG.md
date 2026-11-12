@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.1
+
+- Replace item, location and tag detail/edit dialogs with deep-linkable Router pages and native breadcrumbs, including known object ancestors.
+- Add persistent page footer toolbars for Save/Cancel; preserve forms on API failure and unedited Homebox metadata on update.
+- Show the opposite theme action with native dark-mode/light-mode icons.
+- Replace flex cards with equal-height sap.f.Card controls in GridContainer and add a 13-column responsive inventory table with native pop-ins.
+- Add native Grid filters, server-side sorting and reset; preserve search/location/tag/archive filters and pagination.
+- Remove all application CSS and use UI5 layouts, forms and standard spacing utilities throughout.
+- Cover object reload/deep links, footer edits and cancellation, failed saves, organizer API modes, breadcrumb cycles and uniform card dimensions.
+
 ## 0.5.0
 
 - Convert the complete application to native OpenUI5 MVC: UIComponent, manifest routing, XML views/fragments, TypeScript controllers and UI5 JSONModel.

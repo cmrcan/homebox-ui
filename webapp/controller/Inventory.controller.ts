@@ -18,6 +18,16 @@ export default class InventoryController extends BaseController {
   public onFilter(): void {
     this.app.filter();
   }
+  public onResetFilters(): void {
+    this.app.update({
+      search: "",
+      locationFilter: "",
+      tagFilter: "",
+      archived: false,
+      orderBy: "updatedAt",
+    });
+    this.app.filter();
+  }
   public onGrid(): void {
     this.app.setProperty("/view", "grid");
   }

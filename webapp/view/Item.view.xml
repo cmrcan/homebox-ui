@@ -1,0 +1,60 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="homebox.controller.Item" height="100%">
+  <Page id="itemPage" showFooter="{view&gt;/editing}" busy="{view&gt;/loading}" busyIndicatorDelay="0" showHeader="true" class="sapUiContentPadding">
+    <customHeader>
+      <OverflowToolbar>
+        <Button icon="sap-icon://nav-back" tooltip="Geri" press=".onBack" type="Transparent">
+          <layoutData>
+            <OverflowToolbarLayoutData priority="NeverOverflow"/>
+          </layoutData>
+        </Button>
+        <Title text="{view&gt;/pageTitle}" level="H1">
+          <layoutData>
+            <OverflowToolbarLayoutData priority="NeverOverflow" shrinkable="true"/>
+          </layoutData>
+        </Title>
+        <ToolbarSpacer/>
+        <Button text="Düzenle" icon="sap-icon://edit" press=".onEditItem" visible="{= !${view&gt;/editing} &amp;&amp; !!${/selected} }" enabled="{= !${/saving} }" type="Transparent">
+          <layoutData>
+            <OverflowToolbarLayoutData priority="NeverOverflow"/>
+          </layoutData>
+        </Button>
+        <Button text="Etiket yazdır" icon="sap-icon://print" press=".onPrintLabel" visible="{= !${view&gt;/editing} &amp;&amp; !!${/selected} }" type="Transparent">
+          <layoutData>
+            <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+          </layoutData>
+        </Button>
+        <Button text="Sil" icon="sap-icon://delete" press=".onDeleteItem" visible="{= !${view&gt;/editing} &amp;&amp; !!${/selected} }" enabled="{= !${/saving} }" type="Transparent">
+          <layoutData>
+            <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+          </layoutData>
+        </Button>
+      </OverflowToolbar>
+    </customHeader>
+    <content>
+      <VBox width="100%">
+        <Breadcrumbs currentLocationText="{view&gt;/pageTitle}" class="sapUiSmallMarginBottom" links="{view&gt;/crumbs}">
+          <Link text="{view&gt;text}" press=".onCrumb"/>
+        </Breadcrumbs>
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
+        <VBox visible="{= !${view&gt;/loading} &amp;&amp; ${view&gt;/ready} &amp;&amp; !${view&gt;/editing} }">
+          <core:Fragment fragmentName="homebox.fragment.ItemContent" type="XML"/>
+        </VBox>
+        <VBox visible="{= !${view&gt;/loading} &amp;&amp; ${view&gt;/ready} &amp;&amp; ${view&gt;/editing} }">
+          <core:Fragment fragmentName="homebox.fragment.ItemForm" type="XML"/>
+        </VBox>
+      </VBox>
+    </content>
+    <footer>
+      <OverflowToolbar>
+        <Text text="Değişiklikleri kaydet veya vazgeç."/>
+        <ToolbarSpacer/>
+        <Button text="Vazgeç" press=".onCancelEdit" enabled="{= !${/saving} }"/>
+        <Button id="saveItem" text="Kaydet" icon="sap-icon://save" type="Emphasized" press=".onSaveItem" enabled="{= ${view&gt;/ready} &amp;&amp; !${/saving} &amp;&amp; !${/busy} }">
+          <layoutData>
+            <OverflowToolbarLayoutData priority="NeverOverflow"/>
+          </layoutData>
+        </Button>
+      </OverflowToolbar>
+    </footer>
+  </Page>
+</mvc:View>

@@ -1,15 +1,18 @@
 <mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:tnt="sap.tnt" xmlns:core="sap.ui.core" controllerName="homebox.controller.App" displayBlock="true" height="100%">
-  <VBox fitContainer="true" renderType="Bare" class="hb-root">
+  <VBox fitContainer="true" renderType="Bare">
     <mvc:XMLView viewName="homebox.view.Login" visible="{= !${/user} }" height="100%"/>
-    <tnt:ToolPage id="toolPage" visible="{= !!${/user} }" sideExpanded="{/sideExpanded}" class="hb-tool-page">
+    <tnt:ToolPage id="toolPage" visible="{= !!${/user} }" sideExpanded="{/sideExpanded}">
+      <tnt:layoutData>
+        <FlexItemData growFactor="1" baseSize="0%" shrinkFactor="1"/>
+      </tnt:layoutData>
       <tnt:header>
-        <tnt:ToolHeader id="toolHeader" class="hb-tool-header">
+        <tnt:ToolHeader id="toolHeader">
           <Button id="menuButton" icon="sap-icon://menu2" type="Transparent" tooltip="Menüyü aç" press=".onToggleNavigation">
             <layoutData>
               <OverflowToolbarLayoutData priority="NeverOverflow"/>
             </layoutData>
           </Button>
-          <Image src="{= ${/dark} ? 'assets/homebox-logo-dark.svg' : 'assets/homebox-logo.svg' }" width="9rem" height="1.55rem" decorative="false" alt="Homebox" densityAware="false" class="hb-brand-logo">
+          <Image src="{= ${/dark} ? 'assets/homebox-logo-dark.svg' : 'assets/homebox-logo.svg' }" width="9rem" height="1.55rem" decorative="false" alt="Homebox" densityAware="false">
             <layoutData>
               <OverflowToolbarLayoutData priority="NeverOverflow"/>
             </layoutData>
@@ -18,11 +21,11 @@
           <Text text="{/title}" visible="{= !${/isPhone} }"/>
           <ToolbarSpacer/>
           <SearchField id="globalSearch" width="20rem" placeholder="Envanterde hızlı arama" tooltip="Hızlı arama" search=".onGlobalSearch" visible="{= !${/isPhone} }"/>
-          <Select width="11rem" tooltip="Koleksiyon" selectedKey="{/tenant}" items="{/groups}" change=".onGroupChange">
+          <Select enabled="{= !${/saving} &amp;&amp; !${/busy} }" width="11rem" tooltip="Koleksiyon" selectedKey="{/tenant}" items="{/groups}" change=".onGroupChange">
             <core:Item key="{id}" text="{name}"/>
           </Select>
           <Button icon="sap-icon://refresh" type="Transparent" tooltip="Verileri yenile" press=".onRefresh" enabled="{= !${/busy} &amp;&amp; !${/saving} }"/>
-          <Button icon="sap-icon://lightbulb" type="Transparent" tooltip="{= ${/dark} ? 'Açık görünüm' : 'Koyu görünüm' }" press=".onToggleTheme"/>
+          <Button id="themeButton" icon="{= ${/dark} ? 'sap-icon://light-mode' : 'sap-icon://dark-mode' }" type="Transparent" tooltip="{= ${/dark} ? 'Açık görünüm' : 'Koyu görünüm' }" press=".onToggleTheme"/>
           <Avatar displaySize="XS" initials="{path:'/user/name',formatter:'.formatter.initials'}" tooltip="{/user/name}" press=".onProfile"/>
         </tnt:ToolHeader>
       </tnt:header>

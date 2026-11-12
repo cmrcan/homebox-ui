@@ -1,10 +1,10 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified">
   <Dialog title="Şablondan alan ekle" contentWidth="30rem">
     <content>
-      <VBox class="hb-stack sapUiResponsiveContentPadding">
-        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
-        <Label text="Alan şablonu" labelFor="templatePicker"/>
-        <Select id="templatePicker" width="100%" selectedKey="{view&gt;/templateChoice}" items="{view&gt;/templates}">
+      <VBox class="sapUiResponsiveContentPadding">
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML" class="sapUiSmallMarginBottom"/>
+        <Label text="Alan şablonu" labelFor="templatePicker" class="sapUiSmallMarginBottom"/>
+        <Select id="templatePicker" width="100%" selectedKey="{view&gt;/templateChoice}" items="{view&gt;/templates}" class="sapUiSmallMarginBottom">
           <core:Item key="{view&gt;id}" text="{view&gt;name}"/>
         </Select>
       </VBox>

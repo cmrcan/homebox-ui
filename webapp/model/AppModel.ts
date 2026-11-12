@@ -72,6 +72,8 @@ function initialState() {
     error: "",
     tab: "overview" as TabId,
     title: titles.overview,
+    routeName: "home",
+    orderBy: "updatedAt",
     groupName: "Benim evim",
     search: "",
     locationFilter: "",
@@ -123,6 +125,7 @@ export default class AppModel extends JSONModel {
   public api: HomeboxApi;
   private loadVersion = 0;
   private contextVersion = 0;
+  private selectionVersion = 0;
   private pending = 0;
   private filterTimer?: ReturnType<typeof setTimeout>;
   constructor(baseUri = "/api/v1") {
@@ -264,6 +267,9 @@ export default class AppModel extends JSONModel {
       currency: group?.currency || "TRY",
       groupName: group?.name || "Benim evim",
       selected: null,
+      organizer: null,
+      form: empty.form,
+      organizerForm: empty.organizerForm,
       search: "",
       page: 1,
       locationFilter: "",
@@ -327,7 +333,7 @@ export default class AppModel extends JSONModel {
         pageSize: 12,
         q: s.search,
         includeArchived: s.archived,
-        orderBy: "updatedAt",
+        orderBy: s.orderBy,
         ...(this.api.mode === "entities"
           ? {
               isLocation: false,
@@ -357,8 +363,12 @@ export default class AppModel extends JSONModel {
     }, 250);
   }
   public async selectItem(id: string) {
+    const version = ++this.selectionVersion,
+      context = this.contextVersion;
     return this.run(async () => {
       const item = this.decorate(await this.api.item(id));
+      if (version !== this.selectionVersion || context !== this.contextVersion)
+        return;
       this.setProperty("/selected", item);
       return item;
     });
@@ -499,7 +509,7 @@ export default class AppModel extends JSONModel {
       const s = this.state(),
         f = s.organizerForm;
       if (!f.name.trim()) throw new Error("Lütfen bir ad girin.");
-      await this.api.saveOrganizer(
+      const organizer = await this.api.saveOrganizer(
         s.organizerKind,
         {
           name: f.name.trim(),
@@ -519,8 +529,9 @@ export default class AppModel extends JSONModel {
         s.organizer || undefined,
       );
       await this.refresh();
+      this.setProperty("/organizer", organizer);
       this.flash("Kaydedildi.");
-      return true;
+      return organizer;
     });
   }
 }

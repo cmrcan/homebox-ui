@@ -1,33 +1,33 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified">
   <Dialog title="Alan şablonu" contentWidth="52rem" stretch="{/isPhone}" horizontalScrolling="false">
     <content>
-      <VBox class="hb-stack sapUiResponsiveContentPadding">
-        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
-        <VBox class="hb-field">
+      <VBox class="sapUiResponsiveContentPadding">
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML" class="sapUiSmallMarginBottom"/>
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="Şablon adı" labelFor="templateName"/>
           <Input id="templateName" value="{edit&gt;/name}" type="Text" valueLiveUpdate="true" width="100%"/>
         </VBox>
-        <VBox class="hb-field">
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="Açıklama" labelFor="templateDescription"/>
           <TextArea id="templateDescription" value="{edit&gt;/description}" width="100%" rows="3" valueLiveUpdate="true"/>
         </VBox>
-        <VBox class="hb-field">
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="Varsayılan ürün adı" labelFor="defaultName"/>
           <Input id="defaultName" value="{edit&gt;/defaultName}" type="Text" valueLiveUpdate="true" width="100%"/>
         </VBox>
-        <VBox class="hb-field">
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="Varsayılan marka" labelFor="defaultManufacturer"/>
           <Input id="defaultManufacturer" value="{edit&gt;/defaultManufacturer}" type="Text" valueLiveUpdate="true" width="100%"/>
         </VBox>
-        <VBox class="hb-field">
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="Varsayılan model" labelFor="defaultModel"/>
           <Input id="defaultModel" value="{edit&gt;/defaultModelNumber}" type="Text" valueLiveUpdate="true" width="100%"/>
         </VBox>
-        <VBox class="hb-field">
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="Varsayılan adet" labelFor="defaultQuantity"/>
           <Input id="defaultQuantity" value="{edit&gt;/defaultQuantity}" type="Number" valueLiveUpdate="true" width="100%"/>
         </VBox>
-        <core:Fragment fragmentName="homebox.fragment.FieldsEditor" type="XML"/>
+        <core:Fragment fragmentName="homebox.fragment.FieldsEditor" type="XML" class="sapUiSmallMarginBottom"/>
       </VBox>
     </content>
     <beginButton>

@@ -40,12 +40,21 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Read application version
+        id: package
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const { version } = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${version}\n`);
+          '
       - uses: docker/metadata-action@v5
         id: meta
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.package.outputs.version }},enable={{is_default_branch}}
             type=ref,event=tag
             type=sha
       - uses: docker/build-push-action@v6
@@ -74,4 +83,11 @@ jobs:
           curl --fail http://127.0.0.1:3101/resources/sap/tnt/themes/sap_horizon_dark/library.css > /tmp/homebox-tnt-theme.css
           test -s /tmp/homebox-app-view.xml
           test -s /tmp/homebox-tnt-theme.css
+          curl --fail http://127.0.0.1:3101/view/Item.view.xml > /tmp/homebox-item-view.xml
+          curl --fail http://127.0.0.1:3101/view/Organizer.view.xml > /tmp/homebox-organizer-view.xml
+          curl --fail http://127.0.0.1:3101/resources/sap/f/themes/sap_horizon_dark/library.css > /tmp/homebox-card-theme.css
+          test -s /tmp/homebox-item-view.xml
+          test -s /tmp/homebox-organizer-view.xml
+          test -s /tmp/homebox-card-theme.css
+          python3 -c 'import json; m=json.load(open("/tmp/homebox-manifest.json")); assert not m["sap.ui5"].get("resources", {}).get("css"); assert "sap.f" in m["sap.ui5"]["dependencies"]["libs"]'
           docker exec homebox-ui-smoke nginx -t

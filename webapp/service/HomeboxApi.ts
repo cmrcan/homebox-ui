@@ -313,6 +313,13 @@ export class HomeboxApi {
       method: "DELETE",
     });
   }
+  organizer(kind: "locations" | "tags", id: string) {
+    const resource =
+      kind === "locations" && this.mode === "entities"
+        ? "/entities"
+        : `/${kind}`;
+    return this.request<Organizer>(`${resource}/${encodeURIComponent(id)}`);
+  }
   saveOrganizer(
     kind: "locations" | "tags",
     body: Record<string, unknown>,

@@ -1,0 +1,64 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form" controllerName="homebox.controller.Organizer" height="100%">
+  <Page showFooter="{view&gt;/editing}" busy="{view&gt;/loading}" busyIndicatorDelay="0" showHeader="true" class="sapUiContentPadding">
+    <customHeader>
+      <OverflowToolbar>
+        <Button icon="sap-icon://nav-back" tooltip="Geri" press=".onBack" type="Transparent">
+          <layoutData>
+            <OverflowToolbarLayoutData priority="NeverOverflow"/>
+          </layoutData>
+        </Button>
+        <Title text="{view&gt;/pageTitle}" level="H1">
+          <layoutData>
+            <OverflowToolbarLayoutData priority="NeverOverflow" shrinkable="true"/>
+          </layoutData>
+        </Title>
+        <ToolbarSpacer/>
+        <Button text="Düzenle" icon="sap-icon://edit" press=".onEdit" visible="{= ${view&gt;/ready} &amp;&amp; !${view&gt;/editing} }" type="Transparent">
+          <layoutData>
+            <OverflowToolbarLayoutData priority="NeverOverflow"/>
+          </layoutData>
+        </Button>
+        <Button text="Ürünleri gör" icon="sap-icon://product" press=".onViewItems" visible="{= ${view&gt;/ready} &amp;&amp; !${view&gt;/editing} }" type="Transparent">
+          <layoutData>
+            <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+          </layoutData>
+        </Button>
+      </OverflowToolbar>
+    </customHeader>
+    <content>
+      <VBox width="100%">
+        <Breadcrumbs currentLocationText="{view&gt;/pageTitle}" class="sapUiSmallMarginBottom" links="{view&gt;/crumbs}">
+          <Link text="{view&gt;text}" press=".onCrumb"/>
+        </Breadcrumbs>
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
+        <VBox visible="{= ${view&gt;/ready} &amp;&amp; !${view&gt;/editing} }">
+          <ObjectHeader title="{/organizer/name}" intro="{= ${/organizerKind} === 'locations' ? 'Konum' : 'Etiket' }"/>
+          <f:SimpleForm editable="false" layout="ResponsiveGridLayout">
+            <Label text="Açıklama"/>
+            <Text text="{/organizer/description}"/>
+            <Label text="Üst konum" visible="{= ${/organizerKind} === 'locations' }"/>
+            <Link text="{/organizer/parent/name}" press=".onParent" visible="{= ${/organizerKind} === 'locations' }"/>
+            <Label text="Tür" visible="{= ${/organizerKind} === 'locations' }"/>
+            <Text text="{/organizer/entityType/name}" visible="{= ${/organizerKind} === 'locations' }"/>
+            <Label text="Ürün sayısı"/>
+            <Text text="{= ${/organizer/itemCount} || 0 }"/>
+          </f:SimpleForm>
+        </VBox>
+        <VBox visible="{= ${view&gt;/ready} &amp;&amp; ${view&gt;/editing} }">
+          <core:Fragment fragmentName="homebox.fragment.OrganizerForm" type="XML"/>
+        </VBox>
+      </VBox>
+    </content>
+    <footer>
+      <OverflowToolbar>
+        <ToolbarSpacer/>
+        <Button text="Vazgeç" press=".onCancelEdit" enabled="{= !${/saving} }"/>
+        <Button text="Kaydet" icon="sap-icon://save" type="Emphasized" press=".onSave" enabled="{= ${view&gt;/ready} &amp;&amp; !${/saving} &amp;&amp; !${/busy} }">
+          <layoutData>
+            <OverflowToolbarLayoutData priority="NeverOverflow"/>
+          </layoutData>
+        </Button>
+      </OverflowToolbar>
+    </footer>
+  </Page>
+</mvc:View>

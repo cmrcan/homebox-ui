@@ -120,3 +120,20 @@ it("uses the manifest-configured REST base URI for requests and files", async ()
     "/homebox/api/v1/labelmaker/item/item?",
   );
 });
+
+describe("routed organizer detail reads", () => {
+  it("uses entities for current locations and tags for tag details", async () => {
+    const { api, call } = setup();
+    await api.organizer("locations", "room/one");
+    await api.organizer("tags", "tag");
+    expect(call(0)[0]).toBe("/api/v1/entities/room%2Fone");
+    expect(call(1)[0]).toBe("/api/v1/tags/tag");
+    expect(new Headers(call(0)[1].headers).get("X-Tenant")).toBe("group");
+  });
+  it("uses legacy locations when the legacy adapter is active", async () => {
+    const { api, call } = setup();
+    api.mode = "legacy";
+    await api.organizer("locations", "room");
+    expect(call(0)[0]).toBe("/api/v1/locations/room");
+  });
+});

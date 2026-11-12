@@ -1,17 +1,17 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified">
   <Dialog title="Ürün türü" contentWidth="52rem" stretch="{/isPhone}" horizontalScrolling="false">
     <content>
-      <VBox class="hb-stack sapUiResponsiveContentPadding">
-        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
-        <VBox class="hb-field">
+      <VBox class="sapUiResponsiveContentPadding">
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML" class="sapUiSmallMarginBottom"/>
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="Tür adı" labelFor="typeName"/>
           <Input id="typeName" value="{edit&gt;/name}" type="Text" valueLiveUpdate="true" width="100%"/>
         </VBox>
-        <VBox class="hb-field">
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="Açıklama" labelFor="typeDescription"/>
           <TextArea id="typeDescription" value="{edit&gt;/description}" width="100%" rows="3" valueLiveUpdate="true"/>
         </VBox>
-        <CheckBox text="Konum türü" selected="{edit&gt;/isLocation}"/>
+        <CheckBox text="Konum türü" selected="{edit&gt;/isLocation}" class="sapUiSmallMarginBottom"/>
       </VBox>
     </content>
     <beginButton>

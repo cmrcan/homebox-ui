@@ -27,7 +27,9 @@ export default class AppController extends BaseController {
       return;
     }
     if (key === "create") {
-      await this.onAddItem();
+      if (this.app.state().isPhone)
+        this.app.setProperty("/sideExpanded", false);
+      this.onAddItem();
       return;
     }
     if (!tabIds.includes(key as TabId)) return;

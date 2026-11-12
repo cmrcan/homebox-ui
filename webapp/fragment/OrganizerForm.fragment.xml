@@ -1,0 +1,26 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified">
+  <VBox class="sapUiResponsiveContentPadding">
+    <VBox class="sapUiSmallMarginBottom">
+      <Label text="Ad" labelFor="organizerName"/>
+      <Input id="organizerName" value="{/organizerForm/name}" type="Text" valueLiveUpdate="true" width="100%"/>
+    </VBox>
+    <VBox class="sapUiSmallMarginBottom">
+      <Label text="Açıklama" labelFor="organizerDescription"/>
+      <TextArea id="organizerDescription" value="{/organizerForm/description}" width="100%" rows="3" valueLiveUpdate="true"/>
+    </VBox>
+    <VBox visible="{= ${/organizerKind} === 'locations' }" class="sapUiSmallMarginBottom">
+      <VBox class="sapUiSmallMarginBottom">
+        <Label text="Konum türü" labelFor="locationType"/>
+        <Select id="locationType" width="100%" selectedKey="{/organizerForm/entityTypeId}" items="{/locationTypes}">
+          <core:Item key="{id}" text="{name}"/>
+        </Select>
+      </VBox>
+      <VBox class="sapUiSmallMarginBottom">
+        <Label text="Üst konum" labelFor="organizerParent"/>
+        <Select id="organizerParent" width="100%" selectedKey="{/organizerForm/parentId}" items="{/parentOptions}">
+          <core:Item key="{id}" text="{name}"/>
+        </Select>
+      </VBox>
+    </VBox>
+  </VBox>
+</core:FragmentDefinition>

@@ -1,0 +1,5 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+  <Breadcrumbs currentLocationText="{/title}" class="sapUiSmallMarginBottom">
+    <Link text="Homebox" press=".onHome"/>
+  </Breadcrumbs>
+</core:FragmentDefinition>

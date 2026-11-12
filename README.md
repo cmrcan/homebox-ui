@@ -2,7 +2,18 @@
 
 Homebox için Türkçe, duyarlı alternatif frontend. **OpenUI5 1.154.0** üzerinde standart **MVC** uygulamasıdır: `UIComponent`, `manifest.json`, UI5 Router, XML view/fragment, TypeScript controller ve `JSONModel`. Veriler mevcut Homebox backend'inde kalır.
 
-## v0.5.0 — UI5 MVC ve ToolPage
+## v0.5.1 — Nesne sayfaları ve native UI5 yerleşimi
+
+- Ürün, konum ve etiket detayları ayrı Router sayfalarıdır (`#inventory/{id}`, `#locations/{id}`, `#tags/{id}`); yeni kayıtlar `/new` yolundan açılır. Doğrudan bağlantı ve sayfa yenileme desteklenir.
+- Detay sayfasında **Düzenle**, sabit footer toolbar içinde **Kaydet / Vazgeç**. Başarısız kayıtta form açık kalır; Vazgeç değişiklikleri atar. Silme onayı korunur.
+- Native `Breadcrumbs`: Homebox → liste → bilinen üst konum/ürün zinciri → nesne. Diğer sayfalarda Homebox → sayfa.
+- Aktif temanın tersini gösteren `dark-mode` / `light-mode` ikonları.
+- Native `sap.f.GridContainer` ve eşit 21rem yüksekliğinde `sap.f.Card`; fotoğraflar `Avatar` içinde Contain ile gösterilir.
+- Filtreli responsive tablo: ürün, konum, tür, marka, model, seri numarası, etiketler, adet, değer, satın alma, garanti, güncelleme ve durum olmak üzere 13 sütun. Dar ekranda ek sütunlar UI5 pop-in alanına taşınır.
+- Arama, konum, etiket ve arşiv filtreleri; sunucu tarafında ad/eklenme/güncelleme sıralaması ve filtre temizleme. Mevcut API sayfalaması korunur.
+- **Özel CSS kaldırıldı.** Yerleşim ve boşluklar UI5 Grid, SimpleForm, ToolPage, OverflowToolbar ve standart `sapUi*` sınıflarıyla yönetilir.
+
+## UI5 MVC ve ToolPage
 
 - Üstte Homebox logolu `sap.tnt.ToolHeader`: hızlı arama, koleksiyon seçimi, yenileme, tema ve profil.
 - `sap.tnt.ToolPage` içinde gruplu `SideNavigation`; altta ürün ekleme, kullanıcılar, araçlar ve çıkış. Masaüstünde daraltılabilir, telefonda açılıp kapanır.
@@ -18,18 +29,18 @@ Homebox için Türkçe, duyarlı alternatif frontend. **OpenUI5 1.154.0** üzeri
 
 ## Geliştirme yapısı
 
-| Dosya / klasör                  | Görev                                                                    |
-| ------------------------------- | ------------------------------------------------------------------------ |
-| `webapp/Component.ts`           | UI5 component yaşam döngüsü, model ve Router kurulumu                    |
-| `webapp/manifest.json`          | Kütüphaneler, root view, routing, REST veri kaynağı, CSS                 |
-| `webapp/view/`                  | Sayfaların XML view dosyaları                                            |
-| `webapp/controller/`            | Ekran olayları ve işlem akışları; ortak davranışlar BaseController'da    |
-| `webapp/fragment/`              | Ürün, konum, şablon ve kayıt pencereleri; ortak XML alan editörü         |
-| `webapp/model/AppModel.ts`      | UI5 JSONModel durumu, oturum, koleksiyon ve envanter işlemleri           |
-| `webapp/model/formatter.ts`     | Görüntüleme formatları                                                   |
-| `webapp/service/HomeboxApi.ts`  | Homebox REST istemcisi; auth, tenant, API adaptörleri ve dosyalar        |
-| `webapp/assets/`, `webapp/css/` | Homebox logoları ve yerleşim stilleri                                    |
-| `ui5.yaml`                      | OpenUI5 sürümü, framework kütüphaneleri, build ve development middleware |
+| Dosya / klasör                 | Görev                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------ |
+| `webapp/Component.ts`          | UI5 component yaşam döngüsü, model ve Router kurulumu                    |
+| `webapp/manifest.json`         | Kütüphaneler, root view, routing, REST veri kaynağı, CSS                 |
+| `webapp/view/`                 | Sayfaların XML view dosyaları                                            |
+| `webapp/controller/`           | Ekran olayları ve işlem akışları; ortak davranışlar BaseController'da    |
+| `webapp/fragment/`             | Ürün, konum, şablon ve kayıt pencereleri; ortak XML alan editörü         |
+| `webapp/model/AppModel.ts`     | UI5 JSONModel durumu, oturum, koleksiyon ve envanter işlemleri           |
+| `webapp/model/formatter.ts`    | Görüntüleme formatları                                                   |
+| `webapp/service/HomeboxApi.ts` | Homebox REST istemcisi; auth, tenant, API adaptörleri ve dosyalar        |
+| `webapp/assets/`               | Açık/koyu temaya uygun Homebox logoları                                  |
+| `ui5.yaml`                     | OpenUI5 sürümü, framework kütüphaneleri, build ve development middleware |
 
 Homebox bir REST API sunduğu için servis katmanı bu sözleşmeyi kullanır.
 Component, `manifest.json` içindeki `sap.app/dataSources/homebox/uri` adresini

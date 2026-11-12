@@ -6,7 +6,7 @@
     "title": "Homebox",
     "description": "Homebox inventory with native OpenUI5 MVC",
     "applicationVersion": {
-      "version": "0.5.0"
+      "version": "0.5.1"
     },
     "dataSources": {
       "homebox": {
@@ -37,19 +37,13 @@
         "sap.m": {},
         "sap.tnt": {},
         "sap.ui.layout": {},
-        "sap.ui.unified": {}
+        "sap.ui.unified": {},
+        "sap.f": {}
       }
     },
     "contentDensities": {
       "compact": true,
       "cozy": true
-    },
-    "resources": {
-      "css": [
-        {
-          "uri": "css/style.css"
-        }
-      ]
     },
     "routing": {
       "config": {
@@ -66,6 +60,36 @@
           "name": "home",
           "pattern": "",
           "target": "overview"
+        },
+        {
+          "name": "itemNew",
+          "pattern": "inventory/new",
+          "target": "item"
+        },
+        {
+          "name": "item",
+          "pattern": "inventory/{id}",
+          "target": "item"
+        },
+        {
+          "name": "locationNew",
+          "pattern": "locations/new",
+          "target": "organizer"
+        },
+        {
+          "name": "location",
+          "pattern": "locations/{id}",
+          "target": "organizer"
+        },
+        {
+          "name": "tagNew",
+          "pattern": "tags/new",
+          "target": "organizer"
+        },
+        {
+          "name": "tag",
+          "pattern": "tags/{id}",
+          "target": "organizer"
         },
         {
           "name": "overview",
@@ -158,6 +182,16 @@
           "viewName": "Tools",
           "viewId": "tools",
           "viewLevel": 1
+        },
+        "item": {
+          "viewName": "Item",
+          "viewId": "item",
+          "viewLevel": 2
+        },
+        "organizer": {
+          "viewName": "Organizer",
+          "viewId": "organizer",
+          "viewLevel": 2
         }
       }
     }

@@ -1,21 +1,21 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified">
   <Dialog title="Davet ile hesap oluştur" contentWidth="52rem" stretch="{/isPhone}" horizontalScrolling="false">
     <content>
-      <VBox class="hb-stack sapUiResponsiveContentPadding">
-        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
-        <VBox class="hb-field">
+      <VBox class="sapUiResponsiveContentPadding">
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML" class="sapUiSmallMarginBottom"/>
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="Ad soyad" labelFor="registerName"/>
           <Input id="registerName" value="{view&gt;/register/name}" type="Text" valueLiveUpdate="true" width="100%"/>
         </VBox>
-        <VBox class="hb-field">
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="E-posta" labelFor="registerEmail"/>
           <Input id="registerEmail" value="{view&gt;/register/email}" type="Email" valueLiveUpdate="true" width="100%"/>
         </VBox>
-        <VBox class="hb-field">
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="Şifre" labelFor="registerPassword"/>
           <Input id="registerPassword" value="{view&gt;/register/password}" type="Password" valueLiveUpdate="true" width="100%"/>
         </VBox>
-        <VBox class="hb-field">
+        <VBox class="sapUiSmallMarginBottom">
           <Label text="Davet kodu" labelFor="registerToken"/>
           <Input id="registerToken" value="{view&gt;/register/token}" type="Text" valueLiveUpdate="true" width="100%"/>
         </VBox>

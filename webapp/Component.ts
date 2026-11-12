@@ -18,7 +18,15 @@ export default class Component extends UIComponent {
     const router = this.getRouter();
     router.attachBeforeRouteMatched((event) => {
       const name = event.getParameter("name");
-      const tab = (name === "home" ? "overview" : name) as TabId;
+      const parent = name?.startsWith("item")
+        ? "inventory"
+        : name?.startsWith("location")
+          ? "locations"
+          : name?.startsWith("tag")
+            ? "tags"
+            : name;
+      const tab = (name === "home" ? "overview" : parent) as TabId;
+      app.setProperty("/routeName", name);
       if (tabIds.includes(tab)) app.update({ tab, title: titles[tab] });
     });
     app.attachEvent("sessionChanged", () => {

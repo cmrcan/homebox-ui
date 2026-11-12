@@ -1,28 +1,29 @@
-<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="homebox.controller.Types">
-  <Page showHeader="false" class="hb-content-page">
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="homebox.controller.Types" height="100%">
+  <Page showHeader="false" class="sapUiContentPadding">
     <content>
-      <VBox width="100%" class="hb-page hb-stack">
-        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
-        <Text text="{/groupName}" class="hb-muted"/>
-        <FlexBox renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center" class="hb-row">
-          <Title text="Ürün türleri" level="H1" titleStyle="H2" wrapping="true"/>
-          <Button text="Tür ekle" type="Emphasized" icon="sap-icon://add" press=".onNew"/>
+      <VBox width="100%">
+        <core:Fragment fragmentName="homebox.fragment.Breadcrumbs" type="XML"/>
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML" class="sapUiSmallMarginBottom"/>
+        <Text text="{/groupName}" class="sapUiSmallMarginBottom"/>
+        <FlexBox renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
+          <Title text="Ürün türleri" level="H1" titleStyle="H2" wrapping="true" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+          <Button text="Tür ekle" type="Emphasized" icon="sap-icon://add" press=".onNew" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
         </FlexBox>
-        <MessageStrip text="Ürün türleri için Homebox entities API gereklidir." visible="{= ${/mode} !== 'entities' }"/>
-        <VBox items="{view&gt;/types}" class="hb-stack">
-          <Panel headerText="{view&gt;name}">
-            <VBox class="hb-stack">
-              <Text text="{= ${view&gt;isLocation} ? 'Konum türü' : 'Ürün türü' }"/>
-              <Text text="{view&gt;description}"/>
-              <VBox class="hb-field">
+        <MessageStrip text="Ürün türleri için Homebox entities API gereklidir." visible="{= ${/mode} !== 'entities' }" class="sapUiSmallMarginBottom"/>
+        <VBox items="{view&gt;/types}" class="sapUiSmallMarginBottom">
+          <Panel headerText="{view&gt;name}" class="sapUiSmallMarginBottom">
+            <VBox>
+              <Text text="{= ${view&gt;isLocation} ? 'Konum türü' : 'Ürün türü' }" class="sapUiSmallMarginBottom"/>
+              <Text text="{view&gt;description}" class="sapUiSmallMarginBottom"/>
+              <VBox class="sapUiSmallMarginBottom">
                 <Label text="Varsayılan alan şablonu" labelFor="typeTemplate"/>
                 <Select id="typeTemplate" width="100%" selectedKey="{view&gt;templateId}" items="{view&gt;/templates}" change=".onTemplateChange">
                   <core:Item key="{view&gt;id}" text="{view&gt;name}"/>
                 </Select>
               </VBox>
-              <HBox class="hb-row">
-                <Button text="Düzenle" icon="sap-icon://edit" press=".onEdit"/>
-                <Button text="Sil" icon="sap-icon://delete" press=".onDelete"/>
+              <HBox class="sapUiSmallMarginBottom">
+                <Button text="Düzenle" icon="sap-icon://edit" press=".onEdit" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                <Button text="Sil" icon="sap-icon://delete" press=".onDelete" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
               </HBox>
             </VBox>
           </Panel>
