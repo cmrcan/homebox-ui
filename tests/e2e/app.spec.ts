@@ -957,3 +957,54 @@ test("new locations and tags use routed forms and save through footer actions", 
   ).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
+
+test("overview statistic tiles never overlap and stay above inventory on narrow screens", async ({
+  page,
+}) => {
+  await loginWithInventory(page);
+  const tiles = page.locator('[id$="--demoGrid"] .sapMGT');
+  await expect(tiles).toHaveCount(4);
+  for (const width of [320, 390, 820, 1440]) {
+    await page.setViewportSize({ width, height: 1100 });
+    await expect
+      .poll(async () =>
+        tiles.evaluateAll((els) => {
+          const boxes = els.map((el) => el.getBoundingClientRect());
+          const grid = els[0]
+            .closest(".sapFGridContainer")!
+            .getBoundingClientRect();
+          const inside = boxes.every(
+            (b) =>
+              b.left >= grid.left - 1 &&
+              b.right <= grid.right + 1 &&
+              b.bottom <= grid.bottom + 1,
+          );
+          const disjoint = boxes.every((a, i) =>
+            boxes
+              .slice(i + 1)
+              .every(
+                (b) =>
+                  a.right <= b.left + 1 ||
+                  b.right <= a.left + 1 ||
+                  a.bottom <= b.top + 1 ||
+                  b.bottom <= a.top + 1,
+              ),
+          );
+          return inside && disjoint;
+        }),
+      )
+      .toBe(true);
+    const inventoryTitle = await page
+      .getByRole("heading", { name: "Envanterin", exact: true })
+      .boundingBox();
+    const boxes = await tiles.evaluateAll((els) =>
+      els.map((el) => el.getBoundingClientRect().bottom),
+    );
+    expect(Math.max(...boxes)).toBeLessThanOrEqual(inventoryTitle!.y);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  }
+});
