@@ -2,6 +2,9 @@
 
 ## 0.5.1
 
+- Adopt native sap.uxap ObjectPageLayout with ObjectPageDynamicHeaderTitle and TitleOnTop for object details; split item information, fields, files and maintenance into sections and add location hierarchy sections.
+- Keep breadcrumbs, REST calls, deep links and save/cancel behavior; use the native floating Object Page footer and reset the selected section when opening or editing an object.
+
 - Replace item, location and tag detail/edit dialogs with deep-linkable Router pages and native breadcrumbs, including known object ancestors.
 - Add persistent page footer toolbars for Save/Cancel; preserve forms on API failure and unedited Homebox metadata on update.
 - Show the opposite theme action with native dark-mode/light-mode icons.

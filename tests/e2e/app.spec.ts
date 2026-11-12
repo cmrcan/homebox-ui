@@ -37,7 +37,7 @@ async function shellAction(page: Page, name: string) {
 
 async function objectAction(page: Page, name: string) {
   const overflow = page
-    .locator(".sapMPage:visible header")
+    .locator(".sapMPage:visible .sapFDynamicPageTitle")
     .getByRole("button", { name: "Ek seçenekler", exact: true });
   await overflow.click();
   await page.getByRole("button", { name, exact: true }).click();
@@ -744,7 +744,9 @@ test("object routes restore detail pages, breadcrumbs and footer edits without d
     page.getByRole("navigation", { name: "Dolaşma yolu" }),
   ).toContainText("Mutfak");
   await page.getByRole("button", { name: "Düzenle", exact: true }).click();
-  const footer = page.locator(".sapMPage:visible footer");
+  const footer = page.locator(
+    ".sapMPage:visible .sapUxAPObjectPageFloatingFooter",
+  );
   await expect(
     footer.getByRole("button", { name: "Kaydet", exact: true }),
   ).toBeVisible();
@@ -802,24 +804,24 @@ test("location details edit and cancel through the page footer and survive reloa
   await page.getByRole("button", { name: "Vazgeç", exact: true }).click();
   await expect(
     page
-      .locator(".sapMPage:visible header")
+      .locator(".sapMPage:visible .sapFDynamicPageTitle")
       .getByRole("heading", { name: "Salon", exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Düzenle", exact: true }).click();
   await page.getByLabel("Ad", { exact: true }).fill("Oturma odası");
   await page
-    .locator(".sapMPage:visible footer")
+    .locator(".sapMPage:visible .sapUxAPObjectPageFloatingFooter")
     .getByRole("button", { name: "Kaydet", exact: true })
     .click();
   await expect(
     page
-      .locator(".sapMPage:visible header")
+      .locator(".sapMPage:visible .sapFDynamicPageTitle")
       .getByRole("heading", { name: "Oturma odası", exact: true }),
   ).toBeVisible();
   await page.reload();
   await expect(
     page
-      .locator(".sapMPage:visible header")
+      .locator(".sapMPage:visible .sapFDynamicPageTitle")
       .getByRole("heading", { name: "Oturma odası", exact: true }),
   ).toBeVisible();
   await objectAction(page, "Ürünleri gör");
@@ -932,13 +934,13 @@ test("new locations and tags use routed forms and save through footer actions", 
   await expect(page).toHaveURL(/#\/?locations\/new$/);
   await page.getByLabel("Ad", { exact: true }).fill("Çalışma odası");
   await page
-    .locator(".sapMPage:visible footer")
+    .locator(".sapMPage:visible .sapUxAPObjectPageFloatingFooter")
     .getByRole("button", { name: "Kaydet", exact: true })
     .click();
   await expect(page).toHaveURL(/#\/?locations\/new-room$/);
   await expect(
     page
-      .locator(".sapMPage:visible header")
+      .locator(".sapMPage:visible .sapFDynamicPageTitle")
       .getByRole("heading", { name: "Çalışma odası", exact: true }),
   ).toBeVisible();
   await navigate(page, "Etiketler");
@@ -946,13 +948,13 @@ test("new locations and tags use routed forms and save through footer actions", 
   await expect(page).toHaveURL(/#\/?tags\/new$/);
   await page.getByLabel("Ad", { exact: true }).fill("Elektronik");
   await page
-    .locator(".sapMPage:visible footer")
+    .locator(".sapMPage:visible .sapUxAPObjectPageFloatingFooter")
     .getByRole("button", { name: "Kaydet", exact: true })
     .click();
   await expect(page).toHaveURL(/#\/?tags\/new-tag$/);
   await expect(
     page
-      .locator(".sapMPage:visible header")
+      .locator(".sapMPage:visible .sapFDynamicPageTitle")
       .getByRole("heading", { name: "Elektronik", exact: true }),
   ).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -1007,4 +1009,88 @@ test("overview statistic tiles never overlap and stay above inventory on narrow 
       ),
     ).toBe(true);
   }
+});
+
+test("item and location use native Object Page titles, sections and floating save footers", async ({
+  page,
+}) => {
+  await loginWithInventory(page);
+  await page
+    .getByRole("button", { name: "Siemens EQ700", exact: true })
+    .click();
+  const objectPage = page.locator(".sapUxAPObjectPageLayout:visible");
+  await expect(objectPage).toBeVisible();
+  const describe = async () =>
+    objectPage.evaluate(
+      async (el) =>
+        new Promise<any>((resolve, reject) =>
+          (window as any).sap.ui.require(
+            ["sap/ui/core/Element"],
+            (Element: any) => {
+              try {
+                const control = Element.getElementById(el.id);
+                resolve({
+                  layout: control.getMetadata().getName(),
+                  title: control.getHeaderTitle().getMetadata().getName(),
+                  titlePlacement: control.getSubSectionLayout(),
+                  anchors: control.getShowAnchorBar(),
+                  sections: control
+                    .getSections()
+                    .filter((s: any) => s.getVisible())
+                    .map((s: any) => s.getTitle()),
+                  footer: control.getFooter().getMetadata().getName(),
+                  showFooter: control.getShowFooter(),
+                });
+              } catch (error) {
+                reject(error);
+              }
+            },
+            reject,
+          ),
+        ),
+    );
+  await expect.poll(describe).toMatchObject({
+    layout: "sap.uxap.ObjectPageLayout",
+    title: "sap.uxap.ObjectPageDynamicHeaderTitle",
+    titlePlacement: "TitleOnTop",
+    anchors: true,
+    sections: ["Genel Bilgiler", "Özel Alanlar", "Dosyalar", "Bakım"],
+    footer: "sap.m.OverflowToolbar",
+    showFooter: false,
+  });
+  await page.getByRole("button", { name: "Düzenle", exact: true }).click();
+  await expect(
+    page
+      .locator(".sapMPage:visible .sapUxAPObjectPageFloatingFooter")
+      .getByRole("button", { name: "Kaydet", exact: true }),
+  ).toBeInViewport();
+  await expect.poll(describe).toMatchObject({
+    showFooter: true,
+    sections: ["Genel Bilgiler", "Özel Alanlar"],
+  });
+  await page.getByRole("button", { name: "Vazgeç", exact: true }).click();
+  await page.goto("/#locations/living");
+  await expect(
+    page
+      .locator(".sapFDynamicPageTitle:visible")
+      .getByRole("heading", { name: "Salon", exact: true }),
+  ).toBeVisible();
+  await expect.poll(describe).toMatchObject({
+    layout: "sap.uxap.ObjectPageLayout",
+    titlePlacement: "TitleOnTop",
+    sections: ["Genel Bilgiler", "Hiyerarşi"],
+    showFooter: false,
+  });
+  await page.getByRole("button", { name: "Düzenle", exact: true }).click();
+  await expect(
+    page
+      .locator(".sapMPage:visible .sapUxAPObjectPageFloatingFooter")
+      .getByRole("button", { name: "Kaydet", exact: true }),
+  ).toBeInViewport();
+  await expect(page.getByLabel("Ad", { exact: true })).toBeInViewport();
+  await expect
+    .poll(() =>
+      page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+    )
+    .toBe(true);
 });

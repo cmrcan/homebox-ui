@@ -1,0 +1,18 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified">
+  <VBox>
+    <VBox class="sapUiSmallMarginBottom">
+      <Label text="Dosya türü" labelFor="fileType"/>
+      <Select id="fileType" width="100%" selectedKey="{/uploadType}">
+        <core:Item key="photo" text="Fotoğraf"/>
+        <core:Item key="receipt" text="Fatura"/>
+        <core:Item key="warranty" text="Garanti"/>
+        <core:Item key="manual" text="Kılavuz"/>
+        <core:Item key="attachment" text="Diğer"/>
+      </Select>
+    </VBox>
+    <u:FileUploader buttonOnly="true" buttonText="Dosya yükle" sameFilenameAllowed="true" change=".onUpload" class="sapUiSmallMarginBottom"/>
+    <VBox items="{/selected/attachments}" class="sapUiSmallMarginBottom">
+      <Link text="{title}" href="{url}" target="_blank"/>
+    </VBox>
+  </VBox>
+</core:FragmentDefinition>

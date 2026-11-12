@@ -1,0 +1,8 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified">
+  <VBox items="{/selected/fields}" class="sapUiSmallMarginBottom">
+    <HBox class="sapUiSmallMarginBottom">
+      <Label text="{name}" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+      <Text text="{parts:['type','textValue','numberValue','booleanValue','timeValue'],formatter:'.formatter.fieldValue'}" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+    </HBox>
+  </VBox>
+</core:FragmentDefinition>

@@ -1,60 +1,142 @@
-<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="homebox.controller.Item" height="100%">
-  <Page id="itemPage" showFooter="{view&gt;/editing}" busy="{view&gt;/loading}" busyIndicatorDelay="0" showHeader="true" class="sapUiContentPadding">
-    <customHeader>
-      <OverflowToolbar>
-        <Button icon="sap-icon://nav-back" tooltip="Geri" press=".onBack" type="Transparent">
-          <layoutData>
-            <OverflowToolbarLayoutData priority="NeverOverflow"/>
-          </layoutData>
-        </Button>
-        <Title text="{view&gt;/pageTitle}" level="H1">
-          <layoutData>
-            <OverflowToolbarLayoutData priority="NeverOverflow" shrinkable="true"/>
-          </layoutData>
-        </Title>
-        <ToolbarSpacer/>
-        <Button text="Düzenle" icon="sap-icon://edit" press=".onEditItem" visible="{= !${view&gt;/editing} &amp;&amp; !!${/selected} }" enabled="{= !${/saving} }" type="Transparent">
-          <layoutData>
-            <OverflowToolbarLayoutData priority="NeverOverflow"/>
-          </layoutData>
-        </Button>
-        <Button text="Etiket yazdır" icon="sap-icon://print" press=".onPrintLabel" visible="{= !${view&gt;/editing} &amp;&amp; !!${/selected} }" type="Transparent">
-          <layoutData>
-            <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
-          </layoutData>
-        </Button>
-        <Button text="Sil" icon="sap-icon://delete" press=".onDeleteItem" visible="{= !${view&gt;/editing} &amp;&amp; !!${/selected} }" enabled="{= !${/saving} }" type="Transparent">
-          <layoutData>
-            <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
-          </layoutData>
-        </Button>
-      </OverflowToolbar>
-    </customHeader>
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:uxap="sap.uxap" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form" controllerName="homebox.controller.Item" height="100%">
+  <Page id="itemPage" showHeader="false" enableScrolling="false" busy="{view&gt;/loading}" busyIndicatorDelay="0">
     <content>
-      <VBox width="100%">
-        <Breadcrumbs currentLocationText="{view&gt;/pageTitle}" class="sapUiSmallMarginBottom" links="{view&gt;/crumbs}">
-          <Link text="{view&gt;text}" press=".onCrumb"/>
-        </Breadcrumbs>
-        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
-        <VBox visible="{= !${view&gt;/loading} &amp;&amp; ${view&gt;/ready} &amp;&amp; !${view&gt;/editing} }">
-          <core:Fragment fragmentName="homebox.fragment.ItemContent" type="XML"/>
-        </VBox>
-        <VBox visible="{= !${view&gt;/loading} &amp;&amp; ${view&gt;/ready} &amp;&amp; ${view&gt;/editing} }">
-          <core:Fragment fragmentName="homebox.fragment.ItemForm" type="XML"/>
-        </VBox>
-      </VBox>
+      <uxap:ObjectPageLayout id="objectPage" height="100%" subSectionLayout="TitleOnTop" upperCaseAnchorBar="false" showAnchorBar="true" showAnchorBarPopover="false" enableLazyLoading="false" showFooter="{view&gt;/editing}" headerContentPinnable="true">
+        <uxap:headerTitle>
+          <uxap:ObjectPageDynamicHeaderTitle>
+            <uxap:breadcrumbs>
+              <Breadcrumbs currentLocationText="{view&gt;/pageTitle}" links="{view&gt;/crumbs}">
+                <Link text="{view&gt;text}" press=".onCrumb"/>
+              </Breadcrumbs>
+            </uxap:breadcrumbs>
+            <uxap:heading>
+              <HBox alignItems="Center" width="100%">
+                <Button icon="sap-icon://nav-back" tooltip="Geri" press=".onBack" type="Transparent" class="sapUiTinyMarginEnd">
+                  <layoutData>
+                    <FlexItemData shrinkFactor="0"/>
+                  </layoutData>
+                </Button>
+                <Title text="{view&gt;/pageTitle}" level="H1" wrapping="true">
+                  <layoutData>
+                    <FlexItemData shrinkFactor="1" minWidth="0"/>
+                  </layoutData>
+                </Title>
+              </HBox>
+            </uxap:heading>
+            <uxap:expandedContent>
+              <Text text="{= ${view&gt;/editing} ? 'Düzenleme · Değişiklikleri alttaki Kaydet ile onayla' : ${/selected/entityType/name} || 'Ürün' }"/>
+            </uxap:expandedContent>
+            <uxap:actions>
+              <Button text="Düzenle" icon="sap-icon://edit" press=".onEditItem" visible="{= !${view&gt;/editing} &amp;&amp; !!${/selected} }" enabled="{= !${/saving} }" type="Transparent">
+                <layoutData>
+                  <OverflowToolbarLayoutData priority="NeverOverflow"/>
+                </layoutData>
+              </Button>
+              <Button text="Etiket yazdır" icon="sap-icon://print" press=".onPrintLabel" visible="{= !${view&gt;/editing} &amp;&amp; !!${/selected} }" type="Transparent">
+                <layoutData>
+                  <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+                </layoutData>
+              </Button>
+              <Button text="Sil" icon="sap-icon://delete" press=".onDeleteItem" visible="{= !${view&gt;/editing} &amp;&amp; !!${/selected} }" enabled="{= !${/saving} }" type="Transparent">
+                <layoutData>
+                  <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+                </layoutData>
+              </Button>
+            </uxap:actions>
+          </uxap:ObjectPageDynamicHeaderTitle>
+        </uxap:headerTitle>
+        <uxap:headerContent>
+          <l:Grid width="100%" defaultSpan="XL3 L3 M6 S12" hSpacing="1" vSpacing="1" visible="{= ${view&gt;/ready} &amp;&amp; !${view&gt;/editing} }">
+            <Avatar src="{/selected/photoUrl}" fallbackIcon="sap-icon://product" displaySize="L" displayShape="Square" imageFitType="Contain"/>
+            <VBox>
+              <Label text="Konum"/>
+              <Text text="{parts:['/selected/parent','/selected/location'],formatter:'.formatter.location'}"/>
+            </VBox>
+            <VBox>
+              <Label text="Değer"/>
+              <ObjectNumber number="{parts:['/selected/purchasePrice','/currency'],formatter:'.formatter.money'}"/>
+              <ObjectStatus text="{= ${/selected/quantity} + ' adet' }"/>
+            </VBox>
+            <VBox>
+              <Label text="Durum"/>
+              <ObjectStatus text="{= ${/selected/archived} ? 'Arşiv' : 'Aktif' }" state="{= ${/selected/archived} ? 'None' : 'Success' }"/>
+            </VBox>
+          </l:Grid>
+        </uxap:headerContent>
+        <uxap:sections>
+          <uxap:ObjectPageSection id="generalSection" title="Genel Bilgiler" titleUppercase="false">
+            <uxap:subSections>
+              <uxap:ObjectPageSubSection title="Ürün Bilgileri" titleUppercase="false">
+                <uxap:blocks>
+                  <VBox width="100%">
+                    <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
+                    <VBox visible="{= ${view&gt;/ready} &amp;&amp; !${view&gt;/editing} }">
+                      <core:Fragment fragmentName="homebox.fragment.ItemSummary" type="XML"/>
+                    </VBox>
+                    <VBox visible="{= ${view&gt;/ready} &amp;&amp; ${view&gt;/editing} }">
+                      <core:Fragment fragmentName="homebox.fragment.ItemForm" type="XML"/>
+                    </VBox>
+                  </VBox>
+                </uxap:blocks>
+              </uxap:ObjectPageSubSection>
+            </uxap:subSections>
+          </uxap:ObjectPageSection>
+          <uxap:ObjectPageSection id="fieldsSection" title="Özel Alanlar" titleUppercase="false" visible="{view&gt;/ready}">
+            <uxap:subSections>
+              <uxap:ObjectPageSubSection title="Alan Değerleri" titleUppercase="false">
+                <uxap:blocks>
+                  <VBox width="100%">
+                    <VBox visible="{= !${view&gt;/editing} }">
+                      <core:Fragment fragmentName="homebox.fragment.ItemFields" type="XML"/>
+                      <Text text="Henüz özel alan eklenmemiş." visible="{= !${/selected/fields} || !${/selected/fields}.length }"/>
+                    </VBox>
+                    <VBox visible="{view&gt;/editing}">
+                      <core:Fragment fragmentName="homebox.fragment.ItemFieldsForm" type="XML"/>
+                    </VBox>
+                  </VBox>
+                </uxap:blocks>
+              </uxap:ObjectPageSubSection>
+            </uxap:subSections>
+          </uxap:ObjectPageSection>
+          <uxap:ObjectPageSection id="filesSection" title="Dosyalar" titleUppercase="false" visible="{= ${view&gt;/ready} &amp;&amp; !${view&gt;/editing} }">
+            <uxap:subSections>
+              <uxap:ObjectPageSubSection title="Fotoğraflar ve Belgeler" titleUppercase="false">
+                <uxap:blocks>
+                  <VBox width="100%">
+                    <core:Fragment fragmentName="homebox.fragment.ItemFiles" type="XML"/>
+                  </VBox>
+                </uxap:blocks>
+              </uxap:ObjectPageSubSection>
+            </uxap:subSections>
+          </uxap:ObjectPageSection>
+          <uxap:ObjectPageSection id="maintenanceSection" title="Bakım" titleUppercase="false" visible="{= ${view&gt;/ready} &amp;&amp; !${view&gt;/editing} }">
+            <uxap:subSections>
+              <uxap:ObjectPageSubSection title="Bakım Kayıtları" titleUppercase="false">
+                <uxap:blocks>
+                  <VBox width="100%">
+                    <core:Fragment fragmentName="homebox.fragment.ItemMaintenance" type="XML"/>
+                  </VBox>
+                </uxap:blocks>
+              </uxap:ObjectPageSubSection>
+            </uxap:subSections>
+          </uxap:ObjectPageSection>
+        </uxap:sections>
+        <uxap:footer>
+          <OverflowToolbar>
+            <ToolbarSpacer/>
+            <Button text="Vazgeç" press=".onCancelEdit" enabled="{= !${/saving} }">
+              <layoutData>
+                <OverflowToolbarLayoutData priority="NeverOverflow"/>
+              </layoutData>
+            </Button>
+            <Button id="saveItem" text="Kaydet" icon="sap-icon://save" type="Emphasized" press=".onSaveItem" enabled="{= ${view&gt;/ready} &amp;&amp; !${/saving} &amp;&amp; !${/busy} }">
+              <layoutData>
+                <OverflowToolbarLayoutData priority="NeverOverflow"/>
+              </layoutData>
+            </Button>
+          </OverflowToolbar>
+        </uxap:footer>
+      </uxap:ObjectPageLayout>
     </content>
-    <footer>
-      <OverflowToolbar>
-        <Text text="Değişiklikleri kaydet veya vazgeç."/>
-        <ToolbarSpacer/>
-        <Button text="Vazgeç" press=".onCancelEdit" enabled="{= !${/saving} }"/>
-        <Button id="saveItem" text="Kaydet" icon="sap-icon://save" type="Emphasized" press=".onSaveItem" enabled="{= ${view&gt;/ready} &amp;&amp; !${/saving} &amp;&amp; !${/busy} }">
-          <layoutData>
-            <OverflowToolbarLayoutData priority="NeverOverflow"/>
-          </layoutData>
-        </Button>
-      </OverflowToolbar>
-    </footer>
   </Page>
 </mvc:View>

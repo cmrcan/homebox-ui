@@ -9,6 +9,7 @@ framework:
     - name: sap.ui.core
     - name: sap.m
     - name: sap.f
+    - name: sap.uxap
     - name: sap.tnt
     - name: sap.ui.layout
     - name: sap.ui.unified

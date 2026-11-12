@@ -4,6 +4,9 @@ Homebox için Türkçe, duyarlı alternatif frontend. **OpenUI5 1.154.0** üzeri
 
 ## v0.5.1 — Nesne sayfaları ve native UI5 yerleşimi
 
+- Ürün ve konum detaylarında native `sap.uxap.ObjectPageLayout` + `ObjectPageDynamicHeaderTitle`; örnekteki gibi `TitleOnTop`, breadcrumb, daralabilen başlık ve bölüm navigasyonu.
+- Üründe Genel Bilgiler, Özel Alanlar, Dosyalar ve Bakım bölümleri; konumda Genel Bilgiler ve Hiyerarşi. Düzenleme sırasında Kaydet/Vazgeç native Object Page floating footer toolbar içindedir.
+
 - Ürün, konum ve etiket detayları ayrı Router sayfalarıdır (`#inventory/{id}`, `#locations/{id}`, `#tags/{id}`); yeni kayıtlar `/new` yolundan açılır. Doğrudan bağlantı ve sayfa yenileme desteklenir.
 - Detay sayfasında **Düzenle**, sabit footer toolbar içinde **Kaydet / Vazgeç**. Başarısız kayıtta form açık kalır; Vazgeç değişiklikleri atar. Silme onayı korunur.
 - Native `Breadcrumbs`: Homebox → liste → bilinen üst konum/ürün zinciri → nesne. Diğer sayfalarda Homebox → sayfa.

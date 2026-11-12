@@ -3,6 +3,7 @@ import JSONModel from "sap/ui/model/json/JSONModel";
 import type Router from "sap/ui/core/routing/Router";
 import type UIComponent from "sap/ui/core/UIComponent";
 import type Dialog from "sap/m/Dialog";
+import type ObjectPageLayout from "sap/uxap/ObjectPageLayout";
 import type Control from "sap/ui/core/Control";
 import type Event from "sap/ui/base/Event";
 import MessageBox from "sap/m/MessageBox";
@@ -75,6 +76,14 @@ export default class BaseController extends Controller {
     }
   }
   protected onPageEntered(_entered = false): void | Promise<void> {}
+  protected resetObjectPage(): void {
+    const page = this.byId("objectPage") as ObjectPageLayout | undefined;
+    const section = this.byId("generalSection");
+    if (page && section) {
+      page.setSelectedSection(section.getId());
+      page.scrollToSection(section.getId(), 0);
+    }
+  }
   private contextChanged() {
     if (this.routeNames.includes(this.app.state().routeName))
       void this.onPageEntered();

@@ -55,6 +55,7 @@ export default class OrganizerController extends BaseController {
       if (!organizer) {
         this.vm().setProperty("/pageTitle", "Kayıt yüklenemedi");
         this.setCrumbs();
+        this.resetObjectPage();
         this.loadedKey = "";
         return;
       }
@@ -63,6 +64,7 @@ export default class OrganizerController extends BaseController {
     }
     this.vm().setProperty("/ready", true);
     this.setCrumbs();
+    this.resetObjectPage();
   }
   private setCrumbs(): void {
     const state = this.app.state();
@@ -90,6 +92,7 @@ export default class OrganizerController extends BaseController {
   }
   public onEdit(): void {
     this.vm().setProperty("/editing", true);
+    this.resetObjectPage();
   }
   public onCancelEdit(): void {
     const state = this.app.state();
@@ -99,13 +102,18 @@ export default class OrganizerController extends BaseController {
     }
     this.app.prepareOrganizer(state.organizerKind, state.organizer);
     this.vm().setProperty("/editing", false);
+    this.resetObjectPage();
   }
   public async onSave(): Promise<void> {
     const saved = await this.app.saveOrganizer();
-    if (!saved) return;
+    if (!saved) {
+      this.resetObjectPage();
+      return;
+    }
     this.vm().setProperty("/pageTitle", saved.name);
     this.vm().setProperty("/editing", false);
     this.setCrumbs();
+    this.resetObjectPage();
     if (this.app.state().routeName.endsWith("New"))
       this.getRouter().navTo(
         this.app.state().organizerKind === "locations" ? "location" : "tag",

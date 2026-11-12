@@ -89,5 +89,9 @@ jobs:
           test -s /tmp/homebox-item-view.xml
           test -s /tmp/homebox-organizer-view.xml
           test -s /tmp/homebox-card-theme.css
-          python3 -c 'import json; m=json.load(open("/tmp/homebox-manifest.json")); assert not m["sap.ui5"].get("resources", {}).get("css"); assert "sap.f" in m["sap.ui5"]["dependencies"]["libs"]'
+          curl --fail http://127.0.0.1:3101/resources/sap/uxap/ObjectPageLayout.js > /tmp/homebox-object-page.js
+          curl --fail http://127.0.0.1:3101/resources/sap/uxap/themes/sap_horizon_dark/library.css > /tmp/homebox-object-page-theme.css
+          test -s /tmp/homebox-object-page.js
+          test -s /tmp/homebox-object-page-theme.css
+          python3 -c 'import json; m=json.load(open("/tmp/homebox-manifest.json")); assert not m["sap.ui5"].get("resources", {}).get("css"); assert "sap.f" in m["sap.ui5"]["dependencies"]["libs"]; assert "sap.uxap" in m["sap.ui5"]["dependencies"]["libs"]'
           docker exec homebox-ui-smoke nginx -t

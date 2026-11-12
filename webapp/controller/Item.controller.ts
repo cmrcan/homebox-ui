@@ -52,6 +52,7 @@ export default class ItemController extends BaseController {
       if (!item) {
         this.vm().setProperty("/pageTitle", "Ürün yüklenemedi");
         this.setCrumbs();
+        this.resetObjectPage();
         this.loadedKey = "";
         return;
       }
@@ -60,6 +61,7 @@ export default class ItemController extends BaseController {
     this.vm().setProperty("/ready", true);
     this.editModel().setData(this.app.state().form);
     this.setCrumbs();
+    this.resetObjectPage();
   }
   private setCrumbs(): void {
     const item = this.app.state().selected;
@@ -80,6 +82,7 @@ export default class ItemController extends BaseController {
     await this.app.prepareItem(this.app.state().selected);
     this.editModel().setData(this.app.state().form);
     this.vm().setProperty("/editing", true);
+    this.resetObjectPage();
   }
   public onCancelEdit(): void {
     if (!this.app.state().selected) {
@@ -88,14 +91,19 @@ export default class ItemController extends BaseController {
     }
     this.app.setProperty("/error", "");
     this.vm().setProperty("/editing", false);
+    this.resetObjectPage();
   }
   public async onSaveItem(): Promise<void> {
     this.app.setProperty("/form", this.editModel().getData());
     const selected = await this.app.saveItem();
-    if (!selected) return;
+    if (!selected) {
+      this.resetObjectPage();
+      return;
+    }
     this.vm().setProperty("/editing", false);
     this.vm().setProperty("/pageTitle", selected.name);
     this.setCrumbs();
+    this.resetObjectPage();
     if (this.app.state().routeName === "itemNew")
       this.getRouter().navTo("item", { id: selected.id }, true);
   }

@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified">
-  <VBox class="sapUiResponsiveContentPadding">
+  <VBox>
     <l:Grid defaultSpan="XL6 L6 M6 S12" class="sapUiSmallMarginBottom">
       <VBox class="sapUiSmallMarginBottom">
         <Label text="Ürün adı" labelFor="itemName"/>
@@ -69,11 +69,5 @@
       <TextArea id="notes" value="{edit&gt;/notes}" width="100%" rows="3" valueLiveUpdate="true"/>
     </VBox>
     <CheckBox text="Arşivlendi" selected="{edit&gt;/archived}" class="sapUiSmallMarginBottom"/>
-    <Panel headerText="Özel alanlar" class="sapUiSmallMarginBottom">
-      <VBox>
-        <Button text="Şablondan ekle" press=".onPickTemplate" icon="sap-icon://document-text" class="sapUiSmallMarginBottom"/>
-        <core:Fragment fragmentName="homebox.fragment.FieldsEditor" type="XML" class="sapUiSmallMarginBottom"/>
-      </VBox>
-    </Panel>
   </VBox>
 </core:FragmentDefinition>

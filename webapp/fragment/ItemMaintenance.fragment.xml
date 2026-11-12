@@ -1,0 +1,41 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified">
+  <VBox>
+    <Button text="Bakım kayıtlarını göster" press=".onLoadItemMaintenance" visible="{= !${view&gt;/maintenanceLoaded} }" class="sapUiSmallMarginBottom"/>
+    <VBox visible="{view&gt;/maintenanceLoaded}" class="sapUiSmallMarginBottom">
+      <VBox items="{view&gt;/itemMaintenance}" class="sapUiSmallMarginBottom">
+        <Panel headerText="{view&gt;name}" class="sapUiSmallMarginBottom">
+          <VBox>
+            <Text text="{view&gt;description}" class="sapUiSmallMarginBottom"/>
+            <Text text="{path:'view&gt;scheduledDate',formatter:'.formatter.date'}" class="sapUiSmallMarginBottom"/>
+            <ObjectNumber number="{parts:['view&gt;cost','/currency'],formatter:'.formatter.money'}" class="sapUiSmallMarginBottom"/>
+            <HBox class="sapUiSmallMarginBottom">
+              <Button text="Tamamlandı" press=".onCompleteMaintenance" visible="{= !${view&gt;completedDate} || ${view&gt;completedDate}.indexOf('0001') === 0 }" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+              <Button text="Sil" press=".onDeleteMaintenance" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+            </HBox>
+          </VBox>
+        </Panel>
+      </VBox>
+      <Panel headerText="Bakım ekle" class="sapUiSmallMarginBottom">
+        <VBox>
+          <VBox class="sapUiSmallMarginBottom">
+            <Label text="Bakım adı" labelFor="maintenanceName"/>
+            <Input id="maintenanceName" value="{view&gt;/maintenanceForm/name}" type="Text" valueLiveUpdate="true" width="100%"/>
+          </VBox>
+          <VBox class="sapUiSmallMarginBottom">
+            <Label text="Açıklama" labelFor="maintenanceDescription"/>
+            <TextArea id="maintenanceDescription" value="{view&gt;/maintenanceForm/description}" width="100%" rows="3" valueLiveUpdate="true"/>
+          </VBox>
+          <VBox class="sapUiSmallMarginBottom">
+            <Label text="Maliyet" labelFor="maintenanceCost"/>
+            <Input id="maintenanceCost" value="{view&gt;/maintenanceForm/cost}" type="Number" valueLiveUpdate="true" width="100%"/>
+          </VBox>
+          <VBox class="sapUiSmallMarginBottom">
+            <Label text="Planlanan tarih" labelFor="maintenanceDate"/>
+            <DatePicker id="maintenanceDate" value="{view&gt;/maintenanceForm/scheduledDate}" valueFormat="yyyy-MM-dd" displayFormat="medium" width="100%"/>
+          </VBox>
+          <Button text="Bakımı kaydet" press=".onAddMaintenance" type="Emphasized" class="sapUiSmallMarginBottom"/>
+        </VBox>
+      </Panel>
+    </VBox>
+  </VBox>
+</core:FragmentDefinition>
