@@ -1,0 +1,46 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified">
+  <VBox class="hb-stack">
+    <VBox items="{edit&gt;/fields}" class="hb-stack">
+      <Panel headerText="{= ${edit&gt;name} || 'Yeni alan' }">
+        <VBox class="hb-stack">
+          <l:Grid defaultSpan="XL6 L6 M6 S12">
+            <VBox class="hb-field">
+              <Label text="Alan adı" labelFor="fieldName"/>
+              <Input id="fieldName" value="{edit&gt;name}" type="Text" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <VBox class="hb-field">
+              <Label text="Alan türü" labelFor="fieldType"/>
+              <Select id="fieldType" width="100%" selectedKey="{edit&gt;type}">
+                <core:Item key="text" text="Metin"/>
+                <core:Item key="number" text="Sayı"/>
+                <core:Item key="boolean" text="Evet / hayır"/>
+                <core:Item key="time" text="Tarih"/>
+              </Select>
+            </VBox>
+          </l:Grid>
+          <VBox visible="{= ${edit&gt;type} === 'text' }">
+            <VBox class="hb-field">
+              <Label text="Alan değeri" labelFor="textValue"/>
+              <Input id="textValue" value="{edit&gt;textValue}" type="Text" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+          </VBox>
+          <VBox visible="{= ${edit&gt;type} === 'number' }">
+            <VBox class="hb-field">
+              <Label text="Alan değeri" labelFor="numberValue"/>
+              <Input id="numberValue" value="{edit&gt;numberValue}" type="Number" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+          </VBox>
+          <VBox visible="{= ${edit&gt;type} === 'time' }">
+            <VBox class="hb-field">
+              <Label text="Alan değeri" labelFor="timeValue"/>
+              <DatePicker id="timeValue" value="{edit&gt;timeValue}" valueFormat="yyyy-MM-dd" displayFormat="medium" width="100%"/>
+            </VBox>
+          </VBox>
+          <CheckBox text="Alan değeri" selected="{edit&gt;booleanValue}" visible="{= ${edit&gt;type} === 'boolean' }"/>
+          <Button text="Alanı kaldır" icon="sap-icon://delete" press=".onRemoveField"/>
+        </VBox>
+      </Panel>
+    </VBox>
+    <Button text="Alan ekle" icon="sap-icon://add" press=".onAddField"/>
+  </VBox>
+</core:FragmentDefinition>

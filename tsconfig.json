@@ -6,9 +6,9 @@
     "strict": true,
     "skipLibCheck": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "node", "@openui5/types"],
+    "types": ["@openui5/types", "node"],
     "noEmit": true,
-    "allowImportingTsExtensions": true
+    "useDefineForClassFields": false
   },
-  "include": ["src/**/*.ts", "vite.config.ts"]
+  "include": ["webapp/**/*.ts"]
 }

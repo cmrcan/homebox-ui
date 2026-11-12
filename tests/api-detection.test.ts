@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ApiError, HomeboxApi } from "../src/api";
+import { ApiError, HomeboxApi } from "../webapp/service/HomeboxApi";
 
 describe("automatic server compatibility", () => {
   it("uses entities when the server exposes entity types, replacing a stale cached preference", async () => {

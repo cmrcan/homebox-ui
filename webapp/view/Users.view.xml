@@ -1,0 +1,92 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified" controllerName="homebox.controller.Users">
+  <Page showHeader="false" class="hb-content-page">
+    <content>
+      <VBox class="hb-page hb-stack" width="100%">
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
+        <Text text="{/groupName}" class="hb-muted"/>
+        <Title text="Kullanıcılar" level="H1" titleStyle="H2"/>
+        <Panel headerText="Profil">
+          <VBox class="hb-stack">
+            <VBox class="hb-field">
+              <Label text="Ad soyad" labelFor="profileName"/>
+              <Input id="profileName" value="{view&gt;/profile/name}" type="Text" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <VBox class="hb-field">
+              <Label text="E-posta" labelFor="profileEmail"/>
+              <Input id="profileEmail" value="{view&gt;/profile/email}" type="Email" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <Button text="Profili kaydet" type="Emphasized" press=".onSaveProfile"/>
+          </VBox>
+        </Panel>
+        <Panel headerText="Şifre değiştir">
+          <VBox class="hb-stack">
+            <VBox class="hb-field">
+              <Label text="Mevcut şifre" labelFor="currentPassword"/>
+              <Input id="currentPassword" value="{view&gt;/password/current}" type="Password" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <VBox class="hb-field">
+              <Label text="Yeni şifre" labelFor="nextPassword"/>
+              <Input id="nextPassword" value="{view&gt;/password/next}" type="Password" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <VBox class="hb-field">
+              <Label text="Yeni şifre tekrar" labelFor="repeatPassword"/>
+              <Input id="repeatPassword" value="{view&gt;/password/again}" type="Password" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <Button text="Şifreyi değiştir" press=".onChangePassword"/>
+          </VBox>
+        </Panel>
+        <Panel headerText="Koleksiyon">
+          <VBox class="hb-stack">
+            <VBox class="hb-field">
+              <Label text="Koleksiyon adı" labelFor="groupName"/>
+              <Input id="groupName" value="{view&gt;/group/name}" type="Text" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <VBox class="hb-field">
+              <Label text="Para birimi" labelFor="currency"/>
+              <Input id="currency" value="{view&gt;/group/currency}" type="Text" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <Button text="Koleksiyonu kaydet" press=".onSaveGroup"/>
+          </VBox>
+        </Panel>
+        <Panel headerText="Davet oluştur">
+          <VBox class="hb-stack">
+            <VBox class="hb-field">
+              <Label text="Kullanım sayısı" labelFor="inviteUses"/>
+              <Input id="inviteUses" value="{view&gt;/invite/uses}" type="Number" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <VBox class="hb-field">
+              <Label text="Geçerlilik (gün)" labelFor="inviteDays"/>
+              <Input id="inviteDays" value="{view&gt;/invite/days}" type="Number" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <Button text="Davet oluştur" press=".onInvite"/>
+            <Text text="{view&gt;/token}"/>
+            <Button text="Davet kodunu kopyala" press=".onCopyToken" visible="{= !!${view&gt;/token} }"/>
+          </VBox>
+        </Panel>
+        <Panel headerText="Koleksiyon üyeleri">
+          <VBox class="hb-stack">
+            <Text text="{view&gt;/membersNote}"/>
+            <VBox items="{view&gt;/members}" class="hb-stack">
+              <HBox class="hb-row">
+                <Text text="{view&gt;name}"/>
+                <Text text="{view&gt;email}"/>
+                <ObjectStatus text="Sahip" visible="{view&gt;isOwner}"/>
+                <Button text="Üyeyi çıkar" press=".onRemoveMember" visible="{= !${view&gt;isOwner} }"/>
+              </HBox>
+            </VBox>
+          </VBox>
+        </Panel>
+        <Panel headerText="Hesabı sil">
+          <VBox class="hb-stack">
+            <Text text="Hesabın silinmesi geri alınamaz. Devam etmek için SİL yazın."/>
+            <VBox class="hb-field">
+              <Label text="Onay metni" labelFor="deleteText"/>
+              <Input id="deleteText" value="{view&gt;/deleteText}" type="Text" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <Button text="Hesabı sil" type="Reject" press=".onDeleteAccount"/>
+          </VBox>
+        </Panel>
+      </VBox>
+    </content>
+  </Page>
+</mvc:View>

@@ -4,12 +4,18 @@ import {
   copyFields,
   fieldDisplay,
   mergeTemplateFields,
-} from "../src/fields";
+} from "../webapp/model/fields";
 
 describe("custom fields", () => {
   it("drops unnamed rows and keeps only the value for the field type", () => {
     const cleaned = cleanFields([
-      { id: "a", name: "  Voltaj ", type: "number", numberValue: 24, textValue: "x" },
+      {
+        id: "a",
+        name: "  Voltaj ",
+        type: "number",
+        numberValue: 24,
+        textValue: "x",
+      },
       { name: "", type: "text", textValue: "boş" },
       { name: "Garantili", type: "boolean", booleanValue: true },
       { name: "Bakım", type: "time", timeValue: "" },
@@ -34,8 +40,12 @@ describe("custom fields", () => {
     ]);
   });
   it("formats values and copies deeply", () => {
-    expect(fieldDisplay({ name: "a", type: "boolean", booleanValue: false })).toBe("Hayır");
-    expect(fieldDisplay({ name: "a", type: "time", timeValue: "0001-01-01" })).toBe("—");
+    expect(
+      fieldDisplay({ name: "a", type: "boolean", booleanValue: false }),
+    ).toBe("Hayır");
+    expect(
+      fieldDisplay({ name: "a", type: "time", timeValue: "0001-01-01" }),
+    ).toBe("—");
     const source = [{ name: "a", type: "text" as const }];
     expect(copyFields(source)[0]).not.toBe(source[0]);
     expect(copyFields(undefined)).toEqual([]);

@@ -68,4 +68,10 @@ jobs:
           curl --fail http://127.0.0.1:3101/resources/sap-ui-version.json > /tmp/homebox-ui-version.json
           test -s /tmp/homebox-ui-core.js
           test -s /tmp/homebox-ui-theme.css
+          curl --fail http://127.0.0.1:3101/manifest.json > /tmp/homebox-manifest.json
+          curl --fail http://127.0.0.1:3101/Component.js > /tmp/homebox-component.js
+          curl --fail http://127.0.0.1:3101/view/App.view.xml > /tmp/homebox-app-view.xml
+          curl --fail http://127.0.0.1:3101/resources/sap/tnt/themes/sap_horizon_dark/library.css > /tmp/homebox-tnt-theme.css
+          test -s /tmp/homebox-app-view.xml
+          test -s /tmp/homebox-tnt-theme.css
           docker exec homebox-ui-smoke nginx -t

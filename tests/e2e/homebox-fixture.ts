@@ -1,5 +1,5 @@
 import { expect, type Page } from "@playwright/test";
-import type { Item, Template } from "../../src/api";
+import type { Item, Template } from "../../webapp/service/HomeboxApi";
 
 /** Test-only API data: the application always follows the authenticated path. */
 export async function loginWithInventory(page: Page) {

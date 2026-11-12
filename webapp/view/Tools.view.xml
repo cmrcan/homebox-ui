@@ -1,0 +1,48 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified" controllerName="homebox.controller.Tools">
+  <Page showHeader="false" class="hb-content-page">
+    <content>
+      <VBox class="hb-page hb-stack" width="100%">
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
+        <Text text="{/groupName}" class="hb-muted"/>
+        <Title text="Araçlar" level="H1" titleStyle="H2"/>
+        <Panel headerText="Envanteri aktar">
+          <VBox class="hb-stack">
+            <Button text="CSV dışa aktar" icon="sap-icon://download" press=".onExport"/>
+            <u:FileUploader buttonOnly="true" buttonText="CSV dosyası seç" fileType="csv" change=".onPickFile"/>
+            <Text text="{view&gt;/fileName}"/>
+            <Button text="CSV içe aktar" icon="sap-icon://upload" press=".onImport"/>
+          </VBox>
+        </Panel>
+        <Panel headerText="Bildirimler">
+          <VBox class="hb-stack">
+            <VBox class="hb-field">
+              <Label text="Bildirim adı" labelFor="notifierName"/>
+              <Input id="notifierName" value="{view&gt;/notifier/name}" type="Text" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <VBox class="hb-field">
+              <Label text="Bildirim URL" labelFor="notifierUrl"/>
+              <Input id="notifierUrl" value="{view&gt;/notifier/url}" type="Text" valueLiveUpdate="true" width="100%"/>
+            </VBox>
+            <HBox class="hb-row">
+              <Button text="Bildirim ekle" press=".onAddNotifier"/>
+              <Button text="Test bildirimi gönder" press=".onTestNotifier"/>
+            </HBox>
+            <Text text="{view&gt;/notifierNote}"/>
+            <VBox items="{view&gt;/notifiers}" class="hb-stack">
+              <HBox class="hb-row">
+                <Text text="{view&gt;name}"/>
+                <CheckBox text="Etkin" selected="{view&gt;isActive}" select=".onToggleNotifier"/>
+                <Button text="Sil" press=".onDeleteNotifier"/>
+              </HBox>
+            </VBox>
+          </VBox>
+        </Panel>
+        <Panel headerText="Bakım araçları">
+          <VBox items="{view&gt;/actions}" class="hb-stack">
+            <Button text="{view&gt;name}" icon="sap-icon://wrench" press=".onRunAction"/>
+          </VBox>
+        </Panel>
+      </VBox>
+    </content>
+  </Page>
+</mvc:View>

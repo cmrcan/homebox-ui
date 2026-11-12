@@ -1,0 +1,33 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="homebox.controller.Types">
+  <Page showHeader="false" class="hb-content-page">
+    <content>
+      <VBox width="100%" class="hb-page hb-stack">
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
+        <Text text="{/groupName}" class="hb-muted"/>
+        <FlexBox renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center" class="hb-row">
+          <Title text="Ürün türleri" level="H1" titleStyle="H2" wrapping="true"/>
+          <Button text="Tür ekle" type="Emphasized" icon="sap-icon://add" press=".onNew"/>
+        </FlexBox>
+        <MessageStrip text="Ürün türleri için Homebox entities API gereklidir." visible="{= ${/mode} !== 'entities' }"/>
+        <VBox items="{view&gt;/types}" class="hb-stack">
+          <Panel headerText="{view&gt;name}">
+            <VBox class="hb-stack">
+              <Text text="{= ${view&gt;isLocation} ? 'Konum türü' : 'Ürün türü' }"/>
+              <Text text="{view&gt;description}"/>
+              <VBox class="hb-field">
+                <Label text="Varsayılan alan şablonu" labelFor="typeTemplate"/>
+                <Select id="typeTemplate" width="100%" selectedKey="{view&gt;templateId}" items="{view&gt;/templates}" change=".onTemplateChange">
+                  <core:Item key="{view&gt;id}" text="{view&gt;name}"/>
+                </Select>
+              </VBox>
+              <HBox class="hb-row">
+                <Button text="Düzenle" icon="sap-icon://edit" press=".onEdit"/>
+                <Button text="Sil" icon="sap-icon://delete" press=".onDelete"/>
+              </HBox>
+            </VBox>
+          </Panel>
+        </VBox>
+      </VBox>
+    </content>
+  </Page>
+</mvc:View>

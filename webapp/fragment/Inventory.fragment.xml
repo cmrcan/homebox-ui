@@ -1,0 +1,73 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+  <VBox class="hb-stack" width="100%">
+    <VBox class="hb-field">
+      <Label text="Envanterde ara" labelFor="inventorySearch"/>
+      <SearchField id="inventorySearch" width="100%" placeholder="Ürün adı, marka veya seri numarası" value="{/search}" liveChange=".onSearch" search=".onSearch"/>
+    </VBox>
+    <FlexBox renderType="Bare" wrap="Wrap" alignItems="Center" class="hb-row">
+      <VBox class="hb-field hb-filter">
+        <Label text="Konuma göre filtrele" labelFor="locationFilter"/>
+        <Select id="locationFilter" width="100%" selectedKey="{/locationFilter}" items="{/locationOptions}" change=".onFilter">
+          <core:Item key="{id}" text="{name}"/>
+        </Select>
+      </VBox>
+      <VBox class="hb-field hb-filter">
+        <Label text="Etikete göre filtrele" labelFor="tagFilter"/>
+        <Select id="tagFilter" width="100%" selectedKey="{/tagFilter}" items="{/tagOptions}" change=".onFilter">
+          <core:Item key="{id}" text="{name}"/>
+        </Select>
+      </VBox>
+      <CheckBox text="Arşivdekileri dahil et" selected="{/archived}" select=".onFilter"/>
+    </FlexBox>
+    <HBox class="hb-row">
+      <Button text="Kart görünümü" icon="sap-icon://grid" press=".onGrid"/>
+      <Button text="Liste görünümü" icon="sap-icon://list" press=".onList"/>
+    </HBox>
+    <FlexBox id="inventoryCards" renderType="Bare" wrap="Wrap" items="{/result/items}" visible="{= ${/view} === 'grid' }" class="hb-cards">
+      <Panel class="hb-item-card">
+        <VBox class="hb-stack">
+          <Image src="{photoUrl}" height="10rem" width="100%" densityAware="false" decorative="false" alt="{name}" visible="{= !!${photoUrl} }"/>
+          <core:Icon src="sap-icon://product" size="3rem" visible="{= !${photoUrl} }" class="hb-product-icon"/>
+          <Button text="{name}" press=".onOpenItem" type="Transparent"/>
+          <Text text="{parts:['parent','location'],formatter:'.formatter.location'}"/>
+          <ObjectNumber number="{parts:['purchasePrice','/currency'],formatter:'.formatter.money'}" unit="{= ${quantity} + ' adet' }"/>
+        </VBox>
+      </Panel>
+    </FlexBox>
+    <Table id="inventoryTable" fixedLayout="false" items="{/result/items}" visible="{= ${/view} === 'list' }">
+      <columns>
+        <Column>
+          <Text text="Ürün"/>
+        </Column>
+        <Column minScreenWidth="Tablet" demandPopin="true">
+          <Text text="Konum"/>
+        </Column>
+        <Column minScreenWidth="Tablet" demandPopin="true">
+          <Text text="Adet"/>
+        </Column>
+        <Column minScreenWidth="Tablet" demandPopin="true" hAlign="End">
+          <Text text="Değer"/>
+        </Column>
+      </columns>
+      <items>
+        <ColumnListItem type="Active" press=".onOpenItem">
+          <cells>
+            <Text text="{name}"/>
+            <Text text="{parts:['parent','location'],formatter:'.formatter.location'}"/>
+            <Text text="{quantity}"/>
+            <Text text="{parts:['purchasePrice','/currency'],formatter:'.formatter.money'}"/>
+          </cells>
+        </ColumnListItem>
+      </items>
+    </Table>
+    <VBox visible="{= !${/busy} &amp;&amp; !${/result/total} }">
+      <Title text="Eşleşen ürün bulunamadı" level="H2" titleStyle="H3"/>
+      <Text text="Aramayı veya filtreleri değiştirebilir, yeni bir ürün ekleyebilirsin."/>
+    </VBox>
+    <FlexBox renderType="Bare" wrap="Wrap" alignItems="Center" class="hb-row">
+      <Button text="Önceki" icon="sap-icon://navigation-left-arrow" press=".onPrevious" enabled="{= ${/page} &gt; 1 }"/>
+      <Text text="{parts:['/page','/result/total'],formatter:'.formatter.page'}"/>
+      <Button text="Sonraki" icon="sap-icon://navigation-right-arrow" press=".onNext" enabled="{parts:['/page','/result/total'],formatter:'.formatter.next'}"/>
+    </FlexBox>
+  </VBox>
+</core:FragmentDefinition>

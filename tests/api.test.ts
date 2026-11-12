@@ -5,7 +5,7 @@ import {
   unwrap,
   updatePayload,
   type Item,
-} from "../src/api";
+} from "../webapp/service/HomeboxApi";
 const item: Item = {
   id: "i",
   name: "Lock",

@@ -1,15 +1,13 @@
 # Third-party notices
 
-The interface uses the native **OpenUI5 1.154.0** framework by SAP SE under the
-Apache License 2.0. The full license is included at `public/licenses/openui5.txt`
-and is shipped at `/licenses/openui5.txt` and `/resources/THIRD-PARTY-LICENSES.txt`.
-UI5 Tooling builds the `sap.ui.core`, `sap.m`, `sap.f`, `sap.ui.layout`,
-`sap.ui.unified` and Horizon theme libraries into the Docker image. No SAPUI5
-commercial-only libraries or external CDN resources are used.
+The application uses **OpenUI5 1.154.0** by SAP SE under the Apache License 2.0.
+The complete license is shipped at `/licenses/openui5.txt`. UI5 Tooling builds
+`sap.ui.core`, `sap.m`, `sap.tnt`, `sap.ui.layout`, `sap.ui.unified` and the
+Horizon theme libraries into the image. All runtime resources, icons and fonts
+are served locally. No SAPUI5 commercial-only libraries are included.
 
-`@vue/reactivity` (MIT) is used only for the existing application state. The UI
-is rendered entirely by OpenUI5 controls; Vue templates, Preline and Tailwind
-are no longer part of the application. The MIT license for Vue reactivity is
-shipped at `/licenses/vue-reactivity.txt`.
+The development toolchain uses UI5 CLI and the UI5 community's
+`ui5-tooling-transpile` and `ui5-middleware-simpleproxy` extensions.
+Their respective package license notices remain in the dependencies.
 
-Other dependencies retain their respective package license notices.
+The application no longer includes Vue, Vue reactivity, Vite, Tailwind or Preline.

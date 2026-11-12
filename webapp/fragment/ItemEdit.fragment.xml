@@ -1,0 +1,90 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified">
+  <Dialog title="{= ${/selected} ? 'Ürünü düzenle' : 'Ürün ekle' }" contentWidth="52rem" stretch="{/isPhone}" horizontalScrolling="false">
+    <content>
+      <VBox class="hb-stack sapUiResponsiveContentPadding">
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
+        <l:Grid defaultSpan="XL6 L6 M6 S12">
+          <VBox class="hb-field">
+            <Label text="Ürün adı" labelFor="itemName"/>
+            <Input id="itemName" value="{edit&gt;/name}" type="Text" valueLiveUpdate="true" width="100%"/>
+          </VBox>
+          <VBox class="hb-field">
+            <Label text="Adet" labelFor="quantity"/>
+            <Input id="quantity" value="{edit&gt;/quantity}" type="Number" valueLiveUpdate="true" width="100%"/>
+          </VBox>
+          <VBox class="hb-field" visible="{= ${/mode} === 'entities' }">
+            <Label text="Ürün türü" labelFor="entityType"/>
+            <Select id="entityType" width="100%" selectedKey="{edit&gt;/entityTypeId}" items="{/itemTypes}" change=".onTypeChange">
+              <core:Item key="{id}" text="{name}"/>
+            </Select>
+          </VBox>
+          <VBox class="hb-field">
+            <Label text="Üst konum / ürün" labelFor="parentId"/>
+            <Select id="parentId" width="100%" selectedKey="{edit&gt;/parentId}" items="{/parentOptions}">
+              <core:Item key="{id}" text="{name}"/>
+            </Select>
+          </VBox>
+          <VBox class="hb-field" visible="{= ${/mode} === 'legacy' }">
+            <VBox class="hb-field">
+              <Label text="Konum" labelFor="legacyLocation"/>
+              <Select id="legacyLocation" width="100%" selectedKey="{edit&gt;/locationId}" items="{/locations}">
+                <core:Item key="{id}" text="{name}"/>
+              </Select>
+            </VBox>
+          </VBox>
+          <VBox class="hb-field">
+            <Label text="Etiketler" labelFor="itemTags"/>
+            <MultiComboBox id="itemTags" width="100%" selectedKeys="{edit&gt;/tagIds}" items="{/tags}">
+              <core:Item key="{id}" text="{name}"/>
+            </MultiComboBox>
+          </VBox>
+          <VBox class="hb-field">
+            <Label text="Satın alma değeri ({/currency})" labelFor="price"/>
+            <Input id="price" value="{edit&gt;/purchasePrice}" type="Number" valueLiveUpdate="true" width="100%"/>
+          </VBox>
+          <VBox class="hb-field">
+            <Label text="Marka" labelFor="manufacturer"/>
+            <Input id="manufacturer" value="{edit&gt;/manufacturer}" type="Text" valueLiveUpdate="true" width="100%"/>
+          </VBox>
+          <VBox class="hb-field">
+            <Label text="Model" labelFor="modelNumber"/>
+            <Input id="modelNumber" value="{edit&gt;/modelNumber}" type="Text" valueLiveUpdate="true" width="100%"/>
+          </VBox>
+          <VBox class="hb-field">
+            <Label text="Seri numarası" labelFor="serialNumber"/>
+            <Input id="serialNumber" value="{edit&gt;/serialNumber}" type="Text" valueLiveUpdate="true" width="100%"/>
+          </VBox>
+          <VBox class="hb-field">
+            <Label text="Satın alma tarihi" labelFor="purchaseDate"/>
+            <DatePicker id="purchaseDate" value="{edit&gt;/purchaseDate}" valueFormat="yyyy-MM-dd" displayFormat="medium" width="100%"/>
+          </VBox>
+          <VBox class="hb-field">
+            <Label text="Garanti bitişi" labelFor="warrantyExpires"/>
+            <DatePicker id="warrantyExpires" value="{edit&gt;/warrantyExpires}" valueFormat="yyyy-MM-dd" displayFormat="medium" width="100%"/>
+          </VBox>
+        </l:Grid>
+        <VBox class="hb-field">
+          <Label text="Açıklama" labelFor="description"/>
+          <TextArea id="description" value="{edit&gt;/description}" width="100%" rows="3" valueLiveUpdate="true"/>
+        </VBox>
+        <VBox class="hb-field">
+          <Label text="Notlar" labelFor="notes"/>
+          <TextArea id="notes" value="{edit&gt;/notes}" width="100%" rows="3" valueLiveUpdate="true"/>
+        </VBox>
+        <CheckBox text="Arşivlendi" selected="{edit&gt;/archived}"/>
+        <Panel headerText="Özel alanlar">
+          <VBox class="hb-stack">
+            <Button text="Şablondan ekle" press=".onPickTemplate" icon="sap-icon://document-text"/>
+            <core:Fragment fragmentName="homebox.fragment.FieldsEditor" type="XML"/>
+          </VBox>
+        </Panel>
+      </VBox>
+    </content>
+    <beginButton>
+      <Button text="Ürünü kaydet" press=".onSaveItem" type="Emphasized" enabled="{= !${/saving} &amp;&amp; !${/busy} }"/>
+    </beginButton>
+    <endButton>
+      <Button text="Pencereyi kapat" press=".onCloseDialog"/>
+    </endButton>
+  </Dialog>
+</core:FragmentDefinition>

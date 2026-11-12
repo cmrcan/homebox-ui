@@ -1,0 +1,109 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form" xmlns:u="sap.ui.unified">
+  <Dialog title="{/selected/name}" contentWidth="52rem" stretch="{/isPhone}" horizontalScrolling="false">
+    <content>
+      <VBox class="hb-stack sapUiResponsiveContentPadding">
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
+        <Image src="{/selected/photoUrl}" height="14rem" width="100%" densityAware="false" alt="{/selected/name}" decorative="false" visible="{= !!${/selected/photoUrl} }"/>
+        <Text text="{/selected/description}"/>
+        <f:SimpleForm editable="false" layout="ResponsiveGridLayout">
+          <f:content>
+            <Label text="Konum"/>
+            <Text text="{parts:['/selected/parent','/selected/location'],formatter:'.formatter.location'}"/>
+            <Label text="Değer"/>
+            <Text text="{parts:['/selected/purchasePrice','/currency'],formatter:'.formatter.money'}"/>
+            <Label text="Adet"/>
+            <Text text="{/selected/quantity}"/>
+            <Label text="Marka"/>
+            <Text text="{/selected/manufacturer}"/>
+            <Label text="Model"/>
+            <Text text="{/selected/modelNumber}"/>
+            <Label text="Seri numarası"/>
+            <Text text="{/selected/serialNumber}"/>
+            <Label text="Satın alma tarihi"/>
+            <Text text="{path:'/selected/displayPurchaseDate',formatter:'.formatter.date'}"/>
+            <Label text="Garanti bitişi"/>
+            <Text text="{path:'/selected/warrantyExpires',formatter:'.formatter.date'}"/>
+            <Label text="Etiketler"/>
+            <Text text="{path:'/selected/tags',formatter:'.formatter.tags'}"/>
+          </f:content>
+        </f:SimpleForm>
+        <Text text="{/selected/notes}"/>
+        <VBox items="{/selected/fields}" class="hb-stack">
+          <HBox class="hb-row">
+            <Label text="{name}"/>
+            <Text text="{parts:['type','textValue','numberValue','booleanValue','timeValue'],formatter:'.formatter.fieldValue'}"/>
+          </HBox>
+        </VBox>
+        <Panel headerText="Dosyalar">
+          <VBox class="hb-stack">
+            <VBox class="hb-field">
+              <Label text="Dosya türü" labelFor="fileType"/>
+              <Select id="fileType" width="100%" selectedKey="{/uploadType}">
+                <core:Item key="photo" text="Fotoğraf"/>
+                <core:Item key="receipt" text="Fatura"/>
+                <core:Item key="warranty" text="Garanti"/>
+                <core:Item key="manual" text="Kılavuz"/>
+                <core:Item key="attachment" text="Diğer"/>
+              </Select>
+            </VBox>
+            <u:FileUploader buttonOnly="true" buttonText="Dosya yükle" sameFilenameAllowed="true" change=".onUpload"/>
+            <VBox items="{/selected/attachments}">
+              <Link text="{title}" href="{url}" target="_blank"/>
+            </VBox>
+          </VBox>
+        </Panel>
+        <Panel headerText="Bakım">
+          <VBox class="hb-stack">
+            <Button text="Bakım kayıtlarını göster" press=".onLoadItemMaintenance" visible="{= !${view&gt;/maintenanceLoaded} }"/>
+            <VBox visible="{view&gt;/maintenanceLoaded}" class="hb-stack">
+              <VBox items="{view&gt;/itemMaintenance}" class="hb-stack">
+                <Panel headerText="{view&gt;name}">
+                  <VBox class="hb-stack">
+                    <Text text="{view&gt;description}"/>
+                    <Text text="{path:'view&gt;scheduledDate',formatter:'.formatter.date'}"/>
+                    <ObjectNumber number="{parts:['view&gt;cost','/currency'],formatter:'.formatter.money'}"/>
+                    <HBox class="hb-row">
+                      <Button text="Tamamlandı" press=".onCompleteMaintenance" visible="{= !${view&gt;completedDate} || ${view&gt;completedDate}.indexOf('0001') === 0 }"/>
+                      <Button text="Sil" press=".onDeleteMaintenance"/>
+                    </HBox>
+                  </VBox>
+                </Panel>
+              </VBox>
+              <Panel headerText="Bakım ekle">
+                <VBox class="hb-stack">
+                  <VBox class="hb-field">
+                    <Label text="Bakım adı" labelFor="maintenanceName"/>
+                    <Input id="maintenanceName" value="{view&gt;/maintenanceForm/name}" type="Text" valueLiveUpdate="true" width="100%"/>
+                  </VBox>
+                  <VBox class="hb-field">
+                    <Label text="Açıklama" labelFor="maintenanceDescription"/>
+                    <TextArea id="maintenanceDescription" value="{view&gt;/maintenanceForm/description}" width="100%" rows="3" valueLiveUpdate="true"/>
+                  </VBox>
+                  <VBox class="hb-field">
+                    <Label text="Maliyet" labelFor="maintenanceCost"/>
+                    <Input id="maintenanceCost" value="{view&gt;/maintenanceForm/cost}" type="Number" valueLiveUpdate="true" width="100%"/>
+                  </VBox>
+                  <VBox class="hb-field">
+                    <Label text="Planlanan tarih" labelFor="maintenanceDate"/>
+                    <DatePicker id="maintenanceDate" value="{view&gt;/maintenanceForm/scheduledDate}" valueFormat="yyyy-MM-dd" displayFormat="medium" width="100%"/>
+                  </VBox>
+                  <Button text="Bakımı kaydet" press=".onAddMaintenance" type="Emphasized"/>
+                </VBox>
+              </Panel>
+            </VBox>
+          </VBox>
+        </Panel>
+        <FlexBox renderType="Bare" wrap="Wrap" class="hb-row">
+          <Button text="Etiket yazdır" icon="sap-icon://print" press=".onPrintLabel"/>
+          <Button text="Sil" icon="sap-icon://delete" press=".onDeleteItem"/>
+        </FlexBox>
+      </VBox>
+    </content>
+    <beginButton>
+      <Button text="Düzenle" press=".onEditItem" type="Emphasized" enabled="{= !${/saving} &amp;&amp; !${/busy} }"/>
+    </beginButton>
+    <endButton>
+      <Button text="Pencereyi kapat" press=".onCloseDialog"/>
+    </endButton>
+  </Dialog>
+</core:FragmentDefinition>

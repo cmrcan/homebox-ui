@@ -1,26 +1,89 @@
 # Homebox UI
 
-Homebox için Türkçe, duyarlı ve açık/koyu temalı alternatif frontend. **OpenUI5 1.154.0** ve TypeScript kullanır. Homebox API bağlantısı ve veriler mevcut Homebox sunucusunda kalır.
+Homebox için Türkçe, duyarlı alternatif frontend. **OpenUI5 1.154.0** üzerinde standart **MVC** uygulamasıdır: `UIComponent`, `manifest.json`, UI5 Router, XML view/fragment, TypeScript controller ve `JSONModel`. Veriler mevcut Homebox backend'inde kalır.
 
-## v0.4.0 — OpenUI5
+## v0.5.0 — UI5 MVC ve ToolPage
 
-- Vue şablonları, Preline ve Tailwind kaldırıldı. Arayüz OpenUI5'in gerçek `sap.m` / `sap.f` kontrolleriyle oluşturulur; Web Components sarmalayıcısı kullanılmaz.
-- Horizon açık ve koyu temalar; tercih tarayıcıda saklanır. Mobil menü, klavyeyle gezinme, duyarlı tablo ve ürün kartları.
-- OpenUI5 kaynakları, derlenmiş tema CSS dosyaları, ikonlar, fontlar ve lisanslar imajda bulunur. Çalışma sırasında CDN veya internet bağlantısı gerekmez.
-- Giriş, şifre göster/gizle, davet koduyla kayıt ve koleksiyon seçimi.
-- Genel bakış, envanter arama/filtreleme, arşiv ve sayfalama; kart/liste görünümü.
-- Ürün oluşturma/düzenleme, onaylı silme, fotoğraf/belge yükleme, etiket yazdırma bağlantısı.
-- Konumlar, etiketler, ürün türleri, alan şablonları ve metin/sayı/evet-hayır/tarih özel alanları.
-- Ürün türüne varsayılan alan şablonu bağlama; ürün formuna şablondan alan ekleme.
-- Ürün bazında bakım ekleme/tamamlama/silme ve genel bakım listesi.
-- Profil, şifre ve koleksiyon ayarları; davet kodu, üye yönetimi ve onaylı hesap silme.
-- CSV içe/dışa aktarma, bildirimler ve koleksiyon bakım araçları.
+- Üstte Homebox logolu `sap.tnt.ToolHeader`: hızlı arama, koleksiyon seçimi, yenileme, tema ve profil.
+- `sap.tnt.ToolPage` içinde gruplu `SideNavigation`; altta ürün ekleme, kullanıcılar, araçlar ve çıkış. Masaüstünde daraltılabilir, telefonda açılıp kapanır.
+- Varsayılan Horizon koyu tema; mevcut açık/koyu tercihi korunur. Homebox SVG açık/koyu temada kendi renkleriyle gösterilir.
+- Her sayfa XML view, kullanıcı olayları ayrı controller, tekrar kullanılan formlar/pencereler XML fragment olarak tanımlıdır.
+- Tüm uygulama durumu ve form bağlamaları UI5 `JSONModel` ile yönetilir. Vue reaktivitesi ve Vite kaldırılmıştır.
+- `manifest.json` routing ayarları URL hash'lerini ve doğrudan sayfa bağlantılarını yönetir (`#inventory`, `#locations`, `#templates`, vb.).
+- Giriş/oturum yenileme, koleksiyon seçimi, envanter arama/filtre/arşiv/sayfalama, kart/tablo görünümü.
+- Ürün ekleme/düzenleme/onaylı silme, fotoğraf/belge yükleme ve etiket yazdırma bağlantısı.
+- Konumlar, etiketler, türler, özel alanlar ve alan şablonları; türe varsayılan şablon ve şablondan alan ekleme.
+- Ürün bakım kayıtları, genel bakım listesi, profil/şifre/koleksiyon, davet ve üye yönetimi.
+- CSV içe/dışa aktarma, bildirimler ve toplu bakım araçları.
 
-OpenUI5 tüm ekranları oluşturur. `@vue/reactivity` yalnızca mevcut API/oturum/işlem durumunu yönetmek için tutulmuştur.
+## Geliştirme yapısı
 
-### Mevcut kurulumu güncelleme
+| Dosya / klasör                  | Görev                                                                    |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| `webapp/Component.ts`           | UI5 component yaşam döngüsü, model ve Router kurulumu                    |
+| `webapp/manifest.json`          | Kütüphaneler, root view, routing, REST veri kaynağı, CSS                 |
+| `webapp/view/`                  | Sayfaların XML view dosyaları                                            |
+| `webapp/controller/`            | Ekran olayları ve işlem akışları; ortak davranışlar BaseController'da    |
+| `webapp/fragment/`              | Ürün, konum, şablon ve kayıt pencereleri; ortak XML alan editörü         |
+| `webapp/model/AppModel.ts`      | UI5 JSONModel durumu, oturum, koleksiyon ve envanter işlemleri           |
+| `webapp/model/formatter.ts`     | Görüntüleme formatları                                                   |
+| `webapp/service/HomeboxApi.ts`  | Homebox REST istemcisi; auth, tenant, API adaptörleri ve dosyalar        |
+| `webapp/assets/`, `webapp/css/` | Homebox logoları ve yerleşim stilleri                                    |
+| `ui5.yaml`                      | OpenUI5 sürümü, framework kütüphaneleri, build ve development middleware |
 
-Daha önce yayımlanan imajla kurulmuş `/opt/homebox-ui/compose.yaml` dosyanız için:
+Homebox bir REST API sunduğu için servis katmanı bu sözleşmeyi kullanır.
+Component, `manifest.json` içindeki `sap.app/dataSources/homebox/uri` adresini
+servise verir; controller'lar servisi AppModel üzerinden kullanır. OData protokolü
+varsayılmaz. Kullanıcı token'ı ve `X-Tenant` davranışı korunur.
+
+## Bilgisayarda çalıştırma
+
+Node.js 22 veya üzeri kullanın. Windows PowerShell'de:
+
+```powershell
+git pull --ff-only origin main
+npm.cmd ci
+$env:HOMEBOX_URL = "http://SUNUCU_IP:7745"
+npm.cmd run dev
+```
+
+`SUNUCU_IP` yerine Homebox backend'inizin erişilebilir adresini yazın.
+Tarayıcıdan `http://localhost:5173` adresini açın. `npm run dev`, UI5 CLI server'ını
+başlatır; TypeScript modülleri UI5 modüllerine dönüştürülür. UI5 proxy middleware
+`/api` isteklerini `HOMEBOX_URL` adresindeki `/api` yoluna iletir.
+
+İlk `dev` veya `build` sırasında UI5 Tooling framework kütüphanelerini indirip
+önbelleğe alır. Ayrı bir `postinstall`/kaynak kopyalama adımı gerekmez.
+Kaynak değişikliklerinden sonra tarayıcıyı yenileyin.
+
+Yeni bir UI5 kütüphanesi kullanacaksanız `ui5.yaml` içindeki `framework.libraries`
+listesine ve `webapp/manifest.json` içindeki `sap.ui5.dependencies.libs` alanına
+ekleyin. Tüm OpenUI5 kaynaklarının ayrı klonu inceleme/geliştirme içindir;
+uygulamanın kütüphane sürümünü `ui5.yaml` belirler.
+
+## Derleme ve doğrulama
+
+```powershell
+npm.cmd test
+npm.cmd run build
+npx.cmd playwright install chromium
+npm.cmd run test:e2e
+npm.cmd run preview
+```
+
+Üretim derlemesi `ui5 build --all` ile yapılır. TypeScript controller'lar UI5
+modüllerine çevrilir; XML view/fragment'ler component preload'a dahil edilir;
+Horizon temaları, framework kütüphaneleri ve sürüm metadata'sı `dist/` altına
+hazırlanır. Runtime için CDN bağlantısı gerekmez. `preview` yalnızca derlenmiş
+arayüzü incelemek ve test etmek içindir; backend bağlantısıyla geliştirme için
+`npm run dev` kullanın.
+
+API testleri veri koruma, auth/tenant başlıkları, dosya yükleme ve yapılandırılan
+REST URI'sini kontrol eder. Tarayıcı testleri masaüstü, telefon ve tablette taklit
+Homebox API'si ile çalışır. Kullanıcının canlı Homebox sunucusundaki son doğrulama
+kurulumdan sonra yapılır.
+
+## Mevcut Docker kurulumunu güncelleme
 
 ```bash
 cd /opt/homebox-ui
@@ -29,21 +92,15 @@ docker compose up -d
 curl -fsS http://127.0.0.1:3101/healthz
 ```
 
-Aynı Homebox adresini açın; gerekirse `Ctrl+Shift+R` ile yenileyin. Docker ağı,
-`HOMEBOX_UPSTREAM` ve Nginx Proxy Manager hedefi (`homebox-ui:80`) değişmez.
-Arayüz güncellemesi veritabanını taşımaz veya Homebox backend sürümünü yükseltmez.
+Ardından aynı Homebox adresini açıp gerekirse `Ctrl+Shift+R` ile yenileyin.
+Mevcut `HOMEBOX_UPSTREAM`, Docker ağı ve Nginx Proxy Manager hedefi
+(`homebox-ui:80`) aynı kalır. Backend sürümü ve veritabanı bu işlemle değiştirilmez.
 
-### Bilinen sınırlar
+## Bilinen sınırlar
 
-- Ürün türüne bağlı varsayılan şablon seçimi bu tarayıcıda saklanır. Alan şablonlarının kendisi Homebox'ta durur.
+- Ürün türüne bağlı varsayılan şablon tercihi bu tarayıcıda saklanır; alan şablonlarının kendisi Homebox'ta durur.
 - API anahtarları, OIDC ve sunucu yedeklerini yönetme henüz yoktur.
-- Yönetim uç noktalarının kullanılabilirliği sunucu sürümüne ve kullanıcının yetkilerine bağlıdır.
-- Tarayıcı testleri taklit Homebox API'sini kullanır; bu sürüm kullanıcının canlı sunucusunda henüz denenmemiştir.
-
-## Logo
-
-Sağlanan SVG `src/assets/homebox-logo.svg` dosyasında korunur ve giriş ekranında
-oranı değiştirilmeden gösterilir. Koyu tema için görünürlüğü uyarlanır.
+- Yönetim uç noktaları ve yetkiler Homebox backend sürümüne bağlıdır.
 
 ## API uyumluluğu
 
@@ -110,38 +167,6 @@ Bu Compose dosyası **yalnızca frontend** başlatır. Homebox'ı yükseltmez, m
 - Geri dönmek için NPM hedefini önceki Homebox adresi/portuna alın, ardından UI'yi `docker compose down` ile durdurun.
 
 Dosyalar varsayılan olarak 100 MB ile sınırlıdır; gerekirse `deploy/default.conf.template` içindeki `client_max_body_size` değerini değiştirin. Oturum bilgileri sessionStorage içinde tutulur; şifre saklanmaz. Dosya URL'leri upstream'in dosyalara özel token'ını kullanır; proxy bu URL'leri erişim loguna yazmaz.
-
-## Derleme yapısı
-
-`npm ci` sonrasında `postinstall`, `ui5.yaml` içindeki sabit OpenUI5 sürümünü
-UI5 CLI ile derler. `scripts/ui5-resources.mjs` üretilmiş kaynakları
-`public/resources/` altına taşır; bu klasör git'e eklenmez. Horizon LESS dosyaları
-UI5 Tooling ile CSS'e çevrilir ve kütüphane preload/version dosyaları hazırlanır.
-`npm run build`, TypeScript kontrolü ve Vite üretim paketini oluşturur.
-
-## Yerel geliştirme
-
-Node.js 22 veya daha yeni sürüm:
-
-```bash
-npm ci
-HOMEBOX_URL=http://SUNUCU_IP:3100 npm run dev
-```
-
-`HOMEBOX_URL`, mevcut Homebox'ın API'yi sunan tam adresidir. Vite `/api` isteklerini bu adrese iletir. Tarayıcıdan `http://localhost:5173` adresini açın. Uygulamayı kullanmak için çalışan bir Homebox sunucusu ve kullanıcı hesabı gerekir.
-
-## Doğrulama
-
-```bash
-npm test
-npm run build
-npx playwright install --with-deps chromium
-npm run test:e2e
-```
-
-API testleri kimlik doğrulama/tenant başlıklarını, filtre parametrelerini, konum sayfalamasını, dosya token'larını, multipart yüklemeyi ve düzenlemede bilgi korunmasını kontrol eder. Tarayıcı testleri kaynak şemasını izleyen **taklit API** ile masaüstü, telefon ve tablet üzerinde giriş, arama, filtreleme, düzenleme, silme, özel alanlar, dosya yükleme ve oturum sona ermesini kontrol eder. Geçersiz girişin envanteri açmadığı da doğrulanır. Girişte API seçeneği olmadığı, giriş alanlarının okunabilir boyutu, şifre görünürlüğü, mobil menü ve 320–1440 px genişliklerde yatay taşma da kontrol edilir. Test verileri yalnızca testlerde bulunur. Bunlar gerçek Homebox sunucusuyla entegrasyon testi yerine geçmez.
-
-CI, yayımlanan Docker konteynerinin sağlık yanıtını, derlenmiş OpenUI5 kaynaklarını ve Nginx yapılandırmasını kontrol eder. İlk gerçek kurulumda önce ayrı UI portundan giriş/arama/düzenleme/yükleme akışını doğrulayın, ardından NPM hedefini değiştirin.
 
 ## GitHub repo ve container image
 

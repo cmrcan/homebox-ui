@@ -1,0 +1,165 @@
+{
+  "_version": "1.80.0",
+  "sap.app": {
+    "id": "homebox",
+    "type": "application",
+    "title": "Homebox",
+    "description": "Homebox inventory with native OpenUI5 MVC",
+    "applicationVersion": {
+      "version": "0.5.0"
+    },
+    "dataSources": {
+      "homebox": {
+        "uri": "/api/v1/",
+        "type": "JSON"
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "rootView": {
+      "viewName": "homebox.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "app"
+    },
+    "dependencies": {
+      "minUI5Version": "1.154.0",
+      "libs": {
+        "sap.ui.core": {},
+        "sap.m": {},
+        "sap.tnt": {},
+        "sap.ui.layout": {},
+        "sap.ui.unified": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "viewPath": "homebox.view",
+        "controlId": "pages",
+        "controlAggregation": "pages",
+        "async": true,
+        "transition": "show"
+      },
+      "routes": [
+        {
+          "name": "home",
+          "pattern": "",
+          "target": "overview"
+        },
+        {
+          "name": "overview",
+          "pattern": "overview",
+          "target": "overview"
+        },
+        {
+          "name": "inventory",
+          "pattern": "inventory",
+          "target": "inventory"
+        },
+        {
+          "name": "locations",
+          "pattern": "locations",
+          "target": "locations"
+        },
+        {
+          "name": "tags",
+          "pattern": "tags",
+          "target": "tags"
+        },
+        {
+          "name": "types",
+          "pattern": "types",
+          "target": "types"
+        },
+        {
+          "name": "templates",
+          "pattern": "templates",
+          "target": "templates"
+        },
+        {
+          "name": "maintenance",
+          "pattern": "maintenance",
+          "target": "maintenance"
+        },
+        {
+          "name": "users",
+          "pattern": "users",
+          "target": "users"
+        },
+        {
+          "name": "tools",
+          "pattern": "tools",
+          "target": "tools"
+        }
+      ],
+      "targets": {
+        "overview": {
+          "viewName": "Overview",
+          "viewId": "overview",
+          "viewLevel": 1
+        },
+        "inventory": {
+          "viewName": "Inventory",
+          "viewId": "inventory",
+          "viewLevel": 1
+        },
+        "locations": {
+          "viewName": "Organizers",
+          "viewId": "locations",
+          "viewLevel": 1
+        },
+        "tags": {
+          "viewName": "Organizers",
+          "viewId": "tags",
+          "viewLevel": 1
+        },
+        "types": {
+          "viewName": "Types",
+          "viewId": "types",
+          "viewLevel": 1
+        },
+        "templates": {
+          "viewName": "Templates",
+          "viewId": "templates",
+          "viewLevel": 1
+        },
+        "maintenance": {
+          "viewName": "Maintenance",
+          "viewId": "maintenance",
+          "viewLevel": 1
+        },
+        "users": {
+          "viewName": "Users",
+          "viewId": "users",
+          "viewLevel": 1
+        },
+        "tools": {
+          "viewName": "Tools",
+          "viewId": "tools",
+          "viewLevel": 1
+        }
+      }
+    }
+  }
+}

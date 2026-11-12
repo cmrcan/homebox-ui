@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+- Convert the complete application to native OpenUI5 MVC: UIComponent, manifest routing, XML views/fragments, TypeScript controllers and UI5 JSONModel.
+- Replace the custom sidebar/ShellBar with ToolPage, grouped SideNavigation and a ToolHeader with the Homebox logo, search, collection, theme and profile controls.
+- Remove Vue reactivity and Vite. Use UI5 CLI, TypeScript-to-UI5 transpilation and UI5's development proxy.
+- Configure the REST service URI in manifest.json while preserving Homebox API/session/tenant behavior.
+- Preserve inventory, custom fields, organizers, templates, maintenance, users, CSV, notifications and tools.
+- Reset session-scoped models on expiry/logout; validate deep links, the native MVC component and responsive navigation.
+
 ## 0.4.0
 
 - Replace the Vue template/Preline/Tailwind UI with native OpenUI5 1.154.0 controls.

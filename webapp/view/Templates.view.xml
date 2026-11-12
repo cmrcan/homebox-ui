@@ -1,0 +1,25 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="homebox.controller.Templates">
+  <Page showHeader="false" class="hb-content-page">
+    <content>
+      <VBox width="100%" class="hb-page hb-stack">
+        <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
+        <Text text="{/groupName}" class="hb-muted"/>
+        <FlexBox renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center" class="hb-row">
+          <Title text="Alan şablonları" level="H1" titleStyle="H2" wrapping="true"/>
+          <Button text="Şablon ekle" type="Emphasized" icon="sap-icon://add" press=".onNew"/>
+        </FlexBox>
+        <VBox items="{view&gt;/templates}" class="hb-stack">
+          <Panel headerText="{view&gt;name}">
+            <VBox class="hb-stack">
+              <Text text="{view&gt;description}"/>
+              <HBox class="hb-row">
+                <Button text="Düzenle" icon="sap-icon://edit" press=".onEdit"/>
+                <Button text="Sil" icon="sap-icon://delete" press=".onDelete"/>
+              </HBox>
+            </VBox>
+          </Panel>
+        </VBox>
+      </VBox>
+    </content>
+  </Page>
+</mvc:View>

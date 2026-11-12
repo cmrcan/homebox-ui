@@ -2,20 +2,20 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { loginWithInventory } from "./homebox-fixture";
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("hb-theme"))
+      localStorage.setItem("hb-theme", "light");
+  });
+});
 async function navigate(page: Page, name: string) {
   const sidebar = page.getByRole("navigation", {
     name: "Ana menü",
     exact: true,
   });
-  if (await sidebar.isVisible())
-    await sidebar.getByRole("button", { name, exact: true }).click();
-  else {
+  if (!(await sidebar.getByRole("treeitem", { name, exact: true }).isVisible()))
     await page.getByRole("button", { name: "Menüyü aç", exact: true }).click();
-    await page
-      .getByRole("navigation", { name: "Mobil menü", exact: true })
-      .getByRole("button", { name, exact: true })
-      .click();
-  }
+  await sidebar.getByRole("treeitem", { name, exact: true }).click();
   await expect(
     page.locator(".hb-page").getByRole("heading", { name, exact: true }),
   ).toBeVisible();
@@ -54,7 +54,7 @@ test("OpenUI5 inventory supports search, edit, confirmed deletion and location f
   await page
     .getByRole("searchbox", { name: "Envanterde ara" })
     .fill("Kahve köşesi");
-  await expect(page.locator(".hb-item-card")).toHaveCount(1);
+  await expect(page.locator(".hb-item-card:visible")).toHaveCount(1);
   await page.getByRole("button", { name: "Kahve köşesi", exact: true }).click();
   await page.getByRole("button", { name: "Sil", exact: true }).click();
   await page.getByRole("button", { name: "Vazgeç", exact: true }).click();
@@ -73,7 +73,7 @@ test("OpenUI5 inventory supports search, edit, confirmed deletion and location f
     .getByRole("button", { name: "Ürünleri gör", exact: true })
     .first()
     .click();
-  await expect(page.locator(".hb-item-card")).toHaveCount(2);
+  await expect(page.locator(".hb-item-card:visible")).toHaveCount(2);
   await expect(
     page.getByRole("combobox", { name: "Konuma göre filtrele" }),
   ).toContainText("Salon");
@@ -209,7 +209,7 @@ test("authenticated Homebox entity API: login, create, upload, and expiry", asyn
   await expect(
     page.getByRole("heading", { name: "Evine bir bakış." }),
   ).toBeVisible();
-  await expect(page.locator(".hb-item-card")).toHaveCount(1);
+  await expect(page.locator(".hb-item-card:visible")).toHaveCount(1);
   await page.unrouteAll({ behavior: "wait" });
   await page.route("**/api/v1/**", (route) =>
     route.fulfill({ status: 401, json: { error: "unauthorized" } }),
@@ -276,7 +276,7 @@ test("failed login keeps inventory inaccessible; password visibility and registr
   await expect(
     page.getByRole("heading", { name: "Evine hoş geldin." }),
   ).toBeVisible();
-  await expect(page.locator(".hb-item-card")).toHaveCount(0);
+  await expect(page.locator(".hb-item-card:visible")).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: /Örnek envanter|Demoyu/i }),
   ).toHaveCount(0);
@@ -327,9 +327,12 @@ test("OpenUI5 forms, menu and responsive table fit phones and tablets", async ({
       .toBe(true);
   }
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect(
+    page.getByRole("navigation", { name: "Ana menü", exact: true }),
+  ).not.toBeVisible();
   await page.getByRole("button", { name: "Menüyü aç", exact: true }).click();
   await expect(
-    page.getByRole("navigation", { name: "Mobil menü" }),
+    page.getByRole("navigation", { name: "Ana menü" }),
   ).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -418,6 +421,12 @@ test("entity type creation and field template editing send complete API values",
       writes.push(body);
       types.push({ id: "new-type", ...body });
       await route.fulfill({ json: types.at(-1) });
+    } else if (req.method() === "PUT") {
+      const body = req.postDataJSON();
+      writes.push(body);
+      const existing = types.find((t) => t.id === body.id)!;
+      Object.assign(existing, body);
+      await route.fulfill({ json: existing });
     } else await route.fulfill({ json: types });
   });
   await page.route("**/api/v1/templates**", async (route) => {
@@ -440,6 +449,21 @@ test("entity type creation and field template editing send complete API values",
   await page.getByRole("button", { name: "Türü kaydet", exact: true }).click();
   await expect(page.getByText("Elektronik", { exact: true })).toBeVisible();
   expect(writes[0]).toMatchObject({ name: "Elektronik", isLocation: false });
+  await page
+    .locator(".hb-page .sapMPanel")
+    .filter({ has: page.getByText("Elektronik", { exact: true }) })
+    .getByRole("button", { name: "Düzenle", exact: true })
+    .click();
+  await page.getByLabel("Tür adı", { exact: true }).fill("Elektronik cihazlar");
+  await page.getByRole("button", { name: "Türü kaydet", exact: true }).click();
+  await expect(
+    page.getByText("Elektronik cihazlar", { exact: true }),
+  ).toBeVisible();
+  expect(writes[1]).toMatchObject({
+    id: "new-type",
+    name: "Elektronik cihazlar",
+  });
+  expect(writes[1]).not.toHaveProperty("templateId");
   await navigate(page, "Alan şablonları");
   await page.getByRole("button", { name: "Düzenle", exact: true }).click();
   await page.getByLabel("Şablon adı", { exact: true }).fill("Ağ donanımı");
@@ -448,7 +472,7 @@ test("entity type creation and field template editing send complete API values",
     .getByRole("button", { name: "Şablonu kaydet", exact: true })
     .click();
   await expect(page.getByText("Ağ donanımı", { exact: true })).toBeVisible();
-  expect(writes[1]).toMatchObject({
+  expect(writes[2]).toMatchObject({
     defaultInsured: true,
     name: "Ağ donanımı",
     fields: [{ name: "IP adresi", type: "text", textValue: "10.10.20.1" }],
@@ -520,4 +544,133 @@ test("item maintenance, profile saving and CSV export remain functional", async 
     .getByRole("button", { name: "CSV dışa aktar", exact: true })
     .click();
   expect((await downloaded).suggestedFilename()).toBe("homebox-envanter.csv");
+});
+
+test("native MVC component, ToolPage and router restore a deep-linked inventory page", async ({
+  page,
+}) => {
+  await loginWithInventory(page);
+  await page.goto("/#inventory");
+  await expect(
+    page
+      .locator(".hb-page")
+      .getByRole("heading", { name: "Envanterim", exact: true }),
+  ).toBeVisible();
+  const toolPageId = await page.locator(".hb-tool-page").getAttribute("id");
+  const shape = await page.evaluate(
+    async (id) =>
+      new Promise((resolve, reject) => {
+        (window as any).sap.ui.require(
+          ["sap/ui/core/Element", "sap/ui/core/Component"],
+          (Element: any, Component: any) => {
+            try {
+              const component = Component.getOwnerComponentFor(
+                Element.getElementById(id),
+              );
+              const root = component.getRootControl();
+              resolve({
+                xml: root.isA("sap.ui.core.mvc.XMLView"),
+                model: component.getModel().isA("sap.ui.model.json.JSONModel"),
+                component: component.getMetadata().getName(),
+                router: component.getRouter().getMetadata().getName(),
+                toolPage: root.byId("toolPage").isA("sap.tnt.ToolPage"),
+                header: root.byId("toolHeader").isA("sap.tnt.ToolHeader"),
+                navigation: root
+                  .byId("sideNavigation")
+                  .isA("sap.tnt.SideNavigation"),
+              });
+            } catch (error) {
+              reject(error);
+            }
+          },
+          reject,
+        );
+      }),
+    toolPageId,
+  );
+  expect(shape).toEqual({
+    xml: true,
+    model: true,
+    component: "homebox.Component",
+    router: "sap.m.routing.Router",
+    toolPage: true,
+    header: true,
+    navigation: true,
+  });
+  await expect(
+    page.getByRole("banner").getByRole("img", { name: "Homebox", exact: true }),
+  ).toBeVisible();
+});
+
+test("ToolHeader collection selection reloads inventory with the new tenant", async ({
+  page,
+}) => {
+  await loginWithInventory(page);
+  await page.route("**/api/v1/groups/all", (route) =>
+    route.fulfill({
+      json: [
+        { id: "g", name: "Ev", currency: "TRY" },
+        { id: "h", name: "İkinci ev", currency: "USD" },
+      ],
+    }),
+  );
+  await page.route("**/api/v1/entity-types", (route) =>
+    route.fulfill({
+      json: [
+        { id: "item", name: "Ürün", isLocation: false },
+        { id: "room", name: "Oda", isLocation: true },
+      ],
+    }),
+  );
+  await page.route("**/api/v1/entities?*", async (route) => {
+    if (route.request().headers()["x-tenant"] !== "h") {
+      await route.fallback();
+      return;
+    }
+    const isLocation =
+      new URL(route.request().url()).searchParams.get("isLocation") === "true";
+    const items = isLocation
+      ? []
+      : [
+          {
+            id: "second",
+            name: "Yeni koleksiyon ürünü",
+            quantity: 1,
+            purchasePrice: 50,
+            tags: [],
+            parent: null,
+            entityType: { id: "item", name: "Ürün", isLocation: false },
+          },
+        ];
+    await route.fulfill({
+      json: {
+        items,
+        total: items.length,
+        totalPrice: 50,
+        page: 1,
+        pageSize: 12,
+      },
+    });
+  });
+  await page.reload();
+  await expect(page.locator(".hb-item-card:visible")).toHaveCount(3);
+  const collection = page.getByRole("combobox", {
+    name: "Koleksiyon",
+    exact: true,
+  });
+  if (!(await collection.isVisible()))
+    await page
+      .getByRole("banner")
+      .getByRole("button", { name: "Ek seçenekler", exact: true })
+      .click();
+  await collection.locator("..").click();
+  await page.getByRole("option", { name: "İkinci ev", exact: true }).click();
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".hb-item-card:visible")).toHaveCount(1);
+  await expect(
+    page.getByRole("button", { name: "Yeni koleksiyon ürünü", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".hb-item-card:visible")).not.toContainText(
+    "Siemens EQ700",
+  );
 });

@@ -7,5 +7,3 @@ test-results/
 playwright-report/
 data/
 *.log
-public/resources/
-.ui5-build/

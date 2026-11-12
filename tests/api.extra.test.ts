@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { HomeboxApi } from "../src/api";
+import { HomeboxApi } from "../webapp/service/HomeboxApi";
 
 function setup(handler?: (url: string) => Response) {
   const transport = vi.fn(
@@ -8,7 +8,11 @@ function setup(handler?: (url: string) => Response) {
       new Response(JSON.stringify({ ok: true }), { status: 200 }),
   );
   const api = new HomeboxApi("entities", transport);
-  api.session = { token: "Bearer t", attachmentToken: "att", expiresAt: "2099" };
+  api.session = {
+    token: "Bearer t",
+    attachmentToken: "att",
+    expiresAt: "2099",
+  };
   api.tenant = "group";
   const call = (i: number) =>
     transport.mock.calls[i] as unknown as [string, RequestInit];
@@ -47,7 +51,10 @@ describe("entity types, templates and users", () => {
     const { api, call } = setup();
     await api.changePassword("old", "new");
     await api.invite(3, "2030-01-01T00:00:00Z");
-    expect(JSON.parse(String(call(0)[1].body))).toEqual({ current: "old", new: "new" });
+    expect(JSON.parse(String(call(0)[1].body))).toEqual({
+      current: "old",
+      new: "new",
+    });
     expect(call(1)[0]).toBe("/api/v1/groups/invitations");
     expect(JSON.parse(String(call(1)[1].body))).toEqual({
       uses: 3,
@@ -67,7 +74,9 @@ describe("maintenance, tools and export", () => {
   it("encodes the notifier test URL as a query parameter", async () => {
     const { api, call } = setup();
     await api.testNotifier("ntfy://a/b?c=d");
-    expect(call(0)[0]).toBe("/api/v1/notifiers/test?url=ntfy%3A%2F%2Fa%2Fb%3Fc%3Dd");
+    expect(call(0)[0]).toBe(
+      "/api/v1/notifiers/test?url=ntfy%3A%2F%2Fa%2Fb%3Fc%3Dd",
+    );
   });
   it("falls back to the legacy export path after a 404", async () => {
     const { api, transport } = setup((url) =>
@@ -85,4 +94,29 @@ describe("maintenance, tools and export", () => {
     expect(url).toContain("access_token=att");
     expect(url).not.toContain("Bearer");
   });
+});
+
+it("uses the manifest-configured REST base URI for requests and files", async () => {
+  const urls: string[] = [];
+  const transport = async (url: RequestInfo | URL) => {
+    urls.push(String(url));
+    return new Response("{}", { status: 200 });
+  };
+  const api = new HomeboxApi(
+    "entities",
+    transport as typeof fetch,
+    "/homebox/api/v1/",
+  );
+  await api.request("/users/self");
+  await api.download("/entities/export");
+  expect(urls).toEqual([
+    "/homebox/api/v1/users/self",
+    "/homebox/api/v1/entities/export",
+  ]);
+  expect(api.attachmentUrl("item", "file")).toContain(
+    "/homebox/api/v1/entities/item/attachments/file?",
+  );
+  expect(api.labelUrl("item")).toContain(
+    "/homebox/api/v1/labelmaker/item/item?",
+  );
 });
