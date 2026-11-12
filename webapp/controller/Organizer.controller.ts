@@ -85,7 +85,11 @@ export default class OrganizerController extends BaseController {
   }
   public onParent(): void {
     const parent = this.app.state().organizer?.parent;
-    if (parent) this.getRouter().navTo("location", { id: parent.id });
+    if (parent)
+      this.getRouter().navTo(
+        this.app.state().organizerKind === "locations" ? "location" : "tag",
+        { id: parent.id },
+      );
   }
   public onBack(): void {
     this.getRouter().navTo(this.app.state().organizerKind);

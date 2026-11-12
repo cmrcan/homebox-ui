@@ -44,8 +44,8 @@
           <l:Grid width="100%" defaultSpan="XL3 L3 M6 S12" hSpacing="1" vSpacing="1" visible="{= ${view&gt;/ready} &amp;&amp; !${view&gt;/editing} }">
             <Avatar src="{= ${/organizerKind} === 'locations' ? 'sap-icon://home' : 'sap-icon://tag' }" displaySize="L" displayShape="Square"/>
             <VBox>
-              <Label text="Üst konum"/>
-              <Link text="{= ${/organizer/parent/name} || 'Ana konum' }" press=".onParent" enabled="{= !!${/organizer/parent/id} }"/>
+              <Label text="{= ${/organizerKind} === 'locations' ? 'Üst konum' : 'Üst etiket' }"/>
+              <Link text="{= ${/organizer/parent/name} || (${/organizerKind} === 'locations' ? 'Ana konum' : 'Üst etiket yok') }" press=".onParent" enabled="{= !!${/organizer/parent/id} }"/>
             </VBox>
             <VBox>
               <Label text="Ürün sayısı"/>
@@ -60,7 +60,7 @@
         <uxap:sections>
           <uxap:ObjectPageSection id="generalSection" title="Genel Bilgiler" titleUppercase="false">
             <uxap:subSections>
-              <uxap:ObjectPageSubSection title="Konum / Etiket Bilgileri" titleUppercase="false">
+              <uxap:ObjectPageSubSection title="{= ${/organizerKind} === 'locations' ? 'Konum Bilgileri' : 'Etiket Bilgileri' }" titleUppercase="false">
                 <uxap:blocks>
                   <VBox width="100%">
                     <core:Fragment fragmentName="homebox.fragment.Error" type="XML"/>
@@ -86,8 +86,8 @@
                 <uxap:blocks>
                   <VBox width="100%">
                     <f:SimpleForm editable="false" layout="ResponsiveGridLayout">
-                      <Label text="Üst konum"/>
-                      <Link text="{= ${/organizer/parent/name} || 'Ana konum' }" press=".onParent" enabled="{= !!${/organizer/parent/id} }"/>
+                      <Label text="{= ${/organizerKind} === 'locations' ? 'Üst konum' : 'Üst etiket' }"/>
+                      <Link text="{= ${/organizer/parent/name} || (${/organizerKind} === 'locations' ? 'Ana konum' : 'Üst etiket yok') }" press=".onParent" enabled="{= !!${/organizer/parent/id} }"/>
                       <Label text="Tür"/>
                       <Text text="{/organizer/entityType/name}"/>
                     </f:SimpleForm>
