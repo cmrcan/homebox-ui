@@ -24,10 +24,13 @@ export default class Component extends UIComponent {
     app.attachEvent("sessionChanged", () => {
       if (app.state().user) router.parse(location.hash.slice(1));
     });
-    this.resize = ({ width }: { width: number; height: number }) => {
-      const phone = width < 768;
+    this.resize = () => {
+      // Device resize notifications are delayed. Read the current viewport and
+      // collapse only when entering phone layout; preserve a menu the user just opened.
+      const phone = innerWidth < 768;
+      const wasPhone = app.state().isPhone;
       app.setProperty("/isPhone", phone);
-      if (phone) app.setProperty("/sideExpanded", false);
+      if (phone && !wasPhone) app.setProperty("/sideExpanded", false);
     };
     Device.resize.attachHandler(this.resize);
     router.initialize();

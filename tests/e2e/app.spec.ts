@@ -674,3 +674,42 @@ test("ToolHeader collection selection reloads inventory with the new tenant", as
     "Siemens EQ700",
   );
 });
+
+test("an expanded mobile menu survives resizing within the phone layout", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await loginWithInventory(page);
+  await page.getByRole("button", { name: "Menüyü aç", exact: true }).click();
+  const navigation = page.getByRole("navigation", {
+    name: "Ana menü",
+    exact: true,
+  });
+  await expect(navigation).toBeVisible();
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        (window as any).__ui5ResizeObserved = false;
+        (window as any).sap.ui.require(["sap/ui/Device"], (Device: any) => {
+          const observe = () => {
+            (window as any).__ui5ResizeObserved = true;
+            Device.resize.detachHandler(observe);
+          };
+          Device.resize.attachHandler(observe);
+          resolve();
+        });
+      }),
+  );
+  await page.setViewportSize({ width: 390, height: 820 });
+  await page.waitForFunction(() => (window as any).__ui5ResizeObserved);
+  await expect(navigation).toBeVisible();
+  await navigation
+    .getByRole("treeitem", { name: "Konumlar", exact: true })
+    .click();
+  await expect(
+    page
+      .locator(".hb-page")
+      .getByRole("heading", { name: "Konumlar", exact: true }),
+  ).toBeVisible();
+  await expect(navigation).not.toBeVisible();
+});
