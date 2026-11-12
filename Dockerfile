@@ -2,6 +2,10 @@
 FROM --platform=$BUILDPLATFORM node:22-alpine AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
+COPY scripts ./scripts
+COPY ui5.yaml ./
+COPY runtime ./runtime
+COPY public/licenses ./public/licenses
 RUN npm ci --no-audit --no-fund
 COPY index.html tsconfig.json vite.config.ts ./
 COPY src ./src

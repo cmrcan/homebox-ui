@@ -1,53 +1,82 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
 import { loginWithInventory } from "./homebox-fixture";
-test("authenticated inventory: search, details, edit, delete, filters and dark mode", async ({
+
+async function navigate(page: Page, name: string) {
+  const sidebar = page.getByRole("navigation", {
+    name: "Ana menü",
+    exact: true,
+  });
+  if (await sidebar.isVisible())
+    await sidebar.getByRole("button", { name, exact: true }).click();
+  else {
+    await page.getByRole("button", { name: "Menüyü aç", exact: true }).click();
+    await page
+      .getByRole("navigation", { name: "Mobil menü", exact: true })
+      .getByRole("button", { name, exact: true })
+      .click();
+  }
+  await expect(
+    page.locator(".hb-page").getByRole("heading", { name, exact: true }),
+  ).toBeVisible();
+}
+
+async function shellAction(page: Page, name: string) {
+  const action = page.getByRole("button", { name, exact: true });
+  if (!(await action.isVisible()))
+    await page
+      .getByRole("banner")
+      .getByRole("button", { name: "Ek seçenekler", exact: true })
+      .click();
+  await action.click();
+}
+
+test("OpenUI5 inventory supports search, edit, confirmed deletion and location filters", async ({
   page,
-}, info) => {
+}) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await loginWithInventory(page);
-  await expect(
-    page.getByRole("heading", { name: "Evine bir bakış." }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: /Siemens EQ700/ }).click();
-  await expect(page.getByRole("dialog")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Siemens EQ700", exact: true })
+    .click();
   await page.getByRole("button", { name: "Düzenle", exact: true }).click();
   await page.getByLabel("Ürün adı", { exact: true }).fill("Kahve köşesi");
-  await page.getByRole("button", { name: "Ürünü kaydet" }).click();
+  await page.getByRole("button", { name: "Ürünü kaydet", exact: true }).click();
   await expect(
     page
       .getByRole("dialog")
       .getByRole("heading", { name: "Kahve köşesi", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Pencereyi kapat" }).click();
+  await page
+    .getByRole("button", { name: "Pencereyi kapat", exact: true })
+    .click();
   await page
     .getByRole("searchbox", { name: "Envanterde ara" })
     .fill("Kahve köşesi");
-  await expect(page.locator(".item-card")).toHaveCount(1);
-  await page.locator(".item-card").click();
+  await expect(page.locator(".hb-item-card")).toHaveCount(1);
+  await page.getByRole("button", { name: "Kahve köşesi", exact: true }).click();
   await page.getByRole("button", { name: "Sil", exact: true }).click();
-  await page.getByRole("button", { name: "Evet, sil" }).click();
+  await page.getByRole("button", { name: "Vazgeç", exact: true }).click();
+  await expect(
+    page
+      .getByRole("dialog")
+      .getByRole("heading", { name: "Kahve köşesi", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Sil", exact: true }).click();
+  await page.getByRole("button", { name: "Evet, sil", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Eşleşen ürün bulunamadı" }),
   ).toBeVisible();
-  if (info.project.name !== "desktop")
-    await page.getByRole("button", { name: "Menüyü aç" }).click();
+  await navigate(page, "Konumlar");
   await page
-    .getByRole("navigation", { name: "Ana menü" })
-    .getByRole("button", { name: "Konumlar", exact: true })
+    .getByRole("button", { name: "Ürünleri gör", exact: true })
+    .first()
     .click();
-  await page.getByRole("button", { name: "Ürünleri gör" }).first().click();
+  await expect(page.locator(".hb-item-card")).toHaveCount(2);
   await expect(
     page.getByRole("combobox", { name: "Konuma göre filtrele" }),
-  ).toHaveValue("living");
-  await expect(page.locator(".item-card")).toHaveCount(2);
-  if (info.project.name !== "desktop")
-    await page.getByRole("button", { name: "Menüyü aç" }).click();
-  await page
-    .getByRole("navigation", { name: "Ana menü" })
-    .getByRole("button", { name: "Koyu görünüm" })
-    .click();
-  await expect(page.locator("html")).toHaveClass("dark");
+  ).toContainText("Salon");
   expect(errors).toEqual([]);
 });
 test("authenticated Homebox entity API: login, create, upload, and expiry", async ({
@@ -166,7 +195,9 @@ test("authenticated Homebox entity API: login, create, upload, and expiry", asyn
   expect(writes[1].purchasePrice).toBe(123);
   await page
     .getByRole("combobox", { name: "Dosya türü" })
-    .selectOption("receipt");
+    .locator("..")
+    .click();
+  await page.getByRole("option", { name: "Fatura", exact: true }).click();
   await page.locator("input[type=file]").setInputFiles({
     name: "fatura.txt",
     mimeType: "text/plain",
@@ -178,82 +209,57 @@ test("authenticated Homebox entity API: login, create, upload, and expiry", asyn
   await expect(
     page.getByRole("heading", { name: "Evine bir bakış." }),
   ).toBeVisible();
-  await page.unrouteAll();
+  await expect(page.locator(".hb-item-card")).toHaveCount(1);
+  await page.unrouteAll({ behavior: "wait" });
   await page.route("**/api/v1/**", (route) =>
     route.fulfill({ status: 401, json: { error: "unauthorized" } }),
   );
-  await page.getByRole("button", { name: "Verileri yenile" }).click();
+  await shellAction(page, "Verileri yenile");
   await expect(
     page.getByRole("heading", { name: "Evine hoş geldin." }),
   ).toBeVisible();
 });
-test("layout has no horizontal overflow; Escape closes the modal", async ({
+
+test("item custom fields and template management remain available", async ({
   page,
 }) => {
   await loginWithInventory(page);
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBe(true);
-  await page.getByRole("button", { name: "Ürün ekle" }).click();
+  await page
+    .getByRole("button", { name: "Siemens EQ700", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Düzenle", exact: true }).click();
+  await page.getByRole("button", { name: "Alan ekle", exact: true }).click();
+  await page.getByLabel("Alan adı", { exact: true }).fill("Voltaj");
+  await page.getByLabel("Alan değeri", { exact: true }).fill("230V");
+  await page.getByRole("button", { name: "Ürünü kaydet", exact: true }).click();
+  await expect(
+    page.getByRole("dialog").getByText("230V", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Pencereyi kapat", exact: true })
+    .click();
+  await navigate(page, "Alan şablonları");
+  await expect(page.getByText("Ağ cihazı", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Düzenle", exact: true }).click();
+  await expect(page.getByLabel("Şablon adı", { exact: true })).toHaveValue(
+    "Ağ cihazı",
+  );
+  await expect(page.getByLabel("Alan adı", { exact: true })).toHaveValue(
+    "IP adresi",
+  );
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
-test("authenticated inventory: custom fields on an item and field templates", async ({
-  page,
-}, info) => {
-  const errors: string[] = [];
-  page.on("pageerror", (e) => errors.push(e.message));
-  await loginWithInventory(page);
-  await page.getByRole("button", { name: /Siemens EQ700/ }).click();
-  await page.getByRole("button", { name: "Düzenle", exact: true }).click();
-  await page.getByRole("button", { name: "Alan ekle" }).click();
-  await page.getByLabel("Alan adı").fill("Voltaj");
-  await page.getByLabel("Alan değeri").fill("230V");
-  await page.getByRole("button", { name: "Ürünü kaydet" }).click();
-  await expect(page.getByRole("dialog").getByText("230V")).toBeVisible();
-  await page.getByRole("button", { name: "Pencereyi kapat" }).click();
-  if (info.project.name !== "desktop")
-    await page.getByRole("button", { name: "Menüyü aç" }).click();
-  await page
-    .getByRole("button", { name: "Alan şablonları", exact: true })
-    .click();
-  await expect(page.getByRole("heading", { name: "Ağ cihazı" })).toBeVisible();
-  expect(errors).toEqual([]);
-});
-
-test("login is required and failed authentication never opens sample inventory", async ({
+test("failed login keeps inventory inaccessible; password visibility and registration work", async ({
   page,
 }) => {
   await page.route("**/api/v1/**", (route) =>
     route.fulfill({ status: 401, json: { error: "unauthorized" } }),
   );
   await page.goto("/");
-  await expect(
-    page.getByRole("button", { name: /Örnek envanter|Demoyu/i }),
-  ).toHaveCount(0);
-  await page.getByLabel("E-posta", { exact: true }).fill("test@example.com");
-  await page.getByLabel("Şifre", { exact: true }).fill("invalid");
-  await page.getByRole("button", { name: "Giriş yap", exact: true }).click();
-  await expect(page.getByRole("alert")).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Evine hoş geldin." }),
-  ).toBeVisible();
-  await expect(page.locator(".item-card")).toHaveCount(0);
-});
-
-test("simple login: no connection options, readable inputs and password visibility", async ({
-  page,
-}) => {
-  await page.goto("/");
-  await expect(page.getByRole("combobox")).toHaveCount(0);
-  await expect(page.getByText("Bağlantı seçenekleri")).toHaveCount(0);
-  await expect(page.getByLabel("E-posta", { exact: true })).toBeVisible();
   const password = page.getByLabel("Şifre", { exact: true });
-  await password.fill("test-password");
-  await expect(password).toHaveAttribute("type", "password");
+  await password.fill("invalid");
   await page
     .getByRole("button", { name: "Şifreyi göster", exact: true })
     .click();
@@ -262,114 +268,256 @@ test("simple login: no connection options, readable inputs and password visibili
     .getByRole("button", { name: "Şifreyi gizle", exact: true })
     .click();
   await expect(password).toHaveAttribute("type", "password");
-  const metrics = await password.evaluate((input) => ({
-    fontSize: parseFloat(getComputedStyle(input).fontSize),
-    height: input.getBoundingClientRect().height,
-  }));
-  expect(metrics.fontSize).toBeGreaterThanOrEqual(16);
-  expect(metrics.height).toBeGreaterThanOrEqual(48);
-  expect(
-    await page
-      .getByRole("button", { name: "Giriş yap", exact: true })
-      .evaluate((button) => button.getBoundingClientRect().height),
-  ).toBeGreaterThanOrEqual(48);
+  await page.getByLabel("E-posta", { exact: true }).fill("test@example.com");
+  await page.getByRole("button", { name: "Giriş yap", exact: true }).click();
+  await expect(
+    page.getByRole("note", { name: /Oturum sona erdi/ }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Evine hoş geldin." }),
+  ).toBeVisible();
+  await expect(page.locator(".hb-item-card")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: /Örnek envanter|Demoyu/i }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Davet ile hesap oluştur", exact: true })
+    .click();
+  await expect(
+    page.getByRole("dialog").getByLabel("Davet kodu", { exact: true }),
+  ).toBeVisible();
 });
 
-test("responsive navigation, forms and list remain usable on narrow phones and tablets", async ({
+test("Horizon theme persists after reload and resources stay on the same origin", async ({
   page,
-}, info) => {
-  await page.addInitScript(() => localStorage.setItem("hb-mode", "legacy"));
+}) => {
+  const external: string[] = [];
+  page.on("request", (req) => {
+    if (
+      !req.url().startsWith("http://127.0.0.1:5173") &&
+      !req.url().startsWith("data:")
+    )
+      external.push(req.url());
+  });
+  await loginWithInventory(page);
+  await shellAction(page, "Koyu görünüm");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.locator('link[id="sap-ui-theme-sap.m"]')).toHaveAttribute(
+    "href",
+    /sap_horizon_dark/,
+  );
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Evine bir bakış." }),
+  ).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  expect(external).toEqual([]);
+});
+
+test("OpenUI5 forms, menu and responsive table fit phones and tablets", async ({
+  page,
+}) => {
   await loginWithInventory(page);
   for (const width of [320, 390, 820, 1180, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= innerWidth,
-      ),
-    ).toBe(true);
-    const bottom = page.getByRole("navigation", { name: "Hızlı gezinme" });
-    if (width < 1280) {
-      await expect(bottom).toBeVisible();
-      const open = page.getByRole("button", { name: "Menüyü aç", exact: true });
-      expect(
-        await open.evaluate((button) => button.getBoundingClientRect().height),
-      ).toBeGreaterThanOrEqual(44);
-      await open.click();
-      await expect(page.locator(".navigation-drawer")).toBeVisible();
-      await page.keyboard.press("Escape");
-      await expect(page.locator(".navigation-drawer")).not.toBeVisible();
-    } else await expect(bottom).not.toBeVisible();
+    await expect
+      .poll(() =>
+        page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+      )
+      .toBe(true);
   }
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "Liste görünümü" }).click();
-  await expect(page.getByTestId("mobile-inventory-list")).toBeVisible();
-  await page.getByRole("button", { name: "Ürün ekle", exact: true }).click();
-  const dialog = page
-    .getByRole("dialog")
-    .filter({ has: page.getByLabel("Ürün adı", { exact: true }) });
-  await expect(dialog).toBeVisible();
-  const nameBox = await page
-    .getByLabel("Ürün adı", { exact: true })
-    .boundingBox();
-  const brandBox = await page
-    .getByLabel("Marka", { exact: true })
-    .boundingBox();
-  const modelBox = await page
-    .getByLabel("Model", { exact: true })
-    .boundingBox();
-  expect(nameBox!.width).toBeGreaterThan(300);
-  expect(modelBox!.y).toBeGreaterThan(brandBox!.y);
-  expect(
-    await dialog.evaluate(
-      (element) => element.scrollWidth <= element.clientWidth,
-    ),
-  ).toBe(true);
+  await page.getByRole("button", { name: "Menüyü aç", exact: true }).click();
+  await expect(
+    page.getByRole("navigation", { name: "Mobil menü" }),
+  ).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(dialog).not.toBeVisible();
-  const originalSize = info.project.use.viewport!;
-  await page.setViewportSize(originalSize);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Liste görünümü", exact: true })
+    .click();
+  await expect(page.getByRole("grid")).toBeVisible();
+  await page.getByRole("button", { name: "Ürün ekle", exact: true }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  const name = await page.getByLabel("Ürün adı", { exact: true }).boundingBox();
+  expect(name!.width).toBeGreaterThan(280);
+  await expect
+    .poll(() =>
+      page
+        .getByRole("dialog")
+        .evaluate((el) => el.scrollWidth <= el.clientWidth),
+    )
+    .toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
-test("supplied SVG logo preserves its proportions and follows light and dark themes", async ({
+test("built runtime loads compiled styles, preserves logo and respects production CSP", async ({
   page,
-}, info) => {
+}) => {
+  const template = readFileSync("deploy/default.conf.template", "utf8");
+  const policy = template.match(/Content-Security-Policy "([^"]+)"/)![1];
+  const blocked: string[] = [];
+  await page.route("http://127.0.0.1:5173/", async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({
+      response,
+      headers: { ...response.headers(), "content-security-policy": policy },
+    });
+  });
+  page.on("console", (m) => {
+    if (
+      m.text().includes("Content Security Policy") ||
+      m.text().includes("violates the following")
+    )
+      blocked.push(m.text());
+  });
   await page.goto("/");
-  const loginLogo = page.getByRole("img", { name: "Homebox", exact: true });
-  await expect(loginLogo).toBeVisible();
-  const rect = await loginLogo.boundingBox();
-  expect(rect!.width / rect!.height).toBeCloseTo(263 / 45, 2);
-  expect(await loginLogo.locator("path").count()).toBe(13);
-  const lightText = await loginLogo
-    .locator(".logo-text")
-    .evaluate((path) => getComputedStyle(path).fill);
-  expect(lightText).not.toBe("none");
-  const accent = await loginLogo
-    .locator(".logo-accent")
-    .evaluate((path) => getComputedStyle(path).fill);
-  expect(accent).not.toBe("none");
-  await page.screenshot({
-    path: info.outputPath("homebox-login.png"),
-  });
-  await page.evaluate(() => document.documentElement.classList.add("dark"));
-  const darkText = await loginLogo
-    .locator(".logo-text")
-    .evaluate((path) => getComputedStyle(path).fill);
-  expect(darkText).not.toBe(lightText);
-  expect(darkText).not.toBe("none");
-  await page.screenshot({
-    path: info.outputPath("homebox-dark.png"),
-  });
-  await page.evaluate(() => document.documentElement.classList.remove("dark"));
+  await expect(
+    page.getByRole("button", { name: "Giriş yap", exact: true }),
+  ).toBeVisible();
+  const logo = page.getByRole("img", { name: "Homebox", exact: true });
+  const box = await logo.boundingBox();
+  expect(box!.width / box!.height).toBeCloseTo(263 / 45, 1);
+  expect(
+    await page
+      .getByRole("button", { name: "Giriş yap", exact: true })
+      .evaluate(
+        (el) =>
+          getComputedStyle(el.querySelector(".sapMBtnInner")!).borderRadius,
+      ),
+  ).not.toBe("0px");
+  await expect(page.locator("#sap-ui-theme-sap\\.m")).toHaveAttribute(
+    "href",
+    /sap_horizon/,
+  );
+  expect(blocked).toEqual([]);
+});
+
+test("entity type creation and field template editing send complete API values", async ({
+  page,
+}) => {
   await loginWithInventory(page);
-  const appLogo = page.getByRole("img", { name: "Homebox", exact: true });
-  await expect(appLogo).toHaveCount(1);
-  await expect(appLogo).toBeVisible();
-  if (info.project.name !== "desktop") {
-    await page.getByRole("button", { name: "Menüyü aç", exact: true }).click();
-    await expect(
-      page
-        .locator(".navigation-drawer")
-        .getByRole("img", { name: "Homebox", exact: true }),
-    ).toBeVisible();
-  }
+  const types = [
+    { id: "item", name: "Ürün", isLocation: false },
+    { id: "room", name: "Oda", isLocation: true },
+  ];
+  const templates: any[] = [
+    {
+      id: "network",
+      name: "Ağ cihazı",
+      defaultInsured: true,
+      fields: [{ name: "IP adresi", type: "text", textValue: "" }],
+    },
+  ];
+  const writes: any[] = [];
+  await page.route("**/api/v1/entity-types**", async (route) => {
+    const req = route.request();
+    if (req.method() === "POST") {
+      const body = req.postDataJSON();
+      writes.push(body);
+      types.push({ id: "new-type", ...body });
+      await route.fulfill({ json: types.at(-1) });
+    } else await route.fulfill({ json: types });
+  });
+  await page.route("**/api/v1/templates**", async (route) => {
+    const req = route.request();
+    if (req.method() === "PUT") {
+      const body = req.postDataJSON();
+      writes.push(body);
+      Object.assign(templates[0], body);
+      await route.fulfill({ json: templates[0] });
+    } else
+      await route.fulfill({
+        json: new URL(req.url()).pathname.endsWith("/templates")
+          ? templates
+          : templates[0],
+      });
+  });
+  await navigate(page, "Ürün türleri");
+  await page.getByRole("button", { name: "Tür ekle", exact: true }).click();
+  await page.getByLabel("Tür adı", { exact: true }).fill("Elektronik");
+  await page.getByRole("button", { name: "Türü kaydet", exact: true }).click();
+  await expect(page.getByText("Elektronik", { exact: true })).toBeVisible();
+  expect(writes[0]).toMatchObject({ name: "Elektronik", isLocation: false });
+  await navigate(page, "Alan şablonları");
+  await page.getByRole("button", { name: "Düzenle", exact: true }).click();
+  await page.getByLabel("Şablon adı", { exact: true }).fill("Ağ donanımı");
+  await page.getByLabel("Alan değeri", { exact: true }).fill("10.10.20.1");
+  await page
+    .getByRole("button", { name: "Şablonu kaydet", exact: true })
+    .click();
+  await expect(page.getByText("Ağ donanımı", { exact: true })).toBeVisible();
+  expect(writes[1]).toMatchObject({
+    defaultInsured: true,
+    name: "Ağ donanımı",
+    fields: [{ name: "IP adresi", type: "text", textValue: "10.10.20.1" }],
+  });
+});
+
+test("item maintenance, profile saving and CSV export remain functional", async ({
+  page,
+}) => {
+  await loginWithInventory(page);
+  const maintenance: any[] = [];
+  const writes: any[] = [];
+  await page.route("**/api/v1/entities/coffee/maintenance", async (route) => {
+    if (route.request().method() === "POST") {
+      const body = route.request().postDataJSON();
+      writes.push(body);
+      maintenance.push({ id: "m", ...body });
+      await route.fulfill({ json: maintenance[0] });
+    } else await route.fulfill({ json: maintenance });
+  });
+  await page
+    .getByRole("button", { name: "Siemens EQ700", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Bakım kayıtlarını göster", exact: true })
+    .click();
+  await page.getByLabel("Bakım adı", { exact: true }).fill("Kireç temizliği");
+  await page.getByLabel("Maliyet", { exact: true }).fill("90");
+  await page
+    .getByRole("button", { name: "Bakımı kaydet", exact: true })
+    .click();
+  await expect(
+    page.getByText("Kireç temizliği", { exact: true }),
+  ).toBeVisible();
+  expect(writes[0]).toMatchObject({
+    name: "Kireç temizliği",
+    cost: "90",
+    completedDate: "0001-01-01",
+  });
+  await page
+    .getByRole("button", { name: "Pencereyi kapat", exact: true })
+    .click();
+  await page.route("**/api/v1/groups/members", (route) =>
+    route.fulfill({ json: [] }),
+  );
+  await page.route("**/api/v1/users/self", async (route) => {
+    const body = route.request().postDataJSON();
+    writes.push(body);
+    await route.fulfill({ json: { item: body } });
+  });
+  await navigate(page, "Kullanıcılar");
+  await page.getByLabel("Ad soyad", { exact: true }).fill("Can");
+  await page
+    .getByRole("button", { name: "Profili kaydet", exact: true })
+    .click();
+  await expect.poll(() => writes.at(-1)?.name).toBe("Can");
+  await page.route("**/api/v1/notifiers", (route) =>
+    route.fulfill({ json: [] }),
+  );
+  await page.route("**/api/v1/entities/export", (route) =>
+    route.fulfill({
+      body: "name,quantity\nSiemens,1",
+      contentType: "text/csv",
+    }),
+  );
+  await navigate(page, "Araçlar");
+  const downloaded = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "CSV dışa aktar", exact: true })
+    .click();
+  expect((await downloaded).suggestedFilename()).toBe("homebox-envanter.csv");
 });

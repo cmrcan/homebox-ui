@@ -2,6 +2,7 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,
+  workers: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? 1 : undefined,
   use: {
     baseURL: "http://127.0.0.1:5173",
     headless: true,
@@ -11,7 +12,7 @@ export default defineConfig({
           args: [
             "--no-sandbox",
             "--disable-dev-shm-usage",
-            "--single-process",
+            "--no-zygote",
             "--use-gl=angle",
             "--use-angle=swiftshader",
             "--enable-unsafe-swiftshader",
@@ -20,7 +21,7 @@ export default defineConfig({
       : {},
   },
   webServer: {
-    command: "npm run dev -- --host 127.0.0.1 --port 5173",
+    command: "npm run preview -- --host 127.0.0.1 --port 5173",
     url: "http://127.0.0.1:5173",
     reuseExistingServer: !process.env.CI,
   },

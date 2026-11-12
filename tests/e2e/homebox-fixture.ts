@@ -107,5 +107,5 @@ export async function loginWithInventory(page: Page) {
   await page.getByLabel("E-posta", { exact: true }).fill("test@example.com");
   await page.getByLabel("Şifre", { exact: true }).fill("password");
   await page.getByRole("button", { name: "Giriş yap", exact: true }).click();
-  await expect(page.locator(".item-card")).toHaveCount(3);
+  await expect(page.locator(".hb-item-card")).toHaveCount(3);
 }

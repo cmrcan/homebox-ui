@@ -7,3 +7,6 @@ tests
 test-results
 playwright-report
 *.zip
+
+public/resources
+.ui5-build

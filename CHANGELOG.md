@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+- Replace the Vue template/Preline/Tailwind UI with native OpenUI5 1.154.0 controls.
+- Add locally built Horizon light/dark themes, Fiori shell, responsive inventory table and accessible dialogs.
+- Preserve Homebox authentication, API adapters, inventory, fields, organizers, maintenance, user and collection management, CSV, notifications and tools.
+- Build and serve the complete UI5 runtime locally; preserve the existing Docker/Nginx upstream contract.
+- Validate production assets and CSP in browser tests; update desktop, tablet and mobile interaction coverage.
+
 ## 0.3.0
 
 - Sağlanan Homebox SVG logosu giriş ekranına, mobil üst bölüme ve masaüstü/mobil menüye eklendi; açık/koyu tema desteği ve sekme simgesi.

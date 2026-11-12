@@ -11,8 +11,18 @@
     <meta name="referrer" content="no-referrer" />
     <title>Homebox · Evim, düzenli.</title>
   </head>
-  <body>
-    <div id="app"></div>
+  <body class="sapUiBody">
+    <div id="app"><p role="status">Homebox yükleniyor…</p></div>
+    <script
+      id="sap-ui-bootstrap"
+      src="/resources/sap-ui-core.js"
+      data-sap-ui-theme="sap_horizon"
+      data-sap-ui-libs="sap.m,sap.f,sap.ui.layout,sap.ui.unified"
+      data-sap-ui-async="true"
+      data-sap-ui-compat-version="edge"
+      data-sap-ui-language="tr"
+      data-sap-ui-binding-syntax="complex"
+    ></script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

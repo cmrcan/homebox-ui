@@ -1,38 +1,49 @@
 # Homebox UI
 
-Homebox için Türkçe, duyarlı ve açık/koyu temalı alternatif frontend. Vue 3, TypeScript, Tailwind CSS 4 ve Preline UI 4.2 tema/varyant stillerini kullanır. Homebox'ın API'sine aynı adres üzerinden bağlanır; veriler Homebox sunucusunda kalır.
+Homebox için Türkçe, duyarlı ve açık/koyu temalı alternatif frontend. **OpenUI5 1.154.0** ve TypeScript kullanır. Homebox API bağlantısı ve veriler mevcut Homebox sunucusunda kalır.
 
-Masaüstü ve mobil ekran örnekleri `docs/preview-desktop.png` ve `docs/preview-mobile.png` dosyalarında bulunur.
+## v0.4.0 — OpenUI5
 
-## v0.3.0 kapsamı
+- Vue şablonları, Preline ve Tailwind kaldırıldı. Arayüz OpenUI5'in gerçek `sap.m` / `sap.f` kontrolleriyle oluşturulur; Web Components sarmalayıcısı kullanılmaz.
+- Horizon açık ve koyu temalar; tercih tarayıcıda saklanır. Mobil menü, klavyeyle gezinme, duyarlı tablo ve ürün kartları.
+- OpenUI5 kaynakları, derlenmiş tema CSS dosyaları, ikonlar, fontlar ve lisanslar imajda bulunur. Çalışma sırasında CDN veya internet bağlantısı gerekmez.
+- Giriş, şifre göster/gizle, davet koduyla kayıt ve koleksiyon seçimi.
+- Genel bakış, envanter arama/filtreleme, arşiv ve sayfalama; kart/liste görünümü.
+- Ürün oluşturma/düzenleme, onaylı silme, fotoğraf/belge yükleme, etiket yazdırma bağlantısı.
+- Konumlar, etiketler, ürün türleri, alan şablonları ve metin/sayı/evet-hayır/tarih özel alanları.
+- Ürün türüne varsayılan alan şablonu bağlama; ürün formuna şablondan alan ekleme.
+- Ürün bazında bakım ekleme/tamamlama/silme ve genel bakım listesi.
+- Profil, şifre ve koleksiyon ayarları; davet kodu, üye yönetimi ve onaylı hesap silme.
+- CSV içe/dışa aktarma, bildirimler ve koleksiyon bakım araçları.
 
-- Preline UI tema ve varyant stilleri; Tailwind Forms ile tutarlı form kontrolleri. Etkileşimler Vue ve yerel HTML dialog ile yönetilir.
-- Telefon ve tablet odaklı yerleşim: 16 px temel yazı, büyük kontroller, alt gezinme ve odak tutan mobil menü.
-- Dar ekranda tek sütunlu, tam ekran ürün formları; tablette kart ızgarası; telefonda yatay ürün kartları ve tablo yerine okunabilir liste.
-- Sade giriş ekranı: e-posta ve şifre; şifre göster/gizle; ayrı davet koduyla kayıt görünümü. API sürümü seçilmez.
-- Giriş, koleksiyon seçimi, genel bakış, kart/tablo envanter, arama, filtre, arşiv ve sayfalama.
-- Ürün oluşturma, düzenleme, silme; fotoğraf ve belge yükleme; konum ve etiket yönetimi.
-- **Özel alanlar:** her üründe metin, sayı, evet/hayır ve tarih alanları.
-- **Ürün türleri:** ekle, düzenle, sil; türe varsayılan alan şablonu bağla (yeni ürün eklerken alanlar otomatik gelir).
-- **Alan şablonları:** şablon oluştur/düzenle/sil; ürün formunda "Şablondan ekle".
-- **Kullanıcılar:** profil, şifre, koleksiyon adı/para birimi, davet kodu oluşturma, üye listesi/çıkarma, hesap silme. Yeni kişi giriş ekranındaki "Davet koduyla hesap oluştur" bölümünden kayıt olur.
-- **Bakım:** ürün detayında kayıt ekleme/tamamlama/silme; genel bakım listesi.
-- **Araçlar:** CSV içe/dışa aktarma, bildirimler, toplu bakım eylemleri, etiket yazdırma bağlantısı.
-- Yalnızca Homebox hesabıyla giriş; envanter ve değişiklikler doğrudan Homebox API üzerinden yönetilir.
+OpenUI5 tüm ekranları oluşturur. `@vue/reactivity` yalnızca mevcut API/oturum/işlem durumunu yönetmek için tutulmuştur.
+
+### Mevcut kurulumu güncelleme
+
+Daha önce yayımlanan imajla kurulmuş `/opt/homebox-ui/compose.yaml` dosyanız için:
+
+```bash
+cd /opt/homebox-ui
+docker compose pull
+docker compose up -d
+curl -fsS http://127.0.0.1:3101/healthz
+```
+
+Aynı Homebox adresini açın; gerekirse `Ctrl+Shift+R` ile yenileyin. Docker ağı,
+`HOMEBOX_UPSTREAM` ve Nginx Proxy Manager hedefi (`homebox-ui:80`) değişmez.
+Arayüz güncellemesi veritabanını taşımaz veya Homebox backend sürümünü yükseltmez.
 
 ### Bilinen sınırlar
 
-- Ürün türüne bağlı varsayılan şablon seçimi **bu tarayıcıda** saklanır (Homebox'ta tür başına şema olmadığı varsayımıyla). Alan şablonlarının kendisi Homebox'ta durur.
-- Kullanıcı yönetimi, bakım, bildirim, içe/dışa aktarma ve etiket uç noktaları Homebox'ın bilinen API yollarına göre yazıldı ve canlı sunucuda doğrulanmadı. Yollar `src/api.ts` içinde tek yerde durur; farklıysa orada düzeltin.
-- API anahtarları, OIDC ve yedekler henüz yok.
-- `docs/preview-*.png` görselleri eski tasarımdır.
+- Ürün türüne bağlı varsayılan şablon seçimi bu tarayıcıda saklanır. Alan şablonlarının kendisi Homebox'ta durur.
+- API anahtarları, OIDC ve sunucu yedeklerini yönetme henüz yoktur.
+- Yönetim uç noktalarının kullanılabilirliği sunucu sürümüne ve kullanıcının yetkilerine bağlıdır.
+- Tarayıcı testleri taklit Homebox API'sini kullanır; bu sürüm kullanıcının canlı sunucusunda henüz denenmemiştir.
 
 ## Logo
 
-Giriş ekranı, masaüstü kenar çubuğu ve mobil üst bölüm aynı `HomeboxBrand` bileşenini kullanır.
-Sağlanan Homebox SVG dosyası `src/assets/homebox-logo.svg` konumunda bulunur ve üretim paketine
-inline olarak dahil edilir. Oranları korunur; yazı ve vurgu rengi açık/koyu temadan gelir.
-Tarayıcı sekmesi simgesi aynı SVG içindeki kutu sembolünden oluşturulmuştur.
+Sağlanan SVG `src/assets/homebox-logo.svg` dosyasında korunur ve giriş ekranında
+oranı değiştirilmeden gösterilir. Koyu tema için görünürlüğü uyarlanır.
 
 ## API uyumluluğu
 
@@ -100,6 +111,14 @@ Bu Compose dosyası **yalnızca frontend** başlatır. Homebox'ı yükseltmez, m
 
 Dosyalar varsayılan olarak 100 MB ile sınırlıdır; gerekirse `deploy/default.conf.template` içindeki `client_max_body_size` değerini değiştirin. Oturum bilgileri sessionStorage içinde tutulur; şifre saklanmaz. Dosya URL'leri upstream'in dosyalara özel token'ını kullanır; proxy bu URL'leri erişim loguna yazmaz.
 
+## Derleme yapısı
+
+`npm ci` sonrasında `postinstall`, `ui5.yaml` içindeki sabit OpenUI5 sürümünü
+UI5 CLI ile derler. `scripts/ui5-resources.mjs` üretilmiş kaynakları
+`public/resources/` altına taşır; bu klasör git'e eklenmez. Horizon LESS dosyaları
+UI5 Tooling ile CSS'e çevrilir ve kütüphane preload/version dosyaları hazırlanır.
+`npm run build`, TypeScript kontrolü ve Vite üretim paketini oluşturur.
+
 ## Yerel geliştirme
 
 Node.js 22 veya daha yeni sürüm:
@@ -122,7 +141,7 @@ npm run test:e2e
 
 API testleri kimlik doğrulama/tenant başlıklarını, filtre parametrelerini, konum sayfalamasını, dosya token'larını, multipart yüklemeyi ve düzenlemede bilgi korunmasını kontrol eder. Tarayıcı testleri kaynak şemasını izleyen **taklit API** ile masaüstü, telefon ve tablet üzerinde giriş, arama, filtreleme, düzenleme, silme, özel alanlar, dosya yükleme ve oturum sona ermesini kontrol eder. Geçersiz girişin envanteri açmadığı da doğrulanır. Girişte API seçeneği olmadığı, giriş alanlarının okunabilir boyutu, şifre görünürlüğü, mobil menü ve 320–1440 px genişliklerde yatay taşma da kontrol edilir. Test verileri yalnızca testlerde bulunur. Bunlar gerçek Homebox sunucusuyla entegrasyon testi yerine geçmez.
 
-Docker yapılandırması bu geliştirme ortamında Docker bulunmadığı için çalıştırılmamıştır. İlk gerçek kurulumda önce ayrı UI portundan giriş/arama/düzenleme/yükleme akışını doğrulayın, ardından NPM hedefini değiştirin.
+CI, yayımlanan Docker konteynerinin sağlık yanıtını, derlenmiş OpenUI5 kaynaklarını ve Nginx yapılandırmasını kontrol eder. İlk gerçek kurulumda önce ayrı UI portundan giriş/arama/düzenleme/yükleme akışını doğrulayın, ardından NPM hedefini değiştirin.
 
 ## GitHub repo ve container image
 
